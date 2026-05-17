@@ -9,14 +9,8 @@ import tempfile
 import urllib.parse
 from bottle import Bottle, request, response, static_file, HTTPResponse
 
-# 설정
-APP_NAME = "Joy Markdown Studio v3.51"
-PORT = 58220
+# 설정 파일 명칭 선언
 CONFIG_FILE = "md_viewer_config.json"
-
-# Flask/Bottle 앱 초기화
-app = Bottle()
-active_workspace = os.path.abspath(os.getcwd())
 
 def get_config():
     if os.path.exists(CONFIG_FILE):
@@ -35,10 +29,31 @@ def save_config(config):
     except:
         return False
 
-# 초기 설정 불러오기
+# 설정 로드 및 환경변수 지정
 config = get_config()
+APP_NAME = "Joy Markdown Studio v3.6"
+PORT = int(config.get("port", 58220))
+BIND_IP = config.get("bind_ip", "0.0.0.0")
+
+# Flask/Bottle 앱 초기화
+app = Bottle()
+active_workspace = os.path.abspath(os.getcwd())
+
 if "last_workspace" in config and os.path.exists(config["last_workspace"]):
     active_workspace = os.path.abspath(config["last_workspace"])
+
+# API 인스턴스 전역 바인딩
+api = None
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except:
+        return "127.0.0.1"
 
 # Bottle 라우팅
 @app.route('/')
@@ -61,9 +76,53 @@ def serve_workspace_file(filepath):
     else:
         return HTTPResponse(status=404, body="File not found")
 
-def run_server():
+# HTTP API 브릿지 (브라우저 직접 접속 환경 지원)
+@app.post('/api/<action>')
+def api_bridge(action):
+    global api
+    if api is None:
+        api = MdViewerApi()
+    cfg = get_config()
+    configured_password = cfg.get("access_password", "")
+    if configured_password:
+        provided_password = request.headers.get('X-Access-Password', '')
+        if provided_password != configured_password:
+            response.status = 401
+            response.content_type = 'application/json'
+            return json.dumps({"status": "auth_failed", "message": "인증번호가 잘못되었습니다."}, ensure_ascii=False)
     try:
-        app.run(host='127.0.0.1', port=PORT, quiet=True)
+        data = request.json or {}
+    except:
+        data = {}
+    if hasattr(api, action):
+        method = getattr(api, action)
+        import inspect
+        sig = inspect.signature(method)
+        kwargs = {}
+        for param in sig.parameters.values():
+            if param.name in data:
+                kwargs[param.name] = data[param.name]
+        try:
+            res = method(**kwargs)
+            response.content_type = 'application/json'
+            return json.dumps(res, ensure_ascii=False)
+        except Exception as e:
+            response.status = 500
+            return json.dumps({"status": "error", "message": str(e)}, ensure_ascii=False)
+    else:
+        response.status = 404
+        return json.dumps({"status": "error", "message": f"Method {action} not found"}, ensure_ascii=False)
+
+def run_server():
+    local_ip = get_local_ip()
+    print("=======================================================================")
+    print("  Joy Markdown Studio Local Server is running!")
+    print(f"  - Local Access:    http://127.0.0.1:{PORT}")
+    if BIND_IP == "0.0.0.0":
+        print(f"  - Network Access:  http://{local_ip}:{PORT}  (For external PCs!)")
+    print("=======================================================================")
+    try:
+        app.run(host=BIND_IP, port=PORT, quiet=True)
     except Exception as e:
         print(f"Server error: {e}")
 
@@ -79,8 +138,23 @@ class MdViewerApi:
             "workspace": self.workspace,
             "theme": cfg.get("theme", "dark"),
             "last_file": cfg.get("last_file", ""),
-            "files": self.list_files()
+            "files": self.list_files(),
+            "port": cfg.get("port", PORT),
+            "bind_ip": cfg.get("bind_ip", BIND_IP),
+            "access_password": cfg.get("access_password", ""),
+            "local_ip": get_local_ip()
         }
+
+    def save_network_settings(self, bind_ip, port, access_password):
+        try:
+            cfg = get_config()
+            cfg["bind_ip"] = bind_ip
+            cfg["port"] = int(port)
+            cfg["access_password"] = access_password.strip()
+            save_config(cfg)
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
     def open_library_folder(self):
         try:
@@ -2071,6 +2145,9 @@ HTML_CONTENT = """<!DOCTYPE html>
             <button class="icon-btn" onclick="toggleTheme()" title="테마 전환" style="margin-left: 8px;">
                 <i id="theme-icon" data-lucide="sun" style="width: 18px; height: 18px;"></i>
             </button>
+            <button class="icon-btn" onclick="openSettingsModal()" title="네트워크 및 보안 설정" style="margin-left: 4px;">
+                <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
+            </button>
         </div>
     </header>
 
@@ -2363,6 +2440,73 @@ HTML_CONTENT = """<!DOCTYPE html>
         </div>
     </div>
 
+    <!-- 네트워크 및 보안 설정 모달 -->
+    <div class="modal" id="settings-modal" style="display: none;">
+        <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <i data-lucide="settings" style="width: 20px; height: 20px; color: var(--accent);"></i>
+                <div class="modal-title" style="margin: 0; font-size: 1.25em;">네트워크 및 보안 설정</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-sizing: border-box; text-align: left;">
+                <div style="font-size: 0.85em; font-weight: 600; color: var(--accent); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="info" style="width: 14px; height: 14px;"></i> 현재 네트워크 접속 정보
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-main);">
+                    <span>내부 IP (LAN):</span>
+                    <span id="settings-local-ip" style="font-weight: 600; color: #38bdf8;">127.0.0.1</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-main);">
+                    <span>공인 IP (WAN):</span>
+                    <span id="settings-public-ip" style="font-weight: 600; color: #4ade80;">가져오는 중...</span>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);">접속 호스트 (Bind IP)</label>
+                    <select id="settings-bind-ip" class="modal-input" style="width: 100%; box-sizing: border-box;">
+                        <option value="0.0.0.0">0.0.0.0 (외부 접속 허용)</option>
+                        <option value="127.0.0.1">127.0.0.1 (로컬만 허용)</option>
+                    </select>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);">포트 번호</label>
+                    <input type="number" id="settings-port" class="modal-input" placeholder="58220" style="width: 100%; box-sizing: border-box;" min="1024" max="65535">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);">웹 접속 암호</label>
+                    <input type="password" id="settings-password" class="modal-input" placeholder="미지정 시 로그인 없이 접속" style="width: 100%; box-sizing: border-box;">
+                </div>
+            </div>
+            <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 10px; font-size: 0.78em; color: #f87171; line-height: 1.4;">
+                호스트/포트 변경은 앱 재시작 후 적용. 암호 변경은 즉시 적용.
+            </div>
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end;">
+                <button class="btn" onclick="closeSettingsModal()">취소</button>
+                <button class="btn btn-accent" onclick="saveSettings()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 보안 접속 인증 overlay -->
+    <div id="auth-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(9,10,15,0.85); backdrop-filter: blur(25px); z-index: 99999; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif;">
+        <div style="background: rgba(20,22,30,0.7); border: 1px solid rgba(69,243,255,0.15); border-radius: 16px; padding: 40px; width: 420px; max-width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; display: flex; flex-direction: column; gap: 24px;">
+            <div style="width: 64px; height: 64px; background: rgba(69,243,255,0.1); border-radius: 50%; border: 1px solid rgba(69,243,255,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <i data-lucide="shield-alert" style="width: 32px; height: 32px; color: #45f3ff;"></i>
+            </div>
+            <div>
+                <div style="font-size: 1.5em; font-weight: 700; color: #e2e8f0;">Secure Access</div>
+                <div style="font-size: 0.85em; color: #94a3b8; margin-top: 6px;">접속 암호를 입력해 주세요.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="password" id="auth-password-input" placeholder="비밀번호" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 12px 16px; font-size: 1em; outline: none;" onkeydown="if(event.key==='Enter') submitAuthPassword()">
+                <div id="auth-error-msg" style="display: none; color: #ef4444; font-size: 0.8em;">암호가 올바르지 않습니다.</div>
+            </div>
+            <button class="btn btn-accent" style="width: 100%; padding: 12px; justify-content: center; gap: 8px; font-weight: 600;" onclick="submitAuthPassword()">
+                <i data-lucide="key" style="width: 16px; height: 16px;"></i> 접속하기
+            </button>
+        </div>
+    </div>
+
     <!-- 토스트 알림 -->
     <div class="toast" id="toast">
         <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
@@ -2452,6 +2596,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         let isSyncScrolling = true;
         let isCreatingType = "file"; // 'file' or 'folder'
         let workspaceRoot = "";
+        let currentNetworkConfig = { bind_ip: '0.0.0.0', port: 58220, access_password: '', local_ip: '127.0.0.1' };
         
         // 디바운스 타이머 (Mermaid 및 MathJax 실시간 렌더링 렉 방지)
         let renderTimeout;
@@ -2484,9 +2629,65 @@ HTML_CONTENT = """<!DOCTYPE html>
             });
 
             if (window.pywebview) {
+                // 데스크톱 앱 모드: 네이티브 브릿지 즉시 사용
                 initApp();
             } else {
-                window.addEventListener('pywebviewready', initApp);
+                // pywebviewready 이벤트 대기 (데스크톱 앱에서 약간 늦을 때)
+                let resolved = false;
+                window.addEventListener('pywebviewready', () => {
+                    if (!resolved) {
+                        resolved = true;
+                        initApp();
+                    }
+                });
+                
+                // 500ms 이내에 pywebview가 로드되지 않으면 브라우저 접속으로 판단
+                setTimeout(() => {
+                    if (!resolved && !window.pywebview) {
+                        resolved = true;
+                        console.log("Running in Web Browser mode. Injecting HTTP API Proxy.");
+                        window.pywebview = {
+                            is_browser_proxy: true,
+                            api: new Proxy({}, {
+                                get: function(target, prop) {
+                                    return function(...args) {
+                                        if (prop === 'open_library_folder') {
+                                            alert("웹 브라우저 모드에서는 로컬 폴더를 열 수 없습니다.");
+                                            return Promise.resolve({ status: 'cancel' });
+                                        }
+                                        if (prop === 'add_documents_to_library') {
+                                            alert("웹 브라우저 모드에서는 파일 선택 대화상자를 사용할 수 없습니다.\\n마크다운 파일을 화면에 드래그 앤 드롭해 주세요.");
+                                            return Promise.resolve({ status: 'cancel' });
+                                        }
+                                        
+                                        let bodyData = {};
+                                        if (prop === 'read_file') { bodyData.rel_path = args[0]; }
+                                        else if (prop === 'save_file') { bodyData.rel_path = args[0]; bodyData.content = args[1]; }
+                                        else if (prop === 'create_item') { bodyData.rel_path = args[0]; bodyData.item_type = args[1]; }
+                                        else if (prop === 'delete_item') { bodyData.rel_path = args[0]; }
+                                        else if (prop === 'rename_item') { bodyData.old_rel_path = args[0]; bodyData.new_rel_path = args[1]; }
+                                        else if (prop === 'search_pubchem_smiles') { bodyData.compound_name = args[0]; }
+                                        else if (prop === 'save_theme') { bodyData.theme_name = args[0]; }
+                                        else if (prop === 'save_network_settings') { bodyData.bind_ip = args[0]; bodyData.port = args[1]; bodyData.access_password = args[2]; }
+                                        else if (prop === 'export_html') { bodyData.rel_path = args[0]; bodyData.html_body = args[1]; bodyData.title = args[2]; }
+                                        
+                                        let headers = { 'Content-Type': 'application/json' };
+                                        const savedPwd = localStorage.getItem('access_password');
+                                        if (savedPwd) { headers['X-Access-Password'] = savedPwd; }
+                                        
+                                        return fetch(`/api/${prop}`, {
+                                            method: 'POST',
+                                            headers: headers,
+                                            body: JSON.stringify(bodyData)
+                                        }).then(res => res.json())
+                                          .catch(err => ({ status: 'error', message: err.message }));
+                                    };
+                                }
+                            })
+                        };
+                        initApp();
+                    }
+                }, 500);
             }
             
             // Drag and drop setup
@@ -2496,10 +2697,22 @@ HTML_CONTENT = """<!DOCTYPE html>
         async function initApp() {
             try {
                 const state = await pywebview.api.get_initial_state();
+                
+                // HTTP API 보안 검증 통과 실패 시
+                if (state && state.status === 'auth_failed') {
+                    showAuthOverlay();
+                    return;
+                }
+                
+                // 네트워크 설정 저장
+                currentNetworkConfig.bind_ip = state.bind_ip || '0.0.0.0';
+                currentNetworkConfig.port = state.port || 58220;
+                currentNetworkConfig.access_password = state.access_password || '';
+                currentNetworkConfig.local_ip = state.local_ip || '127.0.0.1';
+
                 workspaceRoot = state.workspace;
                 currentTheme = state.theme;
                 
-                // 설정 적용
                 const wsNameEl = document.getElementById('workspace-name');
                 if (wsNameEl) {
                     wsNameEl.innerText = workspaceRoot.replace(/\\\\/g, '/');
@@ -2507,25 +2720,25 @@ HTML_CONTENT = """<!DOCTYPE html>
                 setTheme(currentTheme);
                 renderFileTree(state.files);
                 
-                // 마지막으로 보던 파일 열기
                 if (state.last_file) {
                     openFile(state.last_file);
                 }
                 
-                // 스플래시 화면 페이드아웃 (최소 1.8초 동안 노출하여 부드러운 애니메이션 감상)
+                // 스플래시 화면 페이드아웃
                 setTimeout(() => {
                     const splash = document.getElementById('splash-screen');
                     if (splash) {
                         splash.style.opacity = '0';
-                        setTimeout(() => {
-                            splash.style.display = 'none';
-                        }, 800); // transition 0.8s 매칭
+                        setTimeout(() => { splash.style.display = 'none'; }, 800);
                     }
                 }, 1800);
             } catch (err) {
                 console.error("Initialization error:", err);
                 const splash = document.getElementById('splash-screen');
                 if (splash) splash.style.display = 'none';
+                if (err && err.message && (err.message.includes('401') || err.message.includes('auth_failed'))) {
+                    showAuthOverlay();
+                }
             }
         }
 
@@ -3870,6 +4083,100 @@ HTML_CONTENT = """<!DOCTYPE html>
                 } else {
                     alert("서재 제외 실패: " + res.message);
                 }
+            }
+        }
+
+        // ----------------- 네트워크 설정 및 인증 -----------------
+        function openSettingsModal() {
+            document.getElementById('settings-bind-ip').value = currentNetworkConfig.bind_ip;
+            document.getElementById('settings-port').value = currentNetworkConfig.port;
+            document.getElementById('settings-password').value = currentNetworkConfig.access_password;
+            
+            // 내부 및 공인 IP 정보 표시
+            document.getElementById('settings-local-ip').innerText = currentNetworkConfig.local_ip;
+            const publicIpEl = document.getElementById('settings-public-ip');
+            publicIpEl.innerText = "조회 중...";
+            
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json())
+                .then(data => {
+                    publicIpEl.innerText = data.ip;
+                })
+                .catch(err => {
+                    publicIpEl.innerText = "조회 실패 (네트워크 점검 필요)";
+                });
+
+            document.getElementById('settings-modal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        function toggleSettingsPasswordView() {
+            const pwdInput = document.getElementById('settings-password');
+            pwdInput.type = pwdInput.type === 'password' ? 'text' : 'password';
+        }
+
+        async function saveSettings() {
+            const bindIp = document.getElementById('settings-bind-ip').value;
+            const port = parseInt(document.getElementById('settings-port').value) || 58220;
+            const accessPassword = document.getElementById('settings-password').value;
+            try {
+                const res = await pywebview.api.save_network_settings(bindIp, port, accessPassword);
+                if (res.status === 'success') {
+                    currentNetworkConfig.bind_ip = bindIp;
+                    currentNetworkConfig.port = port;
+                    currentNetworkConfig.access_password = accessPassword;
+                    localStorage.setItem('access_password', accessPassword);
+                    showToast("네트워크 및 보안 설정이 저장되었습니다!");
+                    closeSettingsModal();
+                } else {
+                    alert("설정 저장 실패: " + res.message);
+                }
+            } catch (err) {
+                alert("설정 저장 오류: " + err.message);
+            }
+        }
+
+        function showAuthOverlay() {
+            // 데스크톱 앱 내부 직접 실행 시에는 암호 오버레이창 차단
+            if (window.pywebview && !window.pywebview.is_browser_proxy) {
+                console.log("Native Desktop mode. Bypassing auth overlay.");
+                const splash = document.getElementById('splash-screen');
+                if (splash) splash.style.display = 'none';
+                return;
+            }
+            const splash = document.getElementById('splash-screen');
+            if (splash) splash.style.display = 'none';
+            document.getElementById('auth-overlay').style.display = 'flex';
+            document.getElementById('auth-password-input').focus();
+            lucide.createIcons();
+        }
+
+        async function submitAuthPassword() {
+            const pwdInput = document.getElementById('auth-password-input');
+            const password = pwdInput.value;
+            const errorMsg = document.getElementById('auth-error-msg');
+            errorMsg.style.display = 'none';
+            localStorage.setItem('access_password', password);
+            try {
+                const res = await pywebview.api.get_initial_state();
+                if (res && res.status !== 'auth_failed') {
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    initApp();
+                } else {
+                    errorMsg.style.display = 'block';
+                    pwdInput.value = "";
+                    pwdInput.focus();
+                    localStorage.removeItem('access_password');
+                }
+            } catch (err) {
+                errorMsg.style.display = 'block';
+                pwdInput.value = "";
+                pwdInput.focus();
+                localStorage.removeItem('access_password');
             }
         }
 
