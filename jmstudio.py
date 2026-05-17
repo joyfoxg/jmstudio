@@ -10,7 +10,7 @@ import urllib.parse
 from bottle import Bottle, request, response, static_file, HTTPResponse
 
 # 설정
-APP_NAME = "Joy Markdown Studio v3.5"
+APP_NAME = "Joy Markdown Studio v3.51"
 PORT = 58220
 CONFIG_FILE = "md_viewer_config.json"
 
@@ -537,7 +537,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Joy Markdown Studio v3.5</title>
+    <title>Joy Markdown Studio v3.51</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -1885,6 +1885,130 @@ HTML_CONTENT = """<!DOCTYPE html>
                 box-shadow: 0 0 60px rgba(69, 243, 255, 0.4);
             }
         }
+
+        /* PDF 인쇄 시 미리보기 영역만 깔끔하게 출력되도록 설정 */
+        @media print {
+            /* 헤더, 사이드바, 편집기, 개요(TOC), 각종 조절 버튼 등 인쇄에 불필요한 모든 UI 요소 숨김 */
+            header,
+            #sidebar-panel,
+            .sidebar-slide-toggle,
+            #pane-editor,
+            #pane-resizer,
+            #sidebar-toc,
+            .toc-slide-toggle,
+            .pane-header,
+            .modal,
+            .toast,
+            #splash-screen,
+            .mermaid-controls,
+            .code-copy-btn,
+            .empty-state {
+                display: none !important;
+            }
+            
+            /* 레이아웃 제약 해제하여 화면 전체를 활용해 인쇄하도록 설정 */
+            html, body, main, .workspace-panes, #pane-preview, #preview-pane {
+                background: #ffffff !important;
+                color: #000000 !important;
+                overflow: visible !important;
+                height: auto !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                position: static !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+                display: block !important;
+            }
+            
+            #preview-pane {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            #preview-content {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: transparent !important;
+            }
+            
+            .markdown-body {
+                max-width: 100% !important;
+                background: transparent !important;
+                color: #000000 !important;
+                padding: 10mm !important; /* 종이 여백 최적화 */
+                margin: 0 auto !important;
+            }
+            
+            /* 제목 및 일반 텍스트 잉크 절약 및 가시성 극대화 (완전한 흑백 대비) */
+            .markdown-body h1, .markdown-body h2, .markdown-body h3, 
+            .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+                color: #000000 !important;
+                border-bottom-color: #dddddd !important;
+                page-break-after: avoid; /* 제목 바로 뒤에서 페이지가 짤리는 현상 방지 */
+            }
+            
+            .markdown-body p, .markdown-body li, .markdown-body td, .markdown-body th, .markdown-body a {
+                color: #000000 !important;
+            }
+            
+            .markdown-body a {
+                border-bottom: none !important;
+                text-decoration: underline !important;
+            }
+            
+            /* 코드 블록, 인용 블록, 테이블, 다이어그램, 화학식 등의 페이지 짤림 현상 방지 */
+            pre, blockquote, .callout, .mermaid-container, .smiles-container, table, img {
+                page-break-inside: avoid !important;
+            }
+            
+            /* 테이블 및 경계선 스타일 가독성 개선 */
+            .markdown-body table, .markdown-body th, .markdown-body td {
+                border-color: #cccccc !important;
+            }
+            
+            .markdown-body th {
+                background-color: #f3f4f6 !important;
+            }
+            
+            /* 코드 블록 인쇄 최적화 (어두운 배경 -> 밝은 배경 및 잉크 절약) */
+            .markdown-body pre {
+                background: #f8fafc !important;
+                border: 1px solid #e2e8f0 !important;
+                color: #0f172a !important;
+            }
+            
+            .markdown-body code {
+                color: #0f172a !important;
+            }
+            
+            .markdown-body :not(pre) > code {
+                background: #f1f5f9 !important;
+                color: #0284c7 !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+            
+            /* 수식 렌더링 글꼴 색상 강제 지정 */
+            .katex {
+                color: #000000 !important;
+            }
+            
+            /* 다이어그램 및 화학식 테두리 및 배경 최적화 */
+            .mermaid-container, .smiles-container {
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: none !important;
+                padding: 12px !important;
+            }
+            
+            /* 인쇄 페이지 여백 설정 */
+            @page {
+                size: auto;
+                margin: 15mm 15mm 15mm 15mm;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1940,7 +2064,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
                 <span>HTML 내보내기</span>
             </button>
-            <button class="btn" onclick="window.print()">
+            <button class="btn" onclick="printDocument()">
                 <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
                 <span>PDF 인쇄</span>
             </button>
@@ -2405,8 +2529,8 @@ HTML_CONTENT = """<!DOCTYPE html>
             }
         }
 
-        // 테마 설정
-        function setTheme(theme) {
+        // 테마 설정 (saveConfig가 false인 경우, 파일 인쇄 시 임시 테마 변경에 대처하여 DB 쓰기 방지)
+        function setTheme(theme, saveConfig = true) {
             currentTheme = theme;
             const body = document.body;
             const themeIcon = document.getElementById('theme-icon');
@@ -2425,7 +2549,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             // 프리뷰 리렌더링
             triggerLiveRender();
             
-            if (window.pywebview) {
+            if (window.pywebview && saveConfig) {
                 pywebview.api.save_theme(theme);
             }
         }
@@ -3654,6 +3778,36 @@ HTML_CONTENT = """<!DOCTYPE html>
                 showToast(`HTML 저장 완료: ${res.dest}`);
             } else {
                 alert("내보내기 실패: " + res.message);
+            }
+        }
+
+        // PDF 인쇄 실행 (미리보기 화면만 밝은 테마로 자동 최적화하여 깔끔하게 출력)
+        async function printDocument() {
+            if (!currentFilePath) {
+                alert("인쇄할 활성화된 파일이 없습니다.");
+                return;
+            }
+            
+            const originalTheme = currentTheme;
+            
+            // 다크 테마인 경우, 인쇄 가독성을 위해 일시적으로 고대비 라이트 테마로 자동 전환
+            if (originalTheme === 'dark') {
+                setTheme('light', false); // 파일 DB 저장을 우회하여 메모리 상에서만 테마 상태 변경
+                
+                // 테마가 가볍게 바뀐 뒤, Mermaid 다이어그램 및 화학 구조식(SMILES)이
+                // 화이트 인쇄용 테마로 고해상도 리렌더링을 완전히 완료할 때까지 대기 (450ms)
+                setTimeout(() => {
+                    window.print();
+                    
+                    // 인쇄창이 호출되거나 닫힌 즉시 원래의 세련된 다크 테마로 깜쪽같이 원복
+                    setTimeout(() => {
+                        setTheme('dark', false);
+                        showToast("인쇄가 정상 호출되어 다크 테마를 복원했습니다.");
+                    }, 100);
+                }, 450);
+            } else {
+                // 이미 라이트 테마인 경우 즉시 출력
+                window.print();
             }
         }
 

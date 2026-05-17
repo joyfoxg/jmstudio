@@ -17,8 +17,9 @@ if not exist .git (
 
 rem Step 2: Get Commit Message Interactively
 echo.
+set commit_msg=
 set /p commit_msg="Enter commit message (Press Enter for default: 'Update source files'): "
-if "%commit_msg%"=="" (
+if not defined commit_msg (
     set commit_msg=Update source files
 )
 
