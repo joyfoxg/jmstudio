@@ -134,24 +134,22 @@ e:\jm_studio\
 ### 📦 단독 실행 파일(.exe)로 배포하기 (Compilation)
 외부 다른 PC에서 별도의 Python이나 라이브러리를 설치하지 않고 **Joy Markdown Studio**를 즉시 실행할 수 있는 독립 실행 파일로 컴파일하는 방법입니다.
 
-1. **Spec 파일을 이용한 빌드 (추천)**:
-   * 프로젝트 폴더에 작성된 [JoyMarkdownStudio.spec](file:///c:/Workspace/jmstudio/JoyMarkdownStudio.spec) 파일을 사용하여 빌드합니다.
-   * 이 Spec 파일은 [jmstudio.py](file:///c:/Workspace/jmstudio/jmstudio.py) 내부의 `APP_NAME` 버전 정보(예: `v3.61`)를 자동으로 파싱하여, 빌드 시 **`JoyMarkdownStudio-vX.XX.exe`** 형태로 버전명이 포함된 실행 파일을 생성해 줍니다.
-   * 터미널에서 아래 명령어를 실행합니다:
-     ```bash
-     pyinstaller JoyMarkdownStudio.spec
-     ```
+1. **원클릭 컴파일 스크립트 실행**:
+   * 폴더 내에 생성된 [compile.bat](file:///e:/jm_studio/compile.bat) 파일을 **더블 클릭**하여 실행하거나 터미널 환경에 맞춰 다음 명령을 수행합니다.
+     * **PowerShell (기본 터미널)**:
+       ```powershell
+       .\compile.bat
+       ```
+     * **Command Prompt (CMD)**:
+       ```cmd
+       compile.bat
+       ```
+   * 이 스크립트는 내부적으로 `PyInstaller`를 자동 설치/업데이트한 뒤 `jmstudio.py`를 단일 EXE로 빌드합니다.
 
-2. **배치 스크립트를 통한 빌드**:
-   * 폴더 내에 생성된 [compile.bat](file:///c:/Workspace/jmstudio/compile.bat) 파일을 **더블 클릭**하여 실행하거나 터미널 환경에 맞춰 실행합니다.
-     * **PowerShell**: `.\compile.bat`
-     * **CMD**: `compile.bat`
-   * 이 스크립트는 내부적으로 `PyInstaller`를 최신으로 유지하며 빌드 과정을 자동 수행합니다.
-
-3. **실행 파일 확인 및 배포**:
-   * 컴파일이 성공적으로 완료되면 프로젝트 폴더 내 `dist\` 경로에 실행 파일이 생성됩니다.
-   * 생성된 **`JoyMarkdownStudio-vx.xx.exe`** 파일만 다른 Windows PC로 가져가면 무설치로 즉시 실행할 수 있습니다.
-   * *참고: 복잡한 라이브러리가 단일 실행 파일에 포함되어 있으므로, 최초 기동 시 압축 해제를 위해 3~5초의 로딩 시간이 걸릴 수 있습니다.*
+2. **실행 파일 복사 및 배포**:
+   * 컴파일이 성공적으로 종료되면 `e:\jm_studio\dist\` 폴더가 생성됩니다.
+   * `dist` 폴더 안에 빌드된 **`JoyMarkdownStudio.exe`** 파일만 복사하여 다른 Windows PC로 가져가면 더블클릭만으로 언제 어디서든 바로 구동됩니다.
+   * *참고: 무겁고 복잡한 디펜던시가 단일 실행 파일에 정밀 압축되어 담기므로, 최초 기동 시 압축 해제를 위해 약간의 로딩(3~5초)이 필요할 수 있습니다.*
 
 ---
 
