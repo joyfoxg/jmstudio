@@ -89,7 +89,8 @@ graph TD
 ```
 e:\jm_studio\
 ├── jmstudio.py                  # 메인 실행 파일 (백엔드 서버 및 GUI 셸, 프론트 HTML 소스 포함)
-├── compile.bat                  # 단독 실행 파일(.exe) 자동 컴파일용 원클릭 배치 스크립트
+├── compile.bat                  # Windows 단독 실행 파일(.exe) 자동 컴파일용 배치 스크립트 (가상환경 지원)
+├── compile.sh                   # macOS 단독 실행 앱(.app) 자동 컴파일용 쉘 스크립트 (가상환경 지원)
 ├── git_push.bat                 # 원격 깃허브 저장소(jmstudio) 자동 push 배치 스크립트
 ├── .gitignore                   # 불필요한 빌드 부산물, 임시 캐시 및 설정 제외를 위한 규칙 파일
 ├── md_viewer_config.json        # 서재 파일 목록, 최근 본 파일, 테마 등 유저 설정 상태 저장 DB
@@ -112,31 +113,64 @@ e:\jm_studio\
 ## 🚀 Getting Started (시작하기)
 
 ### 📋 요구 사항 (Prerequisites)
-이 프로그램을 실행하기 위해서는 아래의 파이썬 라이브러리가 필요합니다.
-* Python 3.10 이상
-* `pywebview`: 데스크톱 앱 윈도우 프레임 생성
-* `bottle`: 로컬 경량 파일 서버 및 리소스 라우팅
-* `Pillow` (PIL): PNG 실행 아이콘을 윈도우 다중 해상도 `.ico` 포맷으로 자동 변환 빌드
+이 프로그램을 실행하거나 독립 패키지로 빌드하기 위해서는 아래의 환경이 권장됩니다.
+* **Python**: Python 3.10 이상 (Windows 빌드 스크립트는 기본적으로 `C:\Python\Python313\python.exe` 및 시스템 PATH의 `python` 명령어를 감지합니다.)
+* **의존성 라이브러리**:
+  * `pywebview`: 데스크톱 앱 GUI 프레임 윈도우 생성
+  * `bottle`: 로컬 경량 웹 서버 구동 및 리소스 라우팅
+  * `Pillow` (PIL): PNG 앱 아이콘을 다중 해상도 Windows `.ico` 포맷으로 자동 변환
+  * `pyinstaller`: 독립형 단일 실행기 컴파일 (빌드 시 필수)
 
 ### 💻 설치 및 실행 (Installation & Run)
 
+#### 방법 1: 일반 시스템 환경에서 실행 및 빌드 라이브러리 설치
 1. **필수 라이브러리 설치**:
    ```bash
    pip install pywebview bottle Pillow
+   # 빌드 작업까지 병행하는 경우
+   pip install pyinstaller
    ```
 
 2. **애플리케이션 실행**:
    ```bash
    python jmstudio.py
    ```
-   * 실행 시, `app_icon.png`가 존재할 경우 자동으로 고품질 다중 해상도(16x16 ~ 256x256) 아이콘 파일인 `app_icon.ico`로 변환하여 윈도우 타이틀바와 하단 작업표시줄에 완벽하게 바인딩합니다.
+
+#### 방법 2: 가상환경(venv)을 생성하여 독립적으로 실행 (권장)
+로컬 가상환경을 사용하면 시스템 환경 오염 없이 안전하게 테스트하고, `compile.bat`/`compile.sh` 스크립트를 통한 독립 빌드 시에도 가상환경 내 패키지를 활용하므로 더욱 깔끔합니다.
+
+1. **가상환경 생성 및 활성화**:
+   * **Windows (PowerShell)**:
+     ```powershell
+     python -m venv .venv
+     .venv\Scripts\activate
+     ```
+   * **macOS / Linux (Terminal)**:
+     ```bash
+     python3 -m venv .venv
+     source .venv/bin/activate
+     ```
+
+2. **가상환경 의존성 설치 및 실행**:
+   ```bash
+   pip install --upgrade pip
+   pip install pywebview bottle Pillow pyinstaller
+   python jmstudio.py
+   ```
+   * *참고: 앱 실행 시 프로젝트 루트에 `app_icon.png`가 있으면 Windows GUI 바인딩용 다중 해상도 `app_icon.ico` 파일이 자동 생성됩니다.*
+
 
 ### 📦 단독 실행 파일로 배포하기 (Compilation)
 외부 다른 PC에서 별도의 Python이나 라이브러리를 설치하지 않고 **Joy Markdown Studio**를 즉시 실행할 수 있는 독립 패키지(실행 파일)로 컴파일하는 방법입니다.
 
+> [!TIP]
+> **가상환경(.venv) 자동 감지 지원**
+> * 빌드 스크립트는 프로젝트 루트 폴더에 `.venv` 가상환경이 존재할 경우, 시스템 글로벌 Python 대신 가상환경 내의 Python 실행 파일(`.venv/Scripts/python.exe` 또는 `.venv/bin/python`)을 **우선적으로 감지하여 빌드에 사용**합니다.
+> * 이를 통해 시스템 환경 오염 없이 독립적인 종속성 하에서 깔끔한 빌드가 가능합니다.
+
 #### 🪟 Windows 환경에서 빌드 (.exe)
 1. **원클릭 컴파일 스크립트 실행**:
-   * 폴더 내에 생성된 [compile.bat](file:///c:/Workspace/jmstudio/compile.bat) 파일을 **더블 클릭**하여 실행하거나 터미널 환경에 맞춰 다음 명령을 수행합니다.
+   * 폴더 내에 생성된 [compile.bat](file:///e:/jm_studio/compile.bat) 파일을 **더블 클릭**하여 실행하거나 터미널 환경에 맞춰 다음 명령을 수행합니다.
      * **PowerShell (기본 터미널)**:
        ```powershell
        .\compile.bat
@@ -145,7 +179,7 @@ e:\jm_studio\
        ```cmd
        compile.bat
        ```
-   * 이 스크립트는 내부적으로 `PyInstaller`를 자동 설치/업데이트한 뒤 `jmstudio.py`를 버전이 포함된 단일 EXE 파일(`JoyMarkdownStudio-vX.XX.exe`)로 빌드합니다.
+   * 이 스크립트는 내부적으로 가상환경(존재 시) 혹은 시스템 Python의 `PyInstaller`를 자동 설치/업데이트한 뒤 `jmstudio.py`를 버전이 포함된 단일 EXE 파일(`JoyMarkdownStudio-vX.XX.exe`)로 빌드합니다.
 
 2. **실행 파일 복사 및 배포**:
    * 컴파일이 성공적으로 종료되면 `.\dist\` 폴더가 생성됩니다.
@@ -158,12 +192,12 @@ e:\jm_studio\
 
 1. **Mac 터미널에서 컴파일 스크립트 실행**:
    * 소스코드 폴더를 Mac PC로 복사한 후, Mac 터미널을 열고 해당 폴더로 이동합니다.
-   * 아래 명령어를 차례로 입력하여 빌드 스크립트 [compile.sh](file:///c:/Workspace/jmstudio/compile.sh)에 실행 권한을 부여하고 실행합니다:
+   * 아래 명령어를 차례로 입력하여 빌드 스크립트 [compile.sh](file:///e:/jm_studio/compile.sh)에 실행 권한을 부여하고 실행합니다:
      ```bash
      chmod +x compile.sh
      ./compile.sh
      ```
-   * 스크립트가 필요한 라이브러리를 설치한 뒤 `dist/` 폴더 내에 단독 실행 가능한 macOS 앱 번들인 **`JoyMarkdownStudio-vX.XX.app`** 폴더를 생성합니다.
+   * 스크립트가 가상환경(존재 시) 혹은 macOS 시스템 Python을 사용해 필요한 라이브러리를 설치한 뒤, `dist/` 폴더 내에 단독 실행 가능한 macOS 앱 번들인 **`JoyMarkdownStudio-vX.XX.app`** 폴더를 생성합니다.
 
 2. **앱 패키지 배포**:
    * 생성된 `JoyMarkdownStudio-vX.XX.app` 폴더를 **우클릭하여 압축(Zip)**한 후 배포합니다.
