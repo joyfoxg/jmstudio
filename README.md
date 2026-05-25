@@ -126,27 +126,27 @@ e:\jm_studio\
 
 ## 🆚 Why Joy Markdown Studio? (vs Obsidian)
 
-While both **Joy Markdown Studio (JMS)** and **Obsidian** are powerful local markdown editors, their core philosophy, target audience, and out-of-the-box features are distinctly different.
+While both **Joy Markdown Studio (JM-STUDIO)** and **Obsidian** are powerful local markdown editors, their core philosophy, target audience, and out-of-the-box features are distinctly different.
 
 ### 1. 🧪 Out-of-the-Box STEM Research Environment
 * **Obsidian**: Focuses on general personal knowledge management (PKM) and Zettelkasten. To comfortably write complex equations or chemistry formulas, you have to find, install, and configure numerous community plugins.
-* **JMS**: A fully-equipped environment for mathematicians, physicists, and chemists is **built-in from the moment you install it**. Dedicated helper panels allow you to insert complex templates like limits, Lorentz force, and the Schrödinger equation with a single click.
+* **JM-STUDIO**: A fully-equipped environment for mathematicians, physicists, and chemists is **built-in from the moment you install it**. Dedicated helper panels allow you to insert complex templates like limits, Lorentz force, and the Schrödinger equation with a single click.
 
 ### 2. 🧬 Real-time PubChem Molecule Visualization (Killer Feature)
 * **Obsidian**: No native feature to search or render chemical molecular structures.
-* **JMS**: Natively integrated with the **NLM PubChem API**. Search for compounds (like "Aspirin" or "Caffeine") to view real-time 2D molecular structures, and automatically insert SMILES codes to render beautiful molecular graphics directly in your markdown document.
+* **JM-STUDIO**: Natively integrated with the **NLM PubChem API**. Search for compounds (like "Aspirin" or "Caffeine") to view real-time 2D molecular structures, and automatically insert SMILES codes to render beautiful molecular graphics directly in your markdown document.
 
 ### 3. 🌐 Built-in Free Remote Web Access & Security
 * **Obsidian**: Real-time sync and remote viewing require paid services (Obsidian Sync) or complex third-party cloud configurations.
-* **JMS**: Automatically spins up an internal web server. By entering the network URL (`http://192.168.x.x:58220`) into a browser on your tablet or smartphone on the same Wi-Fi, you get **instant remote access to your library**. It even supports a custom Lock Screen password for perfect security.
+* **JM-STUDIO**: Automatically spins up an internal web server. By entering the network URL (`http://192.168.x.x:58220`) into a browser on your tablet or smartphone on the same Wi-Fi, you get **instant remote access to your library**. It even supports a custom Lock Screen password for perfect security.
 
 ### 4. 🎨 Premium Glassmorphism UI
 * **Obsidian**: The default UI is utilitarian and requires manual CSS theme tweaking to look modern.
-* **JMS**: Features a stunning, translucent glassmorphism interface and smooth micro-animations right out of the box, providing visual delight and a premium experience while you research.
+* **JM-STUDIO**: Features a stunning, translucent glassmorphism interface and smooth micro-animations right out of the box, providing visual delight and a premium experience while you research.
 
 ### 5. 🖨️ Intelligent PDF Printing & Standalone HTML Export
 * **Obsidian**: Printing PDFs with dark themes can be cumbersome and wastes ink.
-* **JMS**: When printing from Dark Mode, JMS intelligently **auto-renders a high-contrast white theme in 0.1 seconds** just for the PDF export to save ink and maximize readability, instantly reverting to Dark Mode afterward. It also supports zero-dependency Standalone HTML exports, allowing you to share a single file with colleagues that looks identical to the app.
+* **JM-STUDIO**: When printing from Dark Mode, JM-STUDIO intelligently **auto-renders a high-contrast white theme in 0.1 seconds** just for the PDF export to save ink and maximize readability, instantly reverting to Dark Mode afterward. It also supports zero-dependency Standalone HTML exports, allowing you to share a single file with colleagues that looks identical to the app.
 
 > **💡 In Summary:**
 > If Obsidian is a "universal diary where you build your own notes using Lego blocks," **Joy Markdown Studio is a "fully-loaded premium research studio designed so scientists and researchers can dive straight into their work with zero setup!"**
