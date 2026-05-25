@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="joy-markdown-studio",
-    version="3.7.0",
+    version="3.7.1",
     author="Joy Fox",
     author_email="joyfox@example.com",
     description="The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio",

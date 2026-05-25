@@ -1,0 +1,9 @@
+README.md
+jmstudio.py
+setup.py
+joy_markdown_studio.egg-info/PKG-INFO
+joy_markdown_studio.egg-info/SOURCES.txt
+joy_markdown_studio.egg-info/dependency_links.txt
+joy_markdown_studio.egg-info/entry_points.txt
+joy_markdown_studio.egg-info/requires.txt
+joy_markdown_studio.egg-info/top_level.txt

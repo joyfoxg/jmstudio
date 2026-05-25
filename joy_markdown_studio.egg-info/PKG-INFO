@@ -1,3 +1,28 @@
+Metadata-Version: 2.4
+Name: joy-markdown-studio
+Version: 3.7.1
+Summary: The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio
+Home-page: https://github.com/joyfoxg/jmstudio
+Author: Joy Fox
+Author-email: joyfox@example.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: bottle>=0.12.25
+Requires-Dist: pywebview>=4.4.1
+Requires-Dist: Pillow>=10.0.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
 # 🧪 Joy Markdown Studio v3.7.1 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  

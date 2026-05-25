@@ -1,0 +1,2 @@
+[console_scripts]
+jmstudio = jmstudio:main
