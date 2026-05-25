@@ -4696,28 +4696,28 @@ HTML_CONTENT = """<!DOCTYPE html>
             let template = "";
             switch (type) {
                 case 'mindmap':
-                    template = "```mermaid\nmindmap\n  root((?중심 토픽))\n    주제 1\n      세부내용 A\n      세부내용 B\n    주제 2\n      세부내용 C\n      세부내용 D\n```\n";
+                    template = "```mermaid\\nmindmap\\n  root((?중심 토픽))\\n    주제 1\\n      세부내용 A\\n      세부내용 B\\n    주제 2\\n      세부내용 C\\n      세부내용 D\\n```\\n";
                     break;
                 case 'orgchart':
-                    template = "```mermaid\nflowchart TD\n  CEO(?대표이사) --> 이사회\n  CEO --> 부사장\n  부사장 --> 개발본부\n  부사장 --> 마케팅본부\n  개발본부 --> 개발1팀\n  개발본부 --> 개발2팀\n```\n";
+                    template = "```mermaid\\nflowchart TD\\n  CEO(?대표이사) --> 이사회\\n  CEO --> 부사장\\n  부사장 --> 개발본부\\n  부사장 --> 마케팅본부\\n  개발본부 --> 개발1팀\\n  개발본부 --> 개발2팀\\n```\\n";
                     break;
                 case 'flowchart':
-                    template = "```mermaid\nflowchart TD\n  Start(시작) --> Input(?데이터 입력)\n  Input --> Dec{조건 판단}\n  Dec -- Yes --> Process[작업 처리]\n  Dec -- No --> End(종료)\n  Process --> End\n```\n";
+                    template = "```mermaid\\nflowchart TD\\n  Start(시작) --> Input(?데이터 입력)\\n  Input --> Dec{조건 판단}\\n  Dec -- Yes --> Process[작업 처리]\\n  Dec -- No --> End(종료)\\n  Process --> End\\n```\\n";
                     break;
                 case 'state':
-                    template = "```mermaid\nstateDiagram-v2\n  [*] --> Idle\n  Idle --> Processing: ?작업 시작\n  Processing --> Success: 성공\n  Processing --> Failed: 실패\n  Success --> [*]\n  Failed --> Idle: 재시도\n```\n";
+                    template = "```mermaid\\nstateDiagram-v2\\n  [*] --> Idle\\n  Idle --> Processing: ?작업 시작\\n  Processing --> Success: 성공\\n  Processing --> Failed: 실패\\n  Success --> [*]\\n  Failed --> Idle: 재시도\\n```\\n";
                     break;
                 case 'sequence':
-                    template = "```mermaid\nsequenceDiagram\n  actor User as ?사용자\n  participant App as 클라이언트\n  participant Server as 서버\n\n  User->>App: 버튼 클릭\n  App->>Server: API 요청 (data)\n  Server-->>App: JSON 응답 (success)\n  App-->>User: 결과 화면 렌더링\n```\n";
+                    template = "```mermaid\\nsequenceDiagram\\n  actor User as ?사용자\\n  participant App as 클라이언트\\n  participant Server as 서버\\n\\n  User->>App: 버튼 클릭\\n  App->>Server: API 요청 (data)\\n  Server-->>App: JSON 응답 (success)\\n  App-->>User: 결과 화면 렌더링\\n```\\n";
                     break;
                 case 'class':
-                    template = "```mermaid\nclassDiagram\n  class ?Animal {\n    +String name\n    +int age\n    +makeSound()\n  }\n  class Dog {\n    +String breed\n    +bark()\n  }\n  Animal <|-- Dog\n```\n";
+                    template = "```mermaid\\nclassDiagram\\n  class ?Animal {\\n    +String name\\n    +int age\\n    +makeSound()\\n  }\\n  class Dog {\\n    +String breed\\n    +bark()\\n  }\\n  Animal <|-- Dog\\n```\\n";
                     break;
                 case 'gantt':
-                    template = "```mermaid\ngantt\n  title ?프로젝트 개발 일정\n  dateFormat  YYYY-MM-DD\n  section 분석 및 설계\n  요구사항 분석           :a1, 2026-05-25, 5d\n  시스템 설계             :after a1  , 4d\n  section 구현 및 테스트\n  핵심 프론트엔드 개발     :active, b1, 2026-05-30, 8d\n  백엔드 API 연동         :b2, after b1  , 6d\n  통합 테스트             :c1, after b2  , 4d\n```\n";
+                    template = "```mermaid\\ngantt\\n  title ?프로젝트 개발 일정\\n  dateFormat  YYYY-MM-DD\\n  section 분석 및 설계\\n  요구사항 분석           :a1, 2026-05-25, 5d\\n  시스템 설계             :after a1  , 4d\\n  section 구현 및 테스트\\n  핵심 프론트엔드 개발     :active, b1, 2026-05-30, 8d\\n  백엔드 API 연동         :b2, after b1  , 6d\\n  통합 테스트             :c1, after b2  , 4d\\n```\\n";
                     break;
                 case 'pie':
-                    template = "```mermaid\npie title ?시장 점유율 분석\n  \"A사\" : 42.5\n  \"B사\" : 31.8\n  \"C사\" : 15.2\n  \"기타\" : 10.5\n```\n";
+                    template = "```mermaid\\npie title ?시장 점유율 분석\\n  \\\"A사\\\" : 42.5\\n  \\\"B사\\\" : 31.8\\n  \\\"C사\\\" : 15.2\\n  \\\"기타\\\" : 10.5\\n```\\n";
                     break;
             }
             insertMathSymbol(template);
