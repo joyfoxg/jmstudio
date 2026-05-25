@@ -137,6 +137,7 @@ class MdViewerApi:
         return {
             "workspace": self.workspace,
             "theme": cfg.get("theme", "dark"),
+            "lang": cfg.get("lang", "ko"),
             "last_file": cfg.get("last_file", ""),
             "files": self.list_files(),
             "port": cfg.get("port", PORT),
@@ -475,6 +476,12 @@ class MdViewerApi:
     def save_theme(self, theme_name):
         cfg = get_config()
         cfg["theme"] = theme_name
+        save_config(cfg)
+        return {"status": "success"}
+
+    def save_lang(self, lang):
+        cfg = get_config()
+        cfg["lang"] = lang
         save_config(cfg)
         return {"status": "success"}
 
@@ -894,6 +901,75 @@ HTML_CONTENT = """<!DOCTYPE html>
         .btn-accent:hover {
             background: var(--accent-hover);
             color: #090a0f;
+        }
+
+        /* 언어 토글 버튼 */
+        .lang-toggle-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2px;
+            cursor: pointer;
+            display: inline-flex;
+            position: relative;
+            user-select: none;
+            transition: all 0.2s ease;
+            margin-left: 8px;
+        }
+        .theme-light .lang-toggle-container {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        .lang-toggle-container:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+        .lang-toggle-track {
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: 64px;
+            height: 24px;
+        }
+        .lang-text {
+            flex: 1;
+            font-size: 0.72em;
+            font-weight: 700;
+            text-align: center;
+            z-index: 2;
+            transition: color 0.2s ease;
+            color: var(--text-muted);
+            line-height: 24px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .lang-toggle-thumb {
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 30px;
+            height: 22px;
+            background: var(--accent);
+            border-radius: 18px;
+            z-index: 1;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+        .lang-ko .lang-text.ko {
+            color: #090a0f !important;
+        }
+        .theme-light.lang-ko .lang-text.ko {
+            color: #ffffff !important;
+        }
+        .lang-en .lang-text.en {
+            color: #090a0f !important;
+        }
+        .theme-light.lang-en .lang-text.en {
+            color: #ffffff !important;
+        }
+        .lang-ko .lang-toggle-thumb {
+            transform: translateX(0);
+        }
+        .lang-en .lang-toggle-thumb {
+            transform: translateX(32px);
         }
 
         /* 메인 컨테이너 */
@@ -2110,56 +2186,68 @@ HTML_CONTENT = """<!DOCTYPE html>
             <div class="splash-title">JM Studio</div>
         </div>
     </div>
+    <script>
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    </script>
 
     <!-- 헤더 영역 -->
     <header>
         <div class="brand-section">
             <div class="brand-logo"><i data-lucide="book-open" style="width: 18px; height: 18px;"></i></div>
             <div class="brand-title">JM Studio</div>
-            <button class="add-doc-btn" onclick="addDocumentToLibrary()" title="서재에 마크다운 문서(.md) 추가">
+            <button class="add-doc-btn" onclick="addDocumentToLibrary()" title="서재에 마크다운 문서(.md) 추가" data-i18n-title="tooltip_add_doc">
                 <i data-lucide="file-plus" style="width: 14px; height: 14px;"></i>
-                <span>문서 추가</span>
+                <span data-i18n="btn_add_doc">문서 추가</span>
             </button>
         </div>
 
         <!-- 뷰 모드 토글 -->
         <div class="view-mode-toggles">
             <button class="mode-btn" id="mode-edit" onclick="setViewMode('edit')">
-                <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
-                <span>편집기</span>
+                <i data-lucide="edit" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="mode_edit">편집기</span>
             </button>
             <button class="mode-btn active" id="mode-split" onclick="setViewMode('split')">
                 <i data-lucide="columns" style="width: 14px; height: 14px;"></i>
-                <span>스플릿</span>
+                <span data-i18n="mode_split">스플릿</span>
             </button>
             <button class="mode-btn" id="mode-preview" onclick="setViewMode('preview')">
                 <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
-                <span>미리보기</span>
+                <span data-i18n="mode_preview">미리보기</span>
             </button>
         </div>
 
         <!-- 액션 그룹 -->
         <div class="action-group">
-            <button class="btn" onclick="toggleDocumentFullscreen()" title="문서 전체화면 (더블클릭 단축 지원)">
+            <button class="btn" onclick="toggleDocumentFullscreen()" title="문서 전체화면 (더블클릭 단축 지원)" data-i18n-title="tooltip_fullscreen">
                 <i id="fs-doc-icon" data-lucide="expand" style="width: 14px; height: 14px;"></i>
-                <span>문서 전체화면</span>
+                <span data-i18n="btn_fullscreen">문서 전체화면</span>
             </button>
             <button class="btn btn-accent" onclick="saveActiveFile()">
                 <i data-lucide="save" style="width: 14px; height: 14px;"></i>
-                <span>저장</span>
+                <span data-i18n="btn_save">저장</span>
             </button>
             <button class="btn" onclick="exportToHtml()">
                 <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
-                <span>HTML 내보내기</span>
+                <span data-i18n="btn_export_html">HTML 내보내기</span>
             </button>
             <button class="btn" onclick="printDocument()">
                 <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
-                <span>PDF 인쇄</span>
+                <span data-i18n="btn_print_pdf">PDF 인쇄</span>
             </button>
-            <button class="icon-btn" onclick="toggleTheme()" title="테마 전환" style="margin-left: 8px;">
+            <div class="lang-toggle-container" onclick="toggleLanguage()" title="언어 변경 / Switch Language" style="margin-left: 8px;">
+                <div class="lang-toggle-track">
+                    <span class="lang-text ko">KR</span>
+                    <span class="lang-text en">EN</span>
+                    <div class="lang-toggle-thumb"></div>
+                </div>
+            </div>
+            <button class="icon-btn" onclick="toggleTheme()" title="테마 전환" data-i18n-title="tooltip_theme" style="margin-left: 8px;">
                 <i id="theme-icon" data-lucide="sun" style="width: 18px; height: 18px;"></i>
             </button>
-            <button class="icon-btn" onclick="openSettingsModal()" title="네트워크 및 보안 설정" style="margin-left: 4px;">
+            <button class="icon-btn" onclick="openSettingsModal()" title="네트워크 및 보안 설정" data-i18n-title="tooltip_settings" style="margin-left: 4px;">
                 <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
             </button>
         </div>
@@ -2170,7 +2258,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         <!-- 드래그 드롭 오버레이 -->
         <div class="drag-overlay" id="drag-overlay">
             <i data-lucide="upload-cloud" style="width: 48px; height: 48px;"></i>
-            <div style="font-size: 1.2em; font-weight: 600;">여기에 마크다운 파일을 드롭하여 즉시 열기</div>
+            <div style="font-size: 1.2em; font-weight: 600;" data-i18n="msg_drag_drop_desc">여기에 마크다운 파일을 드롭하여 즉시 열기</div>
         </div>
 
         <!-- 사이드바 (내 서재 + 수식 입력기) -->
@@ -2178,30 +2266,30 @@ HTML_CONTENT = """<!DOCTYPE html>
             <div class="sidebar-tabs" style="display: flex; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.15);">
                 <button class="sidebar-tab-btn active" id="tab-explorer" onclick="setSidebarTab('explorer')" style="flex: 1; padding: 12px; background: transparent; border: none; border-bottom: 2px solid var(--accent); color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 0.8em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
                     <i data-lucide="folder" style="width: 14px; height: 14px;"></i>
-                    <span>내 서재</span>
+                    <span data-i18n="tab_explorer">내 서재</span>
                 </button>
                 <button class="sidebar-tab-btn" id="tab-math" onclick="setSidebarTab('math')" style="flex: 1; padding: 12px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.8em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
                     <i data-lucide="calculator" style="width: 14px; height: 14px;"></i>
-                    <span>수식 입력기</span>
+                    <span data-i18n="tab_math">수식 입력기</span>
                 </button>
                 <button class="sidebar-tab-btn" id="tab-chemistry" onclick="setSidebarTab('chemistry')" style="flex: 1; padding: 12px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.8em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
                     <i data-lucide="beaker" style="width: 14px; height: 14px;"></i>
-                    <span>화학식 검색</span>
+                    <span data-i18n="tab_chemistry">화학식 검색</span>
                 </button>
             </div>
             
             <!-- 내 서재 패널 -->
             <div class="sidebar-content-pane" id="sidebar-content-explorer" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
                 <div class="sidebar-header">
-                    <span class="sidebar-title">내 서재</span>
+                    <span class="sidebar-title" data-i18n="sidebar_title_explorer">내 서재</span>
                     <div class="sidebar-actions">
-                        <button class="icon-btn" onclick="openCreateModal('file')" title="새 파일 생성">
+                        <button class="icon-btn" onclick="openCreateModal('file')" title="새 파일 생성" data-i18n-title="tooltip_create_file">
                             <i data-lucide="file-plus" style="width: 16px; height: 16px;"></i>
                         </button>
-                        <button class="icon-btn" onclick="openCreateModal('folder')" title="새 폴더 생성">
+                        <button class="icon-btn" onclick="openCreateModal('folder')" title="새 폴더 생성" data-i18n-title="tooltip_create_folder">
                             <i data-lucide="folder-plus" style="width: 16px; height: 16px;"></i>
                         </button>
-                        <button class="icon-btn" onclick="refreshWorkspace()" title="목록 새로고침">
+                        <button class="icon-btn" onclick="refreshWorkspace()" title="목록 새로고침" data-i18n-title="tooltip_refresh">
                             <i data-lucide="rotate-cw" style="width: 16px; height: 16px;"></i>
                         </button>
                     </div>
@@ -2214,38 +2302,38 @@ HTML_CONTENT = """<!DOCTYPE html>
             <div class="sidebar-content-pane" id="sidebar-content-math" style="display: none; flex-direction: column; flex: 1; overflow-y: auto; padding: 16px; gap: 12px;">
                 <!-- 서브탭 네비게이션 -->
                 <div class="math-subtabs" style="display: flex; gap: 4px; background: rgba(255, 255, 255, 0.03); padding: 4px; border-radius: 6px; margin-bottom: 4px; border: 1px solid var(--border);">
-                    <button class="math-subtab-btn active" id="subtab-math-math" onclick="setMathSubTab('math')" style="flex: 1; padding: 6px 2px; border: none; background: var(--accent-glow); color: var(--accent); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;">📐 수학</button>
-                    <button class="math-subtab-btn" id="subtab-math-physics" onclick="setMathSubTab('physics')" style="flex: 1; padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;">⚛️ 물리</button>
-                    <button class="math-subtab-btn" id="subtab-math-bio" onclick="setMathSubTab('bio')" style="flex: 1; padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;">🧪 화학/생명</button>
+                    <button class="math-subtab-btn active" id="subtab-math-math" onclick="setMathSubTab('math')" style="flex: 1; padding: 6px 2px; border: none; background: var(--accent-glow); color: var(--accent); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_math">📐 수학</button>
+                    <button class="math-subtab-btn" id="subtab-math-physics" onclick="setMathSubTab('physics')" style="flex: 1; padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_physics">⚛️ 물리</button>
+                    <button class="math-subtab-btn" id="subtab-math-bio" onclick="setMathSubTab('bio')" style="flex: 1; padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_bio">🧪 화학/생명</button>
                 </div>
 
                 <!-- 1. 수학 서브탭 콘텐츠 -->
                 <div class="math-subtab-content" id="math-subtab-content-math" style="display: flex; flex-direction: column; gap: 16px;">
                     <div class="math-section">
-                        <div class="math-section-title">자주 쓰이는 기본 수식</div>
+                        <div class="math-section-title" data-i18n="math_title_basic">자주 쓰이는 기본 수식</div>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\frac{?}{?}$')">$$\\frac{a}{b}$$<span>분수</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\sqrt{?}$')">$$\\sqrt{x}$$<span>루트</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$?^{?}$')">$$a^b$$<span>거듭제곱</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$?_{?}$')">$$a_n$$<span>아래첨자</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\sum_{i=1}^{n} ?_{i}$')">$$\\sum x_i$$<span>합(Sum)</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\prod_{i=1}^{n} ?_{i}$')">$$\\prod x_i$$<span>곱(Prod)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\frac{?}{?}$')">$$\\frac{a}{b}$$<span data-i18n="math_label_fraction">분수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\sqrt{?}$')">$$\\sqrt{x}$$<span data-i18n="math_label_sqrt">루트</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$?^{?}$')">$$a^b$$<span data-i18n="math_label_power">거듭제곱</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$?_{?}$')">$$a_n$$<span data-i18n="math_label_subscript">아래첨자</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\sum_{i=1}^{n} ?_{i}$')">$$\\sum x_i$$<span data-i18n="math_label_sum">합(Sum)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\prod_{i=1}^{n} ?_{i}$')">$$\\prod x_i$$<span data-i18n="math_label_prod">곱(Prod)</span></button>
                         </div>
                     </div>
                     
                     <div class="math-section">
-                        <div class="math-section-title">미적분 및 극한</div>
+                        <div class="math-section-title" data-i18n="math_title_calculus">미적분 및 극한</div>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\frac{d?}{d?}$')">$$\\frac{dy}{dx}$$<span>미분</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\frac{\\\\partial ?}{\\\\partial ?}$')">$$\\frac{\\partial y}{\\partial x}$$<span>편미분</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\int f(x)\\\\,dx$')">$$\\int$$<span>부정적분</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\int_{?}^{?} ?\\\\,d?$')">$$\\int_a^b$$<span>정적분</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\lim_{? \\\\to ?} ?$')">$$\\lim$$<span>극한</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\frac{d?}{d?}$')">$$\\frac{dy}{dx}$$<span data-i18n="math_label_diff">미분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\frac{\\\\partial ?}{\\\\partial ?}$')">$$\\frac{\\partial y}{\\partial x}$$<span data-i18n="math_label_partial">편미분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\int f(x)\\\\,dx$')">$$\\int$$<span data-i18n="math_label_indef_int">부정적분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\int_{?}^{?} ?\\\\,d?$')">$$\\int_a^b$$<span data-i18n="math_label_def_int">정적분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\lim_{? \\\\to ?} ?$')">$$\\lim$$<span data-i18n="math_label_limit">극한</span></button>
                         </div>
                     </div>
 
                     <div class="math-section">
-                        <div class="math-section-title">그리스 문자 (Greek)</div>
+                        <div class="math-section-title" data-i18n="math_title_greek">그리스 문자 (Greek)</div>
                         <div class="math-grid-small">
                             <button class="math-item-small" onclick="insertMathSymbol('$\\\\alpha$')">$$\\alpha$$</button>
                             <button class="math-item-small" onclick="insertMathSymbol('$\\\\beta$')">$$\\beta$$</button>
@@ -2265,15 +2353,15 @@ HTML_CONTENT = """<!DOCTYPE html>
                     </div>
 
                     <div class="math-section">
-                        <div class="math-section-title">수학 기호</div>
+                        <div class="math-section-title" data-i18n="math_title_symbols">수학 기호</div>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\infty$')">$$\\infty$$<span>무한대</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\approx$')">$$\\approx$$<span>근사치</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\ne$')">$$\\ne$$<span>다름</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\times$')">$$\\times$$<span>곱셈</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\div$')">$$\\div$$<span>나눗셈</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\vec{?}$')">$$\\vec{v}$$<span>벡터</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\to$')">$$\\to$$<span>화살표</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\infty$')">$$\\infty$$<span data-i18n="math_label_infinity">무한대</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\approx$')">$$\\approx$$<span data-i18n="math_label_approx">근사치</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\ne$')">$$\\ne$$<span data-i18n="math_label_ne">다름</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\times$')">$$\\times$$<span data-i18n="math_label_mul">곱셈</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\div$')">$$\\div$$<span data-i18n="math_label_div">나눗셈</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\vec{?}$')">$$\\vec{v}$$<span data-i18n="math_label_vector">벡터</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\to$')">$$\\to$$<span data-i18n="math_label_arrow">화살표</span></button>
                         </div>
                     </div>
                 </div>
@@ -2281,22 +2369,22 @@ HTML_CONTENT = """<!DOCTYPE html>
                 <!-- 2. 물리학 서브탭 콘텐츠 -->
                 <div class="math-subtab-content" id="math-subtab-content-physics" style="display: none; flex-direction: column; gap: 16px;">
                     <div class="math-section">
-                        <div class="math-section-title">전자기학 및 중력</div>
+                        <div class="math-section-title" data-i18n="math_title_em_gravity">전자기학 및 중력</div>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$F = k_e \\\\frac{q_1 q_2}{r^2}$')">$$F = k_e \\\\frac{q_1 q_2}{r^2}$$<span>쿨롱 법칙</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\vec{F} = q(\\\\vec{E} + \\\\vec{v} \\\\times \\\\vec{B})$')">$$\\\\vec{F} = q(\\\\vec{E} + \\\\vec{v} \\\\times \\\\vec{B})$$<span>로런츠 힘</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\oint \\\\vec{E} \\\\cdot d\\\\vec{A} = \\\\frac{Q}{\\\\varepsilon_0}$')">$$\\\\oint \\\\vec{E} \\\\cdot d\\\\vec{A} = \\\\frac{Q}{\\\\varepsilon_0}$$<span>가우스 법칙</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$F = G \\\\frac{m_1 m_2}{r^2}$')">$$F = G \\\\frac{m_1 m_2}{r^2}$$<span>만유인력</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$F = k_e \\\\frac{q_1 q_2}{r^2}$')">$$F = k_e \\\\frac{q_1 q_2}{r^2}$$<span data-i18n="math_label_coulomb">쿨롱 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\vec{F} = q(\\\\vec{E} + \\\\vec{v} \\\\times \\\\vec{B})$')">$$\\\\vec{F} = q(\\\\vec{E} + \\\\vec{v} \\\\times \\\\vec{B})$$<span data-i18n="math_label_lorentz">로런츠 힘</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\oint \\\\vec{E} \\\\cdot d\\\\vec{A} = \\\\frac{Q}{\\\\varepsilon_0}$')">$$\\\\oint \\\\vec{E} \\\\cdot d\\\\vec{A} = \\\\frac{Q}{\\\\varepsilon_0}$$<span data-i18n="math_label_gauss">가우스 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$F = G \\\\frac{m_1 m_2}{r^2}$')">$$F = G \\\\frac{m_1 m_2}{r^2}$$<span data-i18n="math_label_gravity">만유인력</span></button>
                         </div>
                     </div>
                     
                     <div class="math-section">
-                        <div class="math-section-title">양자역학 및 상대성이론</div>
+                        <div class="math-section-title" data-i18n="math_title_quantum">양자역학 및 상대성이론</div>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$E = mc^2$')">$$E = mc^2$$<span>질량-에너지</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$E = h\\\\nu$')">$$E = h\\\\nu$$<span>플랑크-양자</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$i\\\\hbar\\\\frac{\\\\partial}{\\\\partial t}\\\\Psi = \\\\hat{H}\\\\Psi$')">$$i\\\\hbar\\\\frac{\\\\partial}{\\\\partial t}\\\\Psi = \\\\hat{H}\\\\Psi$$<span>슈뢰딩거</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\Delta x \\\\Delta p \\\\ge \\\\frac{\\\\hbar}{2}$')">$$\\\\Delta x \\\\Delta p \\\\ge \\\\frac{\\\\hbar}{2}$$<span>불확정성</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$E = mc^2$')">$$E = mc^2$$<span data-i18n="math_label_mass_energy">질량-에너지</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$E = h\\\\nu$')">$$E = h\\\\nu$$<span data-i18n="math_label_planck">플랑크-양자</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$i\\\\hbar\\\\frac{\\\\partial}{\\\\partial t}\\\\Psi = \\\\hat{H}\\\\Psi$')">$$i\\\\hbar\\\\frac{\\\\partial}{\\\\partial t}\\\\Psi = \\\\hat{H}\\\\Psi$$<span data-i18n="math_label_schrodinger">슈뢰딩거</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\Delta x \\\\Delta p \\\\ge \\\\frac{\\\\hbar}{2}$')">$$\\\\Delta x \\\\Delta p \\\\ge \\\\frac{\\\\hbar}{2}$$<span data-i18n="math_label_uncertainty">불확정성</span></button>
                         </div>
                     </div>
                 </div>
@@ -2304,25 +2392,25 @@ HTML_CONTENT = """<!DOCTYPE html>
                 <!-- 3. 화학/생명 서브탭 콘텐츠 -->
                 <div class="math-subtab-content" id="math-subtab-content-bio" style="display: none; flex-direction: column; gap: 16px;">
                     <div class="math-section">
-                        <div class="math-section-title">화학 반응 및 평형</div>
+                        <div class="math-section-title" data-i18n="math_title_rxn">화학 반응 및 평형</div>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$k = A e^{-\\\\frac{E_a}{RT}}$')">$$k = A e^{-\\\\frac{E_a}{RT}}$$<span>아레니우스</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$PV = nRT$')">$$PV = nRT$$<span>이상기체</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\rightarrow$')">$$\\\\rightarrow$$<span>정반응</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\rightleftharpoons$')">$$\\\\rightleftharpoons$$<span>가역반응</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\uparrow$')">$$\\\\uparrow$$<span>기체발생</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\downarrow$')">$$\\\\downarrow$$<span>침전발생</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$k = A e^{-\\\\frac{E_a}{RT}}$')">$$k = A e^{-\\\\frac{E_a}{RT}}$$<span data-i18n="math_label_arrhenius">아레니우스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$PV = nRT$')">$$PV = nRT$$<span data-i18n="math_label_ideal_gas">이상기체</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\rightarrow$')">$$\\\\rightarrow$$<span data-i18n="math_label_forward">정반응</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\rightleftharpoons$')">$$\\\\rightleftharpoons$$<span data-i18n="math_label_reversible">가역반응</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\uparrow$')">$$\\\\uparrow$$<span data-i18n="math_label_gas_gen">기체발생</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\downarrow$')">$$\\\\downarrow$$<span data-i18n="math_label_precip">침전발생</span></button>
                         </div>
                     </div>
 
                     <div class="math-section">
-                        <div class="math-section-title">유전공학 및 생화학</div>
+                        <div class="math-section-title" data-i18n="math_title_bio">유전공학 및 생화학</div>
                         <div class="math-grid">
-                            <button class="math-item" onclick="insertMathSymbol('$p^2 + 2pq + q^2 = 1$')">$$p^2 + 2pq + q^2 = 1$$<span>하디-바인베르크</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$v = \\\\frac{V_{max}[S]}{K_m + [S]}$')">$$v = \\\\frac{V_{max}[S]}{K_m + [S]}$$<span>멘텐 속도식</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\text{A} = \\\\text{T}$')">$$\\\\text{A} = \\\\text{T}$$<span>A-T 염기쌍</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\text{G} \\\\equiv \\\\text{C}$')">$$\\\\text{G} \\\\equiv \\\\text{C}$$<span>G-C 염기쌍</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\\\Delta G = \\\\Delta H - T\\\\Delta S$')">$$\\\\Delta G = \\\\Delta H - T\\\\Delta S$$<span>깁스 자유에너지</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$p^2 + 2pq + q^2 = 1$')">$$p^2 + 2pq + q^2 = 1$$<span data-i18n="math_label_hardy">하디-바인베르크</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$v = \\\\frac{V_{max}[S]}{K_m + [S]}$')">$$v = \\\\frac{V_{max}[S]}{K_m + [S]}$$<span data-i18n="math_label_menten">멘텐 속도식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\text{A} = \\\\text{T}$')">$$\\\\text{A} = \\\\text{T}$$<span data-i18n="math_label_at_pair">A-T 염기쌍</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\text{G} \\\\equiv \\\\text{C}$')">$$\\\\text{G} \\\\equiv \\\\text{C}$$<span data-i18n="math_label_gc_pair">G-C 염기쌍</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\\\Delta G = \\\\Delta H - T\\\\Delta S$')">$$\\\\Delta G = \\\\Delta H - T\\\\Delta S$$<span data-i18n="math_label_gibbs">깁스 자유에너지</span></button>
                         </div>
                     </div>
                 </div>
@@ -2332,15 +2420,15 @@ HTML_CONTENT = """<!DOCTYPE html>
             <div class="sidebar-content-pane" id="sidebar-content-chemistry" style="display: none; flex-direction: column; flex: 1; overflow: hidden; padding: 20px; gap: 16px;">
                 <div style="font-family: 'Outfit', sans-serif; font-size: 1.1em; font-weight: 600; color: var(--text-main); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
                     <i data-lucide="beaker" style="width: 18px; height: 18px; color: var(--accent);"></i>
-                    <span>PubChem 화학식 연동 검색</span>
+                    <span data-i18n="chem_title">PubChem 화학식 연동 검색</span>
                 </div>
-                <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4;">
+                <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4;" data-i18n="chem_desc">
                     미국 국립의학도서관(NLM) PubChem 데이터베이스에서 화합물을 검색하여 분자 구조와 SMILES 코드를 실시간으로 가져옵니다. (한글/영어 모두 지원)
                 </div>
                 
                 <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <input type="text" id="chemistry-search-input" placeholder="예: aspirin, caffeine, 캡사이신" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 8px 12px; font-size: 0.9em; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') searchChemistryPubChem()">
-                    <button class="btn btn-accent" style="padding: 8px 14px;" onclick="searchChemistryPubChem()" title="검색 실행">
+                    <input type="text" id="chemistry-search-input" placeholder="예: aspirin, caffeine, 캡사이신" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 8px 12px; font-size: 0.9em; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') searchChemistryPubChem()" data-i18n-placeholder="placeholder_chem_search">
+                    <button class="btn btn-accent" style="padding: 8px 14px;" onclick="searchChemistryPubChem()" title="검색 실행" data-i18n-title="tooltip_chem_search_btn">
                         <i data-lucide="search" style="width: 14px; height: 14px;"></i>
                     </button>
                 </div>
@@ -2348,7 +2436,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 <!-- 검색 로딩 스피너 -->
                 <div id="chemistry-search-loading" style="display: none; align-items: center; justify-content: center; padding: 24px 0; gap: 10px; color: var(--text-muted); font-size: 0.9em;">
                     <div style="width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                    <span>PubChem 검색 중...</span>
+                    <span data-i18n="chem_searching">PubChem 검색 중...</span>
                 </div>
                 
                 <!-- 검색 결과 영역 -->
@@ -2365,15 +2453,15 @@ HTML_CONTENT = """<!DOCTYPE html>
                         </div>
                         
                         <div>
-                            <div style="font-size: 0.75em; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">SMILES 코드</div>
+                            <div style="font-size: 0.75em; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" data-i18n="chem_smiles_title">SMILES 코드</div>
                             <div style="position: relative; display: flex;">
                                 <input type="text" id="chem-result-smiles" readonly style="flex: 1; font-family: monospace; font-size: 0.8em; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; color: var(--text-main); outline: none;">
                             </div>
                         </div>
                         
                         <button class="btn btn-accent" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="insertChemistryToEditor()">
-                            <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
-                            <span>에디터에 분자식 삽입</span>
+                            <i data-lucide="edit" style="width: 14px; height: 14px;"></i>
+                            <span data-i18n="chem_btn_insert">에디터에 분자식 삽입</span>
                         </button>
                     </div>
                 </div>
@@ -2381,7 +2469,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         </div>
 
         <!-- 슬라이딩 숨기기/나오기 핸들 (사이드바 바로 뒤 인접 형제로 배치) -->
-        <button class="sidebar-slide-toggle" onclick="toggleSidebar()" id="sidebar-slide-btn" title="사이드바 열기/접기">
+        <button class="sidebar-slide-toggle" onclick="toggleSidebar()" id="sidebar-slide-btn" title="사이드바 열기/접기" data-i18n-title="tooltip_toggle_sidebar">
             <i id="sidebar-slide-icon" data-lucide="chevron-left" style="width: 12px; height: 12px;"></i>
         </button>
 
@@ -2413,15 +2501,15 @@ HTML_CONTENT = """<!DOCTYPE html>
             <!-- 프리뷰 패널 -->
             <div class="pane" id="pane-preview">
                 <div class="pane-header">
-                    <span>실시간 미리보기</span>
+                    <span data-i18n="preview_live">실시간 미리보기</span>
                     <span>Live Render</span>
                 </div>
                 <div class="preview-pane" id="preview-pane">
                     <div class="markdown-body" id="preview-content">
                         <div class="empty-state">
                             <div class="empty-state-icon"><i data-lucide="markdown" style="width: 64px; height: 64px;"></i></div>
-                            <div style="font-size: 1.1em; font-weight: 500;">파일이 열리지 않았습니다.</div>
-                            <div style="font-size: 0.85em; opacity: 0.8;">좌측 탐색기에서 파일을 열거나 새로운 마크다운 문서를 작성해 보세요.</div>
+                            <div style="font-size: 1.1em; font-weight: 500;" data-i18n="empty_no_file">파일이 열리지 않았습니다.</div>
+                            <div style="font-size: 0.85em; opacity: 0.8;" data-i18n="empty_no_file_desc">좌측 탐색기에서 파일을 열거나 새로운 마크다운 문서를 작성해 보세요.</div>
                         </div>
                     </div>
                 </div>
@@ -2430,14 +2518,14 @@ HTML_CONTENT = """<!DOCTYPE html>
 
         <!-- 우측 TOC 플로팅 패널 -->
         <div class="toc-pane" id="sidebar-toc">
-            <div class="toc-title">문서 개요 (TOC)</div>
+            <div class="toc-title" data-i18n="toc_title">문서 개요 (TOC)</div>
             <div id="toc-container">
                 <ul class="toc-list" id="toc-list"></ul>
             </div>
         </div>
 
         <!-- 슬라이딩 숨기기/나오기 핸들 (우측 TOC) -->
-        <button class="toc-slide-toggle" onclick="toggleToc()" id="toc-slide-btn" title="문서 개요 열기/접기">
+        <button class="toc-slide-toggle" onclick="toggleToc()" id="toc-slide-btn" title="문서 개요 열기/접기" data-i18n-title="tooltip_toggle_toc">
             <i id="toc-slide-icon" data-lucide="chevron-right" style="width: 12px; height: 12px;"></i>
         </button>
     </main>
@@ -2445,11 +2533,11 @@ HTML_CONTENT = """<!DOCTYPE html>
     <!-- 새 아이템 생성 모달 -->
     <div class="modal" id="create-modal">
         <div class="modal-card">
-            <div class="modal-title" id="modal-card-title">새 항목 추가</div>
-            <input type="text" class="modal-input" id="modal-card-input" placeholder="이름을 입력해 주세요...">
+            <div class="modal-title" id="modal-card-title" data-i18n="create_modal_title">새 항목 추가</div>
+            <input type="text" class="modal-input" id="modal-card-input" placeholder="이름을 입력해 주세요..." data-i18n-placeholder="placeholder_name">
             <div class="modal-actions">
-                <button class="btn" onclick="closeCreateModal()">취소</button>
-                <button class="btn btn-accent" onclick="submitCreateItem()">생성</button>
+                <button class="btn" onclick="closeCreateModal()" data-i18n="btn_cancel">취소</button>
+                <button class="btn btn-accent" onclick="submitCreateItem()" data-i18n="btn_create">생성</button>
             </div>
         </div>
     </div>
@@ -2459,44 +2547,44 @@ HTML_CONTENT = """<!DOCTYPE html>
         <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px;">
             <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
                 <i data-lucide="settings" style="width: 20px; height: 20px; color: var(--accent);"></i>
-                <div class="modal-title" style="margin: 0; font-size: 1.25em;">네트워크 및 보안 설정</div>
+                <div class="modal-title" style="margin: 0; font-size: 1.25em;" data-i18n="settings_title">네트워크 및 보안 설정</div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-sizing: border-box; text-align: left;">
-                <div style="font-size: 0.85em; font-weight: 600; color: var(--accent); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                    <i data-lucide="info" style="width: 14px; height: 14px;"></i> 현재 네트워크 접속 정보
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85em; font-weight: 600; color: var(--accent); margin-bottom: 4px;">
+                    <i data-lucide="info" style="width: 14px; height: 14px;"></i> <span data-i18n="settings_network_info">현재 네트워크 접속 정보</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-main);">
-                    <span>내부 IP (LAN):</span>
+                    <span data-i18n="settings_lan">내부 IP (LAN):</span>
                     <span id="settings-local-ip" style="font-weight: 600; color: #38bdf8;">127.0.0.1</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-main);">
-                    <span>공인 IP (WAN):</span>
-                    <span id="settings-public-ip" style="font-weight: 600; color: #4ade80;">가져오는 중...</span>
+                    <span data-i18n="settings_wan">공인 IP (WAN):</span>
+                    <span id="settings-public-ip" style="font-weight: 600; color: #4ade80;" data-i18n="settings_retrieving">가져오는 중...</span>
                 </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
                 <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);">접속 호스트 (Bind IP)</label>
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_bind_ip">접속 호스트 (Bind IP)</label>
                     <select id="settings-bind-ip" class="modal-input" style="width: 100%; box-sizing: border-box;">
-                        <option value="0.0.0.0">0.0.0.0 (외부 접속 허용)</option>
-                        <option value="127.0.0.1">127.0.0.1 (로컬만 허용)</option>
+                        <option value="0.0.0.0" data-i18n="settings_bind_external">0.0.0.0 (외부 접속 허용)</option>
+                        <option value="127.0.0.1" data-i18n="settings_bind_local">127.0.0.1 (로컬만 허용)</option>
                     </select>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);">포트 번호</label>
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_port">포트 번호</label>
                     <input type="number" id="settings-port" class="modal-input" placeholder="58220" style="width: 100%; box-sizing: border-box;" min="1024" max="65535">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);">웹 접속 암호</label>
-                    <input type="password" id="settings-password" class="modal-input" placeholder="미지정 시 로그인 없이 접속" style="width: 100%; box-sizing: border-box;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_password">웹 접속 암호</label>
+                    <input type="password" id="settings-password" class="modal-input" placeholder="미지정 시 로그인 없이 접속" style="width: 100%; box-sizing: border-box;" data-i18n-placeholder="placeholder_password_empty">
                 </div>
             </div>
-            <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 10px; font-size: 0.78em; color: #f87171; line-height: 1.4;">
+            <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 10px; font-size: 0.78em; color: #f87171; line-height: 1.4;" data-i18n="settings_warn">
                 호스트/포트 변경은 앱 재시작 후 적용. 암호 변경은 즉시 적용.
             </div>
             <div class="modal-actions" style="width: 100%; justify-content: flex-end;">
-                <button class="btn" onclick="closeSettingsModal()">취소</button>
-                <button class="btn btn-accent" onclick="saveSettings()">저장</button>
+                <button class="btn" onclick="closeSettingsModal()" data-i18n="btn_cancel">취소</button>
+                <button class="btn btn-accent" onclick="saveSettings()" data-i18n="btn_save">저장</button>
             </div>
         </div>
     </div>
@@ -2509,14 +2597,14 @@ HTML_CONTENT = """<!DOCTYPE html>
             </div>
             <div>
                 <div style="font-size: 1.5em; font-weight: 700; color: #e2e8f0;">Secure Access</div>
-                <div style="font-size: 0.85em; color: #94a3b8; margin-top: 6px;">접속 암호를 입력해 주세요.</div>
+                <div style="font-size: 0.85em; color: #94a3b8; margin-top: 6px;" data-i18n="auth_desc">접속 암호를 입력해 주세요.</div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <input type="password" id="auth-password-input" placeholder="비밀번호" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 12px 16px; font-size: 1em; outline: none;" onkeydown="if(event.key==='Enter') submitAuthPassword()">
-                <div id="auth-error-msg" style="display: none; color: #ef4444; font-size: 0.8em;">암호가 올바르지 않습니다.</div>
+                <input type="password" id="auth-password-input" placeholder="비밀번호" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 12px 16px; font-size: 1em; outline: none;" onkeydown="if(event.key==='Enter') submitAuthPassword()" data-i18n-placeholder="placeholder_password">
+                <div id="auth-error-msg" style="display: none; color: #ef4444; font-size: 0.8em;" data-i18n="auth_error_msg">암호가 올바르지 않습니다.</div>
             </div>
             <button class="btn btn-accent" style="width: 100%; padding: 12px; justify-content: center; gap: 8px; font-weight: 600;" onclick="submitAuthPassword()">
-                <i data-lucide="key" style="width: 16px; height: 16px;"></i> 접속하기
+                <i data-lucide="key" style="width: 16px; height: 16px;"></i> <span data-i18n="auth_btn_connect">접속하기</span>
             </button>
         </div>
     </div>
@@ -2524,7 +2612,7 @@ HTML_CONTENT = """<!DOCTYPE html>
     <!-- 토스트 알림 -->
     <div class="toast" id="toast">
         <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
-        <span id="toast-message">변경 사항이 저장되었습니다.</span>
+        <span id="toast-message" data-i18n="toast_default">변경 사항이 저장되었습니다.</span>
     </div>
 
     <!-- Mermaid 전체화면 모달 -->
@@ -2607,20 +2695,485 @@ HTML_CONTENT = """<!DOCTYPE html>
         let currentFilePath = "";
         let currentViewMode = "split";
         let currentTheme = "dark";
+        let currentLang = "ko";
         let isSyncScrolling = true;
+        let renderTimeout;
         let isCreatingType = "file"; // 'file' or 'folder'
         let workspaceRoot = "";
         let currentNetworkConfig = { bind_ip: '0.0.0.0', port: 58220, access_password: '', local_ip: '127.0.0.1' };
+
+        const translations = {
+            ko: {
+                // Header
+                "btn_add_doc": "문서 추가",
+                "tooltip_add_doc": "서재에 마크다운 문서(.md) 추가",
+                "mode_edit": "편집기",
+                "mode_split": "스플릿",
+                "mode_preview": "미리보기",
+                "btn_fullscreen": "문서 전체화면",
+                "tooltip_fullscreen": "문서 전체화면 (더블클릭 단축 지원)",
+                "btn_save": "저장",
+                "btn_export_html": "HTML 내보내기",
+                "btn_print_pdf": "PDF 인쇄",
+                "tooltip_theme": "테마 전환",
+                "tooltip_settings": "네트워크 및 보안 설정",
+                "tooltip_toggle_sidebar": "사이드바 열기/접기",
+                "tooltip_delete": "목록에서 제외",
+                
+                // Sidebar
+                "tab_explorer": "내 서재",
+                "tab_math": "수식 입력기",
+                "tab_chemistry": "화학식 검색",
+                "sidebar_title_explorer": "내 서재",
+                "tooltip_create_file": "새 파일 생성",
+                "tooltip_create_folder": "새 폴더 생성",
+                "tooltip_refresh": "목록 새로고침",
+                "sidebar_no_files": "파일이 존재하지 않습니다.",
+                "sidebar_empty_folder": "빈 폴더",
+                
+                // Math Input
+                "math_subtab_math": "📐 수학",
+                "math_subtab_physics": "⚛️ 물리",
+                "math_subtab_bio": "🧪 화학/생명",
+                
+                "math_title_basic": "자주 쓰이는 기본 수식",
+                "math_title_calculus": "미적분 및 극한",
+                "math_title_greek": "그리스 문자 (Greek)",
+                "math_title_symbols": "수학 기호",
+                "math_title_em_gravity": "전자기학 및 중력",
+                "math_title_quantum": "양자역학 및 상대성이론",
+                "math_title_rxn": "화학 반응 및 평형",
+                "math_title_bio": "유전공학 및 생화학",
+                
+                "math_label_fraction": "분수",
+                "math_label_sqrt": "루트",
+                "math_label_power": "거듭제곱",
+                "math_label_subscript": "아래첨자",
+                "math_label_sum": "합(Sum)",
+                "math_label_prod": "곱(Prod)",
+                "math_label_diff": "미분",
+                "math_label_partial": "편미분",
+                "math_label_indef_int": "부정적분",
+                "math_label_def_int": "정적분",
+                "math_label_limit": "극한",
+                "math_label_infinity": "무한대",
+                "math_label_approx": "근사치",
+                "math_label_ne": "다름",
+                "math_label_mul": "곱셈",
+                "math_label_div": "나눗셈",
+                "math_label_vector": "벡터",
+                "math_label_arrow": "화살표",
+                "math_label_coulomb": "쿨롱 법칙",
+                "math_label_lorentz": "로런츠 힘",
+                "math_label_gauss": "가우스 법칙",
+                "math_label_gravity": "만유인력",
+                "math_label_mass_energy": "질량-에너지",
+                "math_label_planck": "플랑크-양자",
+                "math_label_schrodinger": "슈뢰딩거",
+                "math_label_uncertainty": "불확정성",
+                "math_label_arrhenius": "아레니우스",
+                "math_label_ideal_gas": "이상기체",
+                "math_label_forward": "정반응",
+                "math_label_reversible": "가역반응",
+                "math_label_gas_gen": "기체발생",
+                "math_label_precip": "침전발생",
+                "math_label_hardy": "하디-바인베르크",
+                "math_label_menten": "멘텐 속도식",
+                "math_label_at_pair": "A-T 염기쌍",
+                "math_label_gc_pair": "G-C 염기쌍",
+                "math_label_gibbs": "깁스 자유에너지",
+                
+                // Chem Search
+                "chem_title": "PubChem 화학식 연동 검색",
+                "chem_desc": "미국 국립의학도서관(NLM) PubChem 데이터베이스에서 화합물을 검색하여 분자 구조와 SMILES 코드를 실시간으로 가져옵니다. (한글/영어 모두 지원)",
+                "placeholder_chem_search": "예: aspirin, caffeine, 캡사이신",
+                "tooltip_chem_search_btn": "검색 실행",
+                "chem_searching": "PubChem 검색 중...",
+                "chem_btn_insert": "에디터에 분자식 삽입",
+                "chem_result_loading_err": "화합물은 발견되었으나 분자식을 찾을 수 없습니다.",
+                "chem_smiles_title": "SMILES 코드",
+                
+                // Workspace Empty
+                "preview_live": "실시간 미리보기",
+                "empty_no_file": "파일이 열리지 않았습니다.",
+                "empty_no_file_desc": "좌측 탐색기에서 파일을 열거나 새로운 마크다운 문서를 작성해 보세요.",
+                "empty_no_content": "내용이 비어있습니다.",
+                "empty_removed": "문서가 내 서재 목록에서 제외되었습니다.",
+                "toc_title": "문서 개요 (TOC)",
+                "tooltip_toggle_toc": "문서 개요 열기/접기",
+                "toc_collapsed_msg": "문서 개요를 접었습니다.",
+                "toc_opened_msg": "문서 개요를 열었습니다.",
+                
+                // Create Modal
+                "create_modal_title": "새 항목 추가",
+                "create_modal_title_folder": "새 폴더 생성",
+                "create_modal_title_file": "새 마크다운 문서 생성",
+                "placeholder_name": "이름을 입력해 주세요...",
+                "btn_cancel": "취소",
+                "btn_create": "생성",
+                
+                // Settings Modal
+                "settings_title": "네트워크 및 보안 설정",
+                "settings_network_info": "현재 네트워크 접속 정보",
+                "settings_lan": "내부 IP (LAN):",
+                "settings_wan": "공인 IP (WAN):",
+                "settings_retrieving": "가져오는 중...",
+                "settings_retrieval_failed": "조회 실패 (네트워크 점검 필요)",
+                "settings_bind_ip": "접속 호스트 (Bind IP)",
+                "settings_bind_external": "0.0.0.0 (외부 접속 허용)",
+                "settings_bind_local": "127.0.0.1 (로컬만 허용)",
+                "settings_port": "포트 번호",
+                "settings_password": "웹 접속 암호",
+                "placeholder_password_empty": "미지정 시 로그인 없이 접속",
+                "settings_warn": "호스트/포트 변경은 앱 재시작 후 적용. 암호 변경은 즉시 적용.",
+                
+                // Auth Overlay
+                "auth_desc": "접속 암호를 입력해 주세요.",
+                "placeholder_password": "비밀번호",
+                "auth_error_msg": "암호가 올바르지 않습니다.",
+                "auth_btn_connect": "접속하기",
+                
+                // Default Toast
+                "toast_default": "변경 사항이 저장되었습니다.",
+                
+                // JS Messages / Alerts / Dialogs
+                "msg_web_folder_err": "웹 브라우저 모드에서는 로컬 폴더를 열 수 없습니다.",
+                "msg_web_file_dialog_err": "웹 브라우저 모드에서는 파일 선택 대화상자를 사용할 수 없습니다.\\n마크다운 파일을 화면에 드래그 앤 드롭해 주세요.",
+                "msg_folder_open_success": "윈도우 탐색기에서 서재 폴더를 열었습니다.",
+                "msg_folder_open_failed": "폴더 열기 실패: ",
+                "msg_doc_add_failed": "문서 추가 중 오류가 발생했습니다: ",
+                "msg_library_refreshed": "내 서재를 새로고침했습니다.",
+                "msg_file_read_failed": "파일을 읽을 수 없습니다: ",
+                "msg_undo_done": "되돌리기(Undo) 완료",
+                "msg_redo_done": "다시 실행(Redo) 완료",
+                "msg_math_inserted": "수식 기호가 에디터에 삽입되었습니다.",
+                "msg_chem_search_empty": "검색할 화합물 이름을 입력해주세요.",
+                "msg_chem_backend_err": "파이썬 백엔드 연결을 찾을 수 없습니다.",
+                "msg_chem_found": "화합물을 성공적으로 찾았습니다!",
+                "msg_chem_search_failed": "검색 오류: ",
+                "msg_chem_inserted": "에디터에 화학 구조식이 삽입되었습니다!",
+                "msg_fullscreen_toast": "문서 전체화면 모드 (종료: Esc / 더블클릭)",
+                "msg_sidebar_collapsed": "사이드바를 접었습니다.",
+                "msg_sidebar_opened": "사이드바를 열었습니다.",
+                "msg_save_no_file": "저장할 활성화된 파일이 없습니다. 좌측에서 새 파일을 생성하거나 선택해 주세요.",
+                "msg_save_success": "성공적으로 저장되었습니다.",
+                "msg_save_failed": "저장 오류: ",
+                "msg_export_no_file": "내보낼 활성화된 파일이 없습니다.",
+                "msg_export_success": "HTML 저장 완료: ",
+                "msg_export_failed": "내보내기 실패: ",
+                "msg_print_no_file": "인쇄할 활성화된 파일이 없습니다.",
+                "msg_print_success": "인쇄가 정상 호출되어 다크 테마를 복원했습니다.",
+                "msg_create_invalid_name": "이름을 제대로 입력해 주세요.",
+                "msg_create_success": "항목이 성공적으로 생성되었습니다.",
+                "msg_create_failed": "생성 실패: ",
+                "msg_delete_confirm": "정말 \\\"{fileName}\\\" 문서를 내 서재 목록에서 제외하시겠습니까?\\n\\n(※ 실제 컴퓨터 내의 원본 파일은 절대 삭제되지 않고 안전하게 보존됩니다)",
+                "msg_delete_success": "내 서재 목록에서 제외했습니다.",
+                "msg_delete_failed": "서재 제외 실패: ",
+                "msg_settings_saved": "네트워크 및 보안 설정이 저장되었습니다!",
+                "msg_settings_failed": "설정 저장 실패: ",
+                "msg_settings_err": "설정 저장 오류: ",
+                "msg_drag_drop_desc": "여기에 마크다운 파일을 드롭하여 즉시 열기",
+                "msg_external_file_loaded": "외부 파일을 읽어왔습니다.",
+                "msg_external_file_unsupported": "지원하지 않는 파일 형식입니다. 마크다운(.md, .qmd) 파일만 드롭해 주세요.",
+                "msg_editor_placeholder": "마크다운 내용을 여기에 입력하거나 좌측 탐색기에서 파일을 선택해 주세요...",
+                "msg_active_file_tooltip": "저장 위치: ",
+                "msg_active_file_external": " (외부 파일 - 저장 시 워크스페이스에 생성)",
+                "msg_no_active_file": "선택된 파일 없음",
+                
+                // Copy Code Block
+                "btn_copy_code": "복사",
+                "btn_copy_code_done": "복사 완료!",
+                
+                // Mermaid
+                "mermaid_zoom_fit": "화면에 맞춤",
+                "mermaid_zoom_orig": "원본 크기",
+                "mermaid_fullscreen": "전체화면",
+                "mermaid_close": "닫기 (Esc)",
+                "mermaid_syntax_error": "Mermaid 다이어그램 문법 오류",
+                "mermaid_syntax_error_desc": "오타가 있거나 문법 규격에 맞지 않습니다. 아래 에러 로그를 확인해 주세요:"
+            },
+            en: {
+                // Header
+                "btn_add_doc": "Add Document",
+                "tooltip_add_doc": "Add Markdown Document (.md) to Library",
+                "mode_edit": "Editor",
+                "mode_split": "Split",
+                "mode_preview": "Preview",
+                "btn_fullscreen": "Fullscreen",
+                "tooltip_fullscreen": "Document Fullscreen (Double-click shortcut)",
+                "btn_save": "Save",
+                "btn_export_html": "Export HTML",
+                "btn_print_pdf": "Print PDF",
+                "tooltip_theme": "Switch Theme",
+                "tooltip_settings": "Network & Security Settings",
+                "tooltip_toggle_sidebar": "Toggle Sidebar",
+                "tooltip_delete": "Remove from library",
+                
+                // Sidebar
+                "tab_explorer": "My Library",
+                "tab_math": "Math Input",
+                "tab_chemistry": "Chem Search",
+                "sidebar_title_explorer": "My Library",
+                "tooltip_create_file": "Create File",
+                "tooltip_create_folder": "Create Folder",
+                "tooltip_refresh": "Refresh List",
+                "sidebar_no_files": "No files found.",
+                "sidebar_empty_folder": "Empty Folder",
+                
+                // Math Input
+                "math_subtab_math": "📐 Math",
+                "math_subtab_physics": "⚛️ Physics",
+                "math_subtab_bio": "🧪 Chem/Bio",
+                
+                "math_title_basic": "Basic Formulas",
+                "math_title_calculus": "Calculus & Limits",
+                "math_title_greek": "Greek Letters",
+                "math_title_symbols": "Math Symbols",
+                "math_title_em_gravity": "Electromagnetism & Gravity",
+                "math_title_quantum": "Quantum & Relativity",
+                "math_title_rxn": "Chemical Reactions & Equilibrium",
+                "math_title_bio": "Genetics & Biochemistry",
+                
+                "math_label_fraction": "Fraction",
+                "math_label_sqrt": "Sqrt",
+                "math_label_power": "Power",
+                "math_label_subscript": "Subscript",
+                "math_label_sum": "Sum",
+                "math_label_prod": "Prod",
+                "math_label_diff": "Diff",
+                "math_label_partial": "Partial Diff",
+                "math_label_indef_int": "Indefinite Integral",
+                "math_label_def_int": "Definite Integral",
+                "math_label_limit": "Limit",
+                "math_label_infinity": "Infinity",
+                "math_label_approx": "Approx",
+                "math_label_ne": "Not Equal",
+                "math_label_mul": "Multiply",
+                "math_label_div": "Divide",
+                "math_label_vector": "Vector",
+                "math_label_arrow": "Arrow",
+                "math_label_coulomb": "Coulomb's Law",
+                "math_label_lorentz": "Lorentz Force",
+                "math_label_gauss": "Gauss's Law",
+                "math_label_gravity": "Gravitation",
+                "math_label_mass_energy": "Mass-Energy",
+                "math_label_planck": "Planck-Quantum",
+                "math_label_schrodinger": "Schrödinger",
+                "math_label_uncertainty": "Uncertainty",
+                "math_label_arrhenius": "Arrhenius",
+                "math_label_ideal_gas": "Ideal Gas",
+                "math_label_forward": "Forward Rxn",
+                "math_label_reversible": "Reversible Rxn",
+                "math_label_gas_gen": "Gas Evolution",
+                "math_label_precip": "Precipitation",
+                "math_label_hardy": "Hardy-Weinberg",
+                "math_label_menten": "Menten Kinetics",
+                "math_label_at_pair": "A-T Base Pair",
+                "math_label_gc_pair": "G-C Base Pair",
+                "math_label_gibbs": "Gibbs Free Energy",
+                
+                // Chem Search
+                "chem_title": "PubChem Chemical Search",
+                "chem_desc": "Search compounds in the US NLM PubChem database to retrieve molecular structures and SMILES codes in real-time. (Supports Korean/English)",
+                "placeholder_chem_search": "e.g., aspirin, caffeine, acetaminophen",
+                "tooltip_chem_search_btn": "Run Search",
+                "chem_searching": "Searching PubChem...",
+                "chem_btn_insert": "Insert Molecule to Editor",
+                "chem_result_loading_err": "Compound was found but molecular structure is unavailable.",
+                "chem_smiles_title": "SMILES Code",
+                
+                // Workspace Empty
+                "preview_live": "Live Preview",
+                "empty_no_file": "No file is open.",
+                "empty_no_file_desc": "Open a file from the left explorer or write a new markdown document.",
+                "empty_no_content": "Content is empty.",
+                "empty_removed": "Document has been removed from the library list.",
+                "toc_title": "Table of Contents (TOC)",
+                "tooltip_toggle_toc": "Open/Close Outline",
+                "toc_collapsed_msg": "Table of Contents collapsed.",
+                "toc_opened_msg": "Table of Contents opened.",
+                
+                // Create Modal
+                "create_modal_title": "Add New Item",
+                "create_modal_title_folder": "Create New Folder",
+                "create_modal_title_file": "Create New Markdown File",
+                "placeholder_name": "Please enter a name...",
+                "btn_cancel": "Cancel",
+                "btn_create": "Create",
+                
+                // Settings Modal
+                "settings_title": "Network & Security Settings",
+                "settings_network_info": "Current Network Connection Info",
+                "settings_lan": "Internal IP (LAN):",
+                "settings_wan": "Public IP (WAN):",
+                "settings_retrieving": "Retrieving...",
+                "settings_retrieval_failed": "Retrieval failed (Check network)",
+                "settings_bind_ip": "Host (Bind IP)",
+                "settings_bind_external": "0.0.0.0 (Allow external connections)",
+                "settings_bind_local": "127.0.0.1 (Allow local only)",
+                "settings_port": "Port Number",
+                "settings_password": "Web Access Password",
+                "placeholder_password_empty": "Leave blank for no password",
+                "settings_warn": "Host/port changes apply after restart. Password changes apply immediately.",
+                
+                // Auth Overlay
+                "auth_desc": "Please enter the access password.",
+                "placeholder_password": "Password",
+                "auth_error_msg": "Incorrect password.",
+                "auth_btn_connect": "Access",
+                
+                // Default Toast
+                "toast_default": "Changes have been saved.",
+                
+                // JS Messages / Alerts / Dialogs
+                "msg_web_folder_err": "Opening local folders is not supported in web browser mode.",
+                "msg_web_file_dialog_err": "File selection dialog is not supported in web browser mode.\\nPlease drag and drop a markdown file onto the screen.",
+                "msg_folder_open_success": "Opened library folder in Windows Explorer.",
+                "msg_folder_open_failed": "Failed to open folder: ",
+                "msg_doc_add_failed": "An error occurred while adding document: ",
+                "msg_library_refreshed": "Refreshed My Library.",
+                "msg_file_read_failed": "Could not read file: ",
+                "msg_undo_done": "Undo completed",
+                "msg_redo_done": "Redo completed",
+                "msg_math_inserted": "Math symbol inserted to editor.",
+                "msg_chem_search_empty": "Please enter a compound name.",
+                "msg_chem_backend_err": "Python backend connection not found.",
+                "msg_chem_found": "Compound found successfully!",
+                "msg_chem_search_failed": "Search error: ",
+                "msg_chem_inserted": "Chemical structure inserted to editor!",
+                "msg_fullscreen_toast": "Document Fullscreen (Exit: Esc / Double click)",
+                "msg_sidebar_collapsed": "Collapsed sidebar.",
+                "msg_sidebar_opened": "Opened sidebar.",
+                "msg_save_no_file": "No active file to save. Please select or create a file on the left.",
+                "msg_save_success": "Saved successfully.",
+                "msg_save_failed": "Save error: ",
+                "msg_export_no_file": "No active file to export.",
+                "msg_export_success": "HTML saved successfully: ",
+                "msg_export_failed": "Export failed: ",
+                "msg_print_no_file": "No active file to print.",
+                "msg_print_success": "Print called, dark theme restored.",
+                "msg_create_invalid_name": "Please enter a valid name.",
+                "msg_create_success": "Item created successfully.",
+                "msg_create_failed": "Failed to create: ",
+                "msg_delete_confirm": "Are you sure you want to remove \\\"{fileName}\\\" from My Library?\\n\\n(※ The original file on your disk will NOT be deleted)",
+                "msg_delete_success": "Removed from My Library list.",
+                "msg_delete_failed": "Failed to remove: ",
+                "msg_settings_saved": "Network and security settings saved!",
+                "msg_settings_failed": "Failed to save settings: ",
+                "msg_settings_err": "Error saving settings: ",
+                "msg_drag_drop_desc": "Drop markdown file here to open instantly",
+                "msg_external_file_loaded": "External file loaded successfully.",
+                "msg_external_file_unsupported": "Unsupported file format. Please drop markdown (.md, .qmd) files only.",
+                "msg_editor_placeholder": "Enter markdown text here or select a file from the explorer...",
+                "msg_active_file_tooltip": "Saving Path: ",
+                "msg_active_file_external": " (External file - will save to workspace)",
+                "msg_no_active_file": "No active file",
+                
+                // Copy Code Block
+                "btn_copy_code": "Copy",
+                "btn_copy_code_done": "Copied!",
+                
+                // Mermaid
+                "mermaid_zoom_fit": "Fit to Screen",
+                "mermaid_zoom_orig": "Original Size",
+                "mermaid_fullscreen": "Fullscreen",
+                "mermaid_close": "Close (Esc)",
+                "mermaid_syntax_error": "Mermaid syntax error",
+                "mermaid_syntax_error_desc": "Typo or invalid syntax. Check the error log below:"
+            }
+        };
+
+        function t(key) {
+            if (translations[currentLang] && translations[currentLang][key]) {
+                return translations[currentLang][key];
+            }
+            if (translations["en"] && translations["en"][key]) {
+                return translations["en"][key];
+            }
+            return key;
+        }
+
+        function setLanguage(lang, saveConfig = true) {
+            currentLang = lang;
+            const body = document.body;
+            
+            if (lang === 'en') {
+                body.classList.remove('lang-ko');
+                body.classList.add('lang-en');
+            } else {
+                body.classList.remove('lang-en');
+                body.classList.add('lang-ko');
+            }
+            
+            // 1. data-i18n
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    const icon = el.querySelector('i[data-lucide]');
+                    const svg = el.querySelector('svg');
+                    
+                    if (icon || svg) {
+                        const iconHtml = icon ? icon.outerHTML : (svg ? svg.outerHTML : "");
+                        el.innerHTML = iconHtml + ` <span>${translations[lang][key]}</span>`;
+                    } else {
+                        el.innerText = translations[lang][key];
+                    }
+                }
+            });
+            
+            // 2. data-i18n-title
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (translations[lang] && translations[lang][key]) {
+                    el.setAttribute('title', translations[lang][key]);
+                }
+            });
+            
+            // 3. data-i18n-placeholder
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[lang] && translations[lang][key]) {
+                    el.setAttribute('placeholder', translations[lang][key]);
+                }
+            });
+            
+            // 4. Update editor placeholder
+            const editorEl = document.getElementById('editor');
+            if (editorEl) {
+                editorEl.setAttribute('placeholder', t('msg_editor_placeholder'));
+            }
+            
+            // 5. Update active file title if it says "선택된 파일 없음" or similar
+            const titleEl = document.getElementById('active-file-title');
+            if (titleEl && (!currentFilePath || titleEl.innerText === translations['ko']['msg_no_active_file'] || titleEl.innerText === translations['en']['msg_no_active_file'])) {
+                titleEl.innerText = t('msg_no_active_file');
+            }
+            
+            // 6. Update empty state if empty
+            const previewContent = document.getElementById('preview-content');
+            if (previewContent && (!editorEl || !editorEl.value.trim())) {
+                previewContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon"><i data-lucide="markdown" style="width: 64px; height: 64px;"></i></div>
+                        <div style="font-size: 1.1em; font-weight: 500;">${t('empty_no_file')}</div>
+                        <div style="font-size: 0.85em; opacity: 0.8;">${t('empty_no_file_desc')}</div>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+            
+            lucide.createIcons();
+            
+            if (window.pywebview && saveConfig) {
+                pywebview.api.save_lang(lang);
+            }
+        }
         
-        // 디바운스 타이머 (Mermaid 및 MathJax 실시간 렌더링 렉 방지)
-        let renderTimeout;
+        function toggleLanguage() {
+            setLanguage(currentLang === 'ko' ? 'en' : 'ko');
+            showToast(t('toast_default'));
+        }
 
-        // Mermaid 초기화 완료 (모듈 로더에서 글로벌 바인딩됨)
-
-        // Lucide 아이콘 활성화
-        lucide.createIcons();
-
-        // 초기 앱 구동 시 파이썬 백엔드에서 초기 상태 로드
         document.addEventListener('DOMContentLoaded', async () => {
             // Undo Manager 초기화 및 이벤트 바인딩
             const textareaEl = document.getElementById('editor');
@@ -2633,7 +3186,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     if (window.undoManager) {
                         window.undoManager.saveState();
                     }
-                }, 500); // 500ms 간 타이핑 중지 시 상태 스냅샷 저장
+                }, 500);
             });
             
             textareaEl.addEventListener('blur', () => {
@@ -2643,10 +3196,8 @@ HTML_CONTENT = """<!DOCTYPE html>
             });
 
             if (window.pywebview) {
-                // 데스크톱 앱 모드: 네이티브 브릿지 즉시 사용
                 initApp();
             } else {
-                // pywebviewready 이벤트 대기 (데스크톱 앱에서 약간 늦을 때)
                 let resolved = false;
                 window.addEventListener('pywebviewready', () => {
                     if (!resolved) {
@@ -2654,59 +3205,62 @@ HTML_CONTENT = """<!DOCTYPE html>
                         initApp();
                     }
                 });
-                
+
                 // 500ms 이내에 pywebview가 로드되지 않으면 브라우저 접속으로 판단
                 setTimeout(() => {
-                    if (!resolved && !window.pywebview) {
-                        resolved = true;
-                        console.log("Running in Web Browser mode. Injecting HTTP API Proxy.");
-                        window.pywebview = {
-                            is_browser_proxy: true,
-                            api: new Proxy({}, {
-                                get: function(target, prop) {
-                                    return function(...args) {
-                                        if (prop === 'open_library_folder') {
-                                            alert("웹 브라우저 모드에서는 로컬 폴더를 열 수 없습니다.");
-                                            return Promise.resolve({ status: 'cancel' });
-                                        }
-                                        if (prop === 'add_documents_to_library') {
-                                            alert("웹 브라우저 모드에서는 파일 선택 대화상자를 사용할 수 없습니다.\\n마크다운 파일을 화면에 드래그 앤 드롭해 주세요.");
-                                            return Promise.resolve({ status: 'cancel' });
-                                        }
-                                        
-                                        let bodyData = {};
-                                        if (prop === 'read_file') { bodyData.rel_path = args[0]; }
-                                        else if (prop === 'save_file') { bodyData.rel_path = args[0]; bodyData.content = args[1]; }
-                                        else if (prop === 'create_item') { bodyData.rel_path = args[0]; bodyData.item_type = args[1]; }
-                                        else if (prop === 'delete_item') { bodyData.rel_path = args[0]; }
-                                        else if (prop === 'rename_item') { bodyData.old_rel_path = args[0]; bodyData.new_rel_path = args[1]; }
-                                        else if (prop === 'search_pubchem_smiles') { bodyData.compound_name = args[0]; }
-                                        else if (prop === 'save_theme') { bodyData.theme_name = args[0]; }
-                                        else if (prop === 'save_network_settings') { bodyData.bind_ip = args[0]; bodyData.port = args[1]; bodyData.access_password = args[2]; }
-                                        else if (prop === 'export_html') { bodyData.rel_path = args[0]; bodyData.html_body = args[1]; bodyData.title = args[2]; }
-                                        
-                                        let headers = { 'Content-Type': 'application/json' };
-                                        const savedPwd = localStorage.getItem('access_password');
-                                        if (savedPwd) { headers['X-Access-Password'] = savedPwd; }
-                                        
-                                        return fetch(`/api/${prop}`, {
-                                            method: 'POST',
-                                            headers: headers,
-                                            body: JSON.stringify(bodyData)
-                                        }).then(res => res.json())
-                                          .catch(err => ({ status: 'error', message: err.message }));
-                                    };
+            if (!resolved && !window.pywebview) {
+                resolved = true;
+                console.log("Running in Web Browser mode. Injecting HTTP API Proxy.");
+                window.pywebview = {
+                    is_browser_proxy: true,
+                    api: new Proxy({}, {
+                        get: function(target, prop) {
+                            return function(...args) {
+                                if (prop === 'open_library_folder') {
+                                    alert(t('msg_web_folder_err'));
+                                    return Promise.resolve({ status: 'cancel' });
                                 }
-                            })
-                        };
-                        initApp();
-                    }
-                }, 500);
+                                if (prop === 'add_documents_to_library') {
+                                    alert(t('msg_web_file_dialog_err'));
+                                    return Promise.resolve({ status: 'cancel' });
+                                }
+                                
+                                let bodyData = {};
+                                if (prop === 'read_file') { bodyData.rel_path = args[0]; }
+                                else if (prop === 'save_file') { bodyData.rel_path = args[0]; bodyData.content = args[1]; }
+                                else if (prop === 'create_item') { bodyData.rel_path = args[0]; bodyData.item_type = args[1]; }
+                                else if (prop === 'delete_item') { bodyData.rel_path = args[0]; }
+                                else if (prop === 'rename_item') { bodyData.old_rel_path = args[0]; bodyData.new_rel_path = args[1]; }
+                                else if (prop === 'search_pubchem_smiles') { bodyData.compound_name = args[0]; }
+                                else if (prop === 'save_theme') { bodyData.theme_name = args[0]; }
+                                else if (prop === 'save_lang') { bodyData.lang = args[0]; }
+                                else if (prop === 'save_network_settings') { bodyData.bind_ip = args[0]; bodyData.port = args[1]; bodyData.access_password = args[2]; }
+                                else if (prop === 'export_html') { bodyData.rel_path = args[0]; bodyData.html_body = args[1]; bodyData.title = args[2]; }
+                                
+                                let headers = { 'Content-Type': 'application/json' };
+                                const savedPwd = localStorage.getItem('access_password');
+                                if (savedPwd) { headers['X-Access-Password'] = savedPwd; }
+                                
+                                return fetch(`/api/${prop}`, {
+                                    method: 'POST',
+                                    headers: headers,
+                                    body: JSON.stringify(bodyData)
+                                }).then(res => res.json())
+                                  .catch(err => ({ status: 'error', message: err.message }));
+                            };
+                        }
+                    })
+                };
+                initApp();
+            }
+        }, 500);
             }
             
             // Drag and drop setup
             setupDragAndDrop();
         });
+
+
 
         async function initApp() {
             try {
@@ -2732,20 +3286,21 @@ HTML_CONTENT = """<!DOCTYPE html>
                     wsNameEl.innerText = workspaceRoot.replace(/\\\\/g, '/');
                 }
                 setTheme(currentTheme);
+                setLanguage(state.lang || 'ko', false);
                 renderFileTree(state.files);
                 
                 if (state.last_file) {
                     openFile(state.last_file);
                 }
                 
-                // 스플래시 화면 페이드아웃
+                // 스플래시 화면 페이드아웃 (사용자가 타이틀과 로고 그라데이션 광채를 충분히 감상할 수 있도록 시간을 3초로 지정)
                 setTimeout(() => {
                     const splash = document.getElementById('splash-screen');
                     if (splash) {
                         splash.style.opacity = '0';
                         setTimeout(() => { splash.style.display = 'none'; }, 800);
                     }
-                }, 1800);
+                }, 3000);
             } catch (err) {
                 console.error("Initialization error:", err);
                 const splash = document.getElementById('splash-screen');
@@ -2790,9 +3345,9 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (window.pywebview) {
                 const res = await pywebview.api.open_library_folder();
                 if (res.status === 'success') {
-                    showToast("윈도우 탐색기에서 서재 폴더를 열었습니다.");
+                    showToast(t('msg_folder_open_success'));
                 } else if (res.status === 'error') {
-                    alert("폴더 열기 실패: " + res.message);
+                    alert(t('msg_folder_open_failed') + res.message);
                 }
             }
         }
@@ -2803,9 +3358,16 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const res = await pywebview.api.add_documents_to_library();
                 if (res.status === 'success') {
                     renderFileTree(res.files);
-                    showToast(res.message);
+                    let msg = res.message;
+                    if (currentLang === 'en' && msg) {
+                        const match = msg.match(/(\\d+)개의 문서/);
+                        if (match) {
+                            msg = `${match[1]} documents successfully added to the library in their original location.`;
+                        }
+                    }
+                    showToast(msg);
                 } else if (res.status === 'error') {
-                    alert("문서 추가 중 오류가 발생했습니다: " + res.message);
+                    alert(t('msg_doc_add_failed') + res.message);
                 }
             }
         }
@@ -2814,7 +3376,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         async function refreshWorkspace() {
             const files = await pywebview.api.list_files();
             renderFileTree(files);
-            showToast("내 서재를 새로고침했습니다.");
+            showToast(t('msg_library_refreshed'));
         }
 
         // 파일 트리 렌더링
@@ -2823,7 +3385,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             container.innerHTML = "";
             
             if (!files || files.length === 0) {
-                container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85em; padding: 10px; text-align: center;">파일이 존재하지 않습니다.</div>`;
+                container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85em; padding: 10px; text-align: center;">${t('sidebar_no_files')}</div>`;
                 return;
             }
             
@@ -2847,7 +3409,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     <i data-lucide="${iconName}" style="width: 16px; height: 16px; min-width: 16px;"></i>
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.name}</span>
                     <div class="tree-item-actions">
-                        <button class="icon-btn" onclick="deleteWorkspaceItem(event, '${item.path}')" title="삭제"><i data-lucide="trash-2" style="width: 12px; height: 12px;"></i></button>
+                        <button class="icon-btn" onclick="deleteWorkspaceItem(event, '${item.path}')" title="${t('tooltip_delete')}"><i data-lucide="trash-2" style="width: 12px; height: 12px;"></i></button>
                     </div>
                 `;
                 
@@ -2869,7 +3431,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     if (item.children && item.children.length > 0) {
                         childrenWrapper.appendChild(createTreeDOM(item.children));
                     } else {
-                        childrenWrapper.innerHTML = `<div style="color: var(--text-muted); font-size: 0.8em; padding: 4px 16px;">빈 폴더</div>`;
+                        childrenWrapper.innerHTML = `<div style="color: var(--text-muted); font-size: 0.8em; padding: 4px 16px;">${t('sidebar_empty_folder')}</div>`;
                     }
                     
                     folderWrapper.appendChild(itemEl);
@@ -2901,7 +3463,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const fileName = relPath.substring(relPath.lastIndexOf('/') + 1);
                 titleEl.innerText = fileName;
                 const fullSavingPath = (workspaceRoot.replace(/\\\\/g, '/') + '/' + relPath).replace(/\\/+/g, '/');
-                titleEl.title = "저장 위치: " + fullSavingPath;
+                titleEl.title = t('msg_active_file_tooltip') + fullSavingPath;
                 
                 const textarea = document.getElementById('editor');
                 textarea.value = res.content;
@@ -2919,7 +3481,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     window.undoManager.saveState();
                 }
             } else {
-                alert("파일을 읽을 수 없습니다: " + res.message);
+                alert(t('msg_file_read_failed') + res.message);
             }
         }
 
@@ -2959,7 +3521,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     document.getElementById('preview-content').innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon"><i data-lucide="file-text" style="width: 64px; height: 64px;"></i></div>
-                            <div style="font-size: 1.1em; font-weight: 500;">내용이 비어있습니다.</div>
+                            <div style="font-size: 1.1em; font-weight: 500;">${t('empty_no_content')}</div>
                         </div>
                     `;
                     lucide.createIcons();
@@ -3162,13 +3724,13 @@ HTML_CONTENT = """<!DOCTYPE html>
                 // 돋보기(확대/축소) 버튼 생성
                 const zoomBtn = document.createElement('button');
                 zoomBtn.className = 'mermaid-zoom-btn';
-                zoomBtn.innerHTML = '<i data-lucide="maximize-2" style="width: 12px; height: 12px;"></i><span>원본 크기</span>';
+                zoomBtn.innerHTML = '<i data-lucide="maximize-2" style="width: 12px; height: 12px;"></i><span>' + t('mermaid_zoom_orig') + '</span>';
                 zoomBtn.onclick = () => toggleMermaidZoom(zoomBtn);
                 
                 // 전체화면 버튼 생성
                 const fsBtn = document.createElement('button');
                 fsBtn.className = 'mermaid-fs-btn';
-                fsBtn.innerHTML = '<i data-lucide="expand" style="width: 12px; height: 12px;"></i><span>전체화면</span>';
+                fsBtn.innerHTML = '<i data-lucide="expand" style="width: 12px; height: 12px;"></i><span>' + t('mermaid_fullscreen') + '</span>';
                 fsBtn.onclick = () => openMermaidFullscreen(fsBtn);
                 
                 controlsDiv.appendChild(zoomBtn);
@@ -3213,9 +3775,9 @@ HTML_CONTENT = """<!DOCTYPE html>
                         <div class="mermaid-error">
                             <div class="error-title">
                                 <i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i>
-                                <span>Mermaid 다이어그램 문법 오류</span>
+                                <span>${t('mermaid_syntax_error')}</span>
                             </div>
-                            <div style="font-size: 0.85em; opacity: 0.85; margin-bottom: 8px;">오타가 있거나 문법 규격에 맞지 않습니다. 아래 에러 로그를 확인해 주세요:</div>
+                            <div style="font-size: 0.85em; opacity: 0.85; margin-bottom: 8px;">${t('mermaid_syntax_error_desc')}</div>
                             <pre style="margin: 0; background: rgba(0,0,0,0.2) !important; font-size:0.8em; color: #ef4444; border:none; padding:8px;">${err.message || err}</pre>
                         </div>
                     `;
@@ -3232,7 +3794,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             
             if (svg) {
                 if (isZoomed) {
-                    btn.querySelector('span').innerText = '화면에 맞춤';
+                    btn.querySelector('span').innerText = t('mermaid_zoom_fit');
                     icon.setAttribute('data-lucide', 'minimize-2');
                     
                     // 원본 크기로 강제 확대하기 위해 viewBox 또는 원래 style의 max-width 값을 width로 임시 설정
@@ -3253,7 +3815,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                         }
                     }
                 } else {
-                    btn.querySelector('span').innerText = '원본 크기';
+                    btn.querySelector('span').innerText = t('mermaid_zoom_orig');
                     icon.setAttribute('data-lucide', 'maximize-2');
                     
                     // 원래 상태로 환원
@@ -3262,10 +3824,10 @@ HTML_CONTENT = """<!DOCTYPE html>
                 }
             } else {
                 if (isZoomed) {
-                    btn.querySelector('span').innerText = '화면에 맞춤';
+                    btn.querySelector('span').innerText = t('mermaid_zoom_fit');
                     icon.setAttribute('data-lucide', 'minimize-2');
                 } else {
-                    btn.querySelector('span').innerText = '원본 크기';
+                    btn.querySelector('span').innerText = t('mermaid_zoom_orig');
                     icon.setAttribute('data-lucide', 'maximize-2');
                 }
             }
@@ -3339,7 +3901,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (window.undoManager) {
                 const undone = window.undoManager.undo();
                 if (undone) {
-                    showToast("되돌리기(Undo) 완료");
+                    showToast(t('msg_undo_done'));
                 }
             }
         }
@@ -3348,7 +3910,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (window.undoManager) {
                 const redone = window.undoManager.redo();
                 if (redone) {
-                    showToast("다시 실행(Redo) 완료");
+                    showToast(t('msg_redo_done'));
                 }
             }
         }
@@ -3488,7 +4050,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             
             handleEditorInput();
             if (window.undoManager) window.undoManager.saveState();
-            showToast("수식 기호가 에디터에 삽입되었습니다.");
+            showToast(t('msg_math_inserted'));
         }
 
         let isSidebarMathRendered = false;
@@ -3547,7 +4109,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             const inputEl = document.getElementById('chemistry-search-input');
             const query = inputEl.value.trim();
             if (!query) {
-                alert("검색할 화합물 이름을 입력해주세요.");
+                alert(t('msg_chem_search_empty'));
                 return;
             }
             
@@ -3559,7 +4121,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             
             try {
                 if (!window.pywebview) {
-                    throw new Error("파이썬 백엔드 연결을 찾을 수 없습니다.");
+                    throw new Error(t('msg_chem_backend_err'));
                 }
                 
                 const res = await pywebview.api.search_pubchem_smiles(query);
@@ -3576,13 +4138,13 @@ HTML_CONTENT = """<!DOCTYPE html>
                     
                     // 2D 벡터 구조식 즉시 프리뷰 렌더링
                     renderSearchPreview(res.smiles);
-                    showToast("화합물을 성공적으로 찾았습니다!");
+                    showToast(t('msg_chem_found'));
                 } else {
                     alert(res.message);
                 }
             } catch (err) {
                 loadingEl.style.display = 'none';
-                alert("검색 오류: " + err.message);
+                alert(t('msg_chem_search_failed') + err.message);
             }
         }
         
@@ -3636,14 +4198,14 @@ HTML_CONTENT = """<!DOCTYPE html>
             handleEditorInput();
             if (window.undoManager) window.undoManager.saveState();
             
-            showToast("에디터에 화학 구조식이 삽입되었습니다!");
+            showToast(t('msg_chem_inserted'));
         }
 
         function toggleDocumentFullscreen() {
             const pane = document.getElementById('preview-pane');
             if (!document.fullscreenElement) {
                 pane.requestFullscreen().then(() => {
-                    showToast("문서 전체화면 모드 (종료: Esc / 더블클릭)");
+                    showToast(t('msg_fullscreen_toast'));
                 }).catch(err => {
                     console.error("Fullscreen failed:", err);
                 });
@@ -3662,12 +4224,12 @@ HTML_CONTENT = """<!DOCTYPE html>
             
             if (isCollapsed) {
                 icon.setAttribute('data-lucide', 'chevron-right');
-                btn.title = "사이드바 열기";
-                showToast("사이드바를 접었습니다.");
+                btn.title = t('tooltip_toggle_sidebar');
+                showToast(t('msg_sidebar_collapsed'));
             } else {
                 icon.setAttribute('data-lucide', 'chevron-left');
-                btn.title = "사이드바 접기";
-                showToast("사이드바를 열었습니다.");
+                btn.title = t('tooltip_toggle_sidebar');
+                showToast(t('msg_sidebar_opened'));
             }
             lucide.createIcons();
         }
@@ -3683,12 +4245,12 @@ HTML_CONTENT = """<!DOCTYPE html>
             
             if (isCollapsed) {
                 icon.setAttribute('data-lucide', 'chevron-left');
-                btn.title = "문서 개요 열기";
-                showToast("문서 개요를 접었습니다.");
+                btn.title = t('tooltip_toggle_toc');
+                showToast(t('toc_collapsed_msg'));
             } else {
                 icon.setAttribute('data-lucide', 'chevron-right');
-                btn.title = "문서 개요 접기";
-                showToast("문서 개요를 열었습니다.");
+                btn.title = t('tooltip_toggle_toc');
+                showToast(t('toc_opened_msg'));
             }
             lucide.createIcons();
         }
@@ -3722,13 +4284,13 @@ HTML_CONTENT = """<!DOCTYPE html>
                     // 복사 버튼 추가
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'code-copy-btn';
-                    copyBtn.innerText = '복사';
+                    copyBtn.innerText = t('btn_copy_code');
                     copyBtn.onclick = () => {
                         navigator.clipboard.writeText(code.textContent);
-                        copyBtn.innerText = '복사 완료!';
+                        copyBtn.innerText = t('btn_copy_code_done');
                         copyBtn.style.color = '#10b981';
                         setTimeout(() => {
-                            copyBtn.innerText = '복사';
+                            copyBtn.innerText = t('btn_copy_code');
                             copyBtn.style.color = '';
                         }, 2000);
                     };
@@ -3769,13 +4331,13 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const icon = document.getElementById('toc-slide-icon');
                 const btn = document.getElementById('toc-slide-btn');
                 if (icon) icon.setAttribute('data-lucide', 'chevron-left');
-                if (btn) btn.title = "문서 개요 열기";
+                if (btn) btn.title = t('tooltip_toggle_toc');
             } else {
                 tocPanel.classList.remove('collapsed');
                 const icon = document.getElementById('toc-slide-icon');
                 const btn = document.getElementById('toc-slide-btn');
                 if (icon) icon.setAttribute('data-lucide', 'chevron-right');
-                if (btn) btn.title = "문서 개요 접기";
+                if (btn) btn.title = t('tooltip_toggle_toc');
             }
             if (window.lucide) lucide.createIcons();
             
@@ -3981,37 +4543,37 @@ HTML_CONTENT = """<!DOCTYPE html>
         // 파일 저장 (Python 연동)
         async function saveActiveFile() {
             if (!currentFilePath) {
-                alert("저장할 활성화된 파일이 없습니다. 좌측에서 새 파일을 생성하거나 선택해 주세요.");
+                alert(t('msg_save_no_file'));
                 return;
             }
             const content = document.getElementById('editor').value;
             const res = await pywebview.api.save_file(currentFilePath, content);
             if (res.status === 'success') {
-                showToast("성공적으로 저장되었습니다.");
+                showToast(t('msg_save_success'));
             } else {
-                alert("저장 오류: " + res.message);
+                alert(t('msg_save_failed') + res.message);
             }
         }
 
         // HTML standalone 파일 내보내기
         async function exportToHtml() {
             if (!currentFilePath) {
-                alert("내보낼 활성화된 파일이 없습니다.");
+                alert(t('msg_export_no_file'));
                 return;
             }
             const htmlBody = document.getElementById('preview-content').innerHTML;
             const res = await pywebview.api.export_html(currentFilePath, htmlBody, currentFilePath);
             if (res.status === 'success') {
-                showToast(`HTML 저장 완료: ${res.dest}`);
+                showToast(t('msg_export_success') + res.dest);
             } else {
-                alert("내보내기 실패: " + res.message);
+                alert(t('msg_export_failed') + res.message);
             }
         }
 
         // PDF 인쇄 실행 (미리보기 화면만 밝은 테마로 자동 최적화하여 깔끔하게 출력)
         async function printDocument() {
             if (!currentFilePath) {
-                alert("인쇄할 활성화된 파일이 없습니다.");
+                alert(t('msg_print_no_file'));
                 return;
             }
             
@@ -4029,7 +4591,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     // 인쇄창이 호출되거나 닫힌 즉시 원래의 세련된 다크 테마로 깜쪽같이 원복
                     setTimeout(() => {
                         setTheme('dark', false);
-                        showToast("인쇄가 정상 호출되어 다크 테마를 복원했습니다.");
+                        showToast(t('msg_print_success'));
                     }, 100);
                 }, 450);
             } else {
@@ -4042,7 +4604,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         
         function openCreateModal(type) {
             isCreatingType = type;
-            document.getElementById('modal-card-title').innerText = type === 'folder' ? '새 폴더 생성' : '새 마크다운 문서 생성';
+            document.getElementById('modal-card-title').innerText = type === 'folder' ? t('create_modal_title_folder') : t('create_modal_title_file');
             document.getElementById('modal-card-input').value = type === 'folder' ? 'new_folder' : 'document.md';
             document.getElementById('create-modal').style.display = 'flex';
             document.getElementById('modal-card-input').focus();
@@ -4055,7 +4617,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         async function submitCreateItem() {
             const name = document.getElementById('modal-card-input').value.trim();
             if (!name) {
-                alert("이름을 제대로 입력해 주세요.");
+                alert(t('msg_create_invalid_name'));
                 return;
             }
             
@@ -4064,38 +4626,38 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (res.status === 'success') {
                 renderFileTree(res.files);
                 closeCreateModal();
-                showToast("항목이 성공적으로 생성되었습니다.");
+                showToast(t('msg_create_success'));
                 if (isCreatingType === 'file') {
                     openFile(name);
                 }
             } else {
-                alert("생성 실패: " + res.message);
+                alert(t('msg_create_failed') + res.message);
             }
         }
 
         async function deleteWorkspaceItem(event, relPath) {
             event.stopPropagation();
             const fileName = relPath.substring(relPath.lastIndexOf('/') + 1);
-            if (confirm(`정말 "${fileName}" 문서를 내 서재 목록에서 제외하시겠습니까?\n\n(※ 실제 컴퓨터 내의 원본 파일은 절대 삭제되지 않고 안전하게 보존됩니다)`)) {
+            if (confirm(t('msg_delete_confirm').replace('{fileName}', fileName))) {
                 const res = await pywebview.api.delete_item(relPath);
                 if (res.status === 'success') {
                     renderFileTree(res.files);
                     if (currentFilePath === relPath) {
                         currentFilePath = "";
-                        document.getElementById('active-file-title').innerText = "선택된 파일 없음";
+                        document.getElementById('active-file-title').innerText = t('msg_no_active_file');
                         document.getElementById('editor').value = "";
                         updateLineNumbers();
                         document.getElementById('preview-content').innerHTML = `
                             <div class="empty-state">
                                 <div class="empty-state-icon"><i data-lucide="markdown" style="width: 64px; height: 64px;"></i></div>
-                                <div style="font-size: 1.1em; font-weight: 500;">문서가 내 서재 목록에서 제외되었습니다.</div>
+                                <div style="font-size: 1.1em; font-weight: 500;">${t('empty_removed')}</div>
                             </div>
                         `;
                         lucide.createIcons();
                     }
-                    showToast("내 서재 목록에서 제외했습니다.");
+                    showToast(t('msg_delete_success'));
                 } else {
-                    alert("서재 제외 실패: " + res.message);
+                    alert(t('msg_delete_failed') + res.message);
                 }
             }
         }
@@ -4109,7 +4671,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             // 내부 및 공인 IP 정보 표시
             document.getElementById('settings-local-ip').innerText = currentNetworkConfig.local_ip;
             const publicIpEl = document.getElementById('settings-public-ip');
-            publicIpEl.innerText = "조회 중...";
+            publicIpEl.innerText = t('settings_retrieving');
             
             fetch('https://api.ipify.org?format=json')
                 .then(res => res.json())
@@ -4117,7 +4679,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     publicIpEl.innerText = data.ip;
                 })
                 .catch(err => {
-                    publicIpEl.innerText = "조회 실패 (네트워크 점검 필요)";
+                    publicIpEl.innerText = t('settings_retrieval_failed');
                 });
 
             document.getElementById('settings-modal').style.display = 'flex';
@@ -4144,13 +4706,13 @@ HTML_CONTENT = """<!DOCTYPE html>
                     currentNetworkConfig.port = port;
                     currentNetworkConfig.access_password = accessPassword;
                     localStorage.setItem('access_password', accessPassword);
-                    showToast("네트워크 및 보안 설정이 저장되었습니다!");
+                    showToast(t('msg_settings_saved'));
                     closeSettingsModal();
                 } else {
-                    alert("설정 저장 실패: " + res.message);
+                    alert(t('msg_settings_failed') + res.message);
                 }
             } catch (err) {
-                alert("설정 저장 오류: " + err.message);
+                alert(t('msg_settings_err') + err.message);
             }
         }
 
@@ -4236,15 +4798,15 @@ HTML_CONTENT = """<!DOCTYPE html>
                         const reader = new FileReader();
                         reader.onload = function(evt) {
                             currentFilePath = file.name; // 로컬 가상 주소
-                            document.getElementById('active-file-title').innerText = file.name + " (외부 파일 - 저장 시 워크스페이스에 생성)";
+                            document.getElementById('active-file-title').innerText = file.name + t('msg_active_file_external');
                             document.getElementById('editor').value = evt.target.result;
                             updateLineNumbers();
                             triggerLiveRender();
-                            showToast("외부 파일을 읽어왔습니다.");
+                            showToast(t('msg_external_file_loaded'));
                         };
                         reader.readAsText(file);
                     } else {
-                        alert("지원하지 않는 파일 형식입니다. 마크다운(.md, .qmd) 파일만 드롭해 주세요.");
+                        alert(t('msg_external_file_unsupported'));
                     }
                 }
             });
