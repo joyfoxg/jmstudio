@@ -165,11 +165,27 @@ To run this application or build standalone packages, the following environment 
 ### 💻 Installation & Run
 
 #### Option 1: Official Installation via PyPI (Highly Recommended)
-If you have a Python environment, you can install and run the app from anywhere in the world with a single command.
-```bash
-pip install joy-markdown-studio
-jmstudio
-```
+If you have a Python environment, you can install, run, upgrade, and uninstall the app from anywhere in the world with a single command.
+
+##### Windows & macOS & Linux Combined Commands
+
+| Action | Command |
+| :--- | :--- |
+| **Install** | `pip install joy-markdown-studio` |
+| **Run** | `jmstudio` |
+| **Upgrade** | `pip install --upgrade joy-markdown-studio` |
+| **Uninstall** | `pip uninstall joy-markdown-studio` |
+
+> [!TIP]
+> **OS Specific Reference**
+> - **Windows**: Open PowerShell or CMD and type the commands to run immediately.
+> - **macOS**: Can be run from the default Terminal. Depending on your environment, you may need to use `pip3` and `python3` instead.
+> - **Linux (Ubuntu/Debian, etc.)**: 
+>   - On Linux desktop environments, some system dependency packages are required for GUI rendering. We highly recommend installing them first using:
+>     ```bash
+>     sudo apt-get update
+>     sudo apt-get install python3-pip python3-pywebview libgtk-3-dev libwebkit2gtk-4.0-dev
+>     ```
 
 #### Option 2: Global System Environment Source Code Run
 1. **Install required libraries**:

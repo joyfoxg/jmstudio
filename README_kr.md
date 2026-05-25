@@ -166,11 +166,27 @@ e:\jm_studio\
 ### 💻 설치 및 실행 (Installation & Run)
 
 #### 방법 1: PyPI를 통한 공식 설치 (가장 추천)
-전 세계 어디서나 Python 환경만 있다면 명령어 한 줄로 설치 및 실행이 가능합니다.
-```bash
-pip install joy-markdown-studio
-jmstudio
-```
+전 세계 어디서나 Python 환경만 있다면 명령어 한 줄로 설치, 실행, 업그레이드 및 삭제가 가능합니다.
+
+##### 윈도우 (Windows) & 맥 (macOS) & 리눅스 (Linux) 통합 명령어
+
+| 작업 | 실행 명령어 |
+| :--- | :--- |
+| **설치 (Install)** | `pip install joy-markdown-studio` |
+| **실행 (Run)** | `jmstudio` |
+| **업그레이드 (Upgrade)** | `pip install --upgrade joy-markdown-studio` |
+| **삭제 (Uninstall)** | `pip uninstall joy-markdown-studio` |
+
+> [!TIP]
+> **운영체제별 추가 참고 사항 (OS Specifics)**
+> - **Windows**: PowerShell 또는 CMD 창을 열고 위 명령어를 입력하면 즉시 구동됩니다.
+> - **macOS**: Mac의 기본 터미널 환경에서 실행할 수 있습니다. Python 환경 및 버전에 따라 `pip3` 및 `python3` 명령어를 사용해야 할 수 있습니다.
+> - **Linux (Ubuntu/Debian 등)**: 
+>   - 리눅스 데스크톱 환경에서는 GUI 렌더링을 위해 일부 시스템 의존성 패키지가 필요할 수 있으므로, 실행 전 아래 명령어로 미리 설치해 주는 것을 권장합니다:
+>     ```bash
+>     sudo apt-get update
+>     sudo apt-get install python3-pip python3-pywebview libgtk-3-dev libwebkit2gtk-4.0-dev
+>     ```
 
 #### 방법 2: 일반 시스템 환경 소스코드 실행
 1. **필수 라이브러리 설치**:
