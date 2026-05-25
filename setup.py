@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="joy-markdown-studio",
-    version="3.7.2",
+    version="3.7.3",
     author="Joy Fox",
     author_email="joyfoxg@gmail.com",
     description="The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio",
@@ -25,7 +25,7 @@ setup(
         "Pillow>=10.0.0",
     ],
     entry_points={
-        "console_scripts": [
+        "gui_scripts": [
             "jmstudio=jmstudio:main",
         ],
     },
