@@ -5435,8 +5435,6 @@ HTML_CONTENT = """<!DOCTYPE html>
 
         // ----------------- 단축키 및 에디터 키 편의 기능 -----------------
         
-        const textarea = document.getElementById('editor');
-        
         // 글로벌 단축키 지원 (저장 / 되돌리기 / 다시 실행)
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -5450,55 +5448,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
                 e.preventDefault();
                 redoEditor();
-            }
-        });
-        
-        // 괄호/따옴표 자동 닫기 기능
-        textarea.addEventListener('keydown', (e) => {
-            const pairs = {
-                '{': '}',
-                '[': ']',
-                '(': ')',
-                '"': '"',
-                "'": "'",
-                '`': '`'
-            };
-            
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            
-            // Tab 키 들여쓰기 처리
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                if (window.undoManager) window.undoManager.saveState();
-                const before = textarea.value.substring(0, start);
-                const after = textarea.value.substring(end);
-                textarea.value = before + "    " + after;
-                textarea.selectionStart = textarea.selectionEnd = start + 4;
-                handleEditorInput();
-                if (window.undoManager) window.undoManager.saveState();
-            }
-            
-            // 자동 완성 쌍 매칭
-            if (pairs[e.key] !== undefined) {
-                e.preventDefault();
-                if (window.undoManager) window.undoManager.saveState();
-                const closingChar = pairs[e.key];
-                const before = textarea.value.substring(0, start);
-                const after = textarea.value.substring(end);
-                
-                // 만약 선택 영역이 있는 경우 감싸기
-                if (start !== end) {
-                    const selected = textarea.value.substring(start, end);
-                    textarea.value = before + e.key + selected + closingChar + after;
-                    textarea.selectionStart = start + 1;
-                    textarea.selectionEnd = end + 1;
-                } else {
-                    textarea.value = before + e.key + closingChar + after;
-                    textarea.selectionStart = textarea.selectionEnd = start + 1;
-                }
-                handleEditorInput();
-                if (window.undoManager) window.undoManager.saveState();
             }
         });
 
@@ -5620,7 +5569,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 alert(t('msg_save_no_file'));
                 return;
             }
-            const content = document.getElementById('editor').value;
+            const content = getEditorContent();
             const res = await pywebview.api.save_file(currentFilePath, content);
             if (res.status === 'success') {
                 showToast(t('msg_save_success'));
@@ -5719,7 +5668,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     if (currentFilePath === relPath || currentFilePath.startsWith(relPath + "/")) {
                         currentFilePath = "";
                         document.getElementById('active-file-title').innerText = t('msg_no_active_file');
-                        document.getElementById('editor').value = "";
+                        setEditorContent("");
                         updateLineNumbers();
                         document.getElementById('preview-content').innerHTML = `
                             <div class="empty-state">
@@ -5873,7 +5822,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                         reader.onload = function(evt) {
                             currentFilePath = file.name; // 로컬 가상 주소
                             document.getElementById('active-file-title').innerText = file.name + t('msg_active_file_external');
-                            document.getElementById('editor').value = evt.target.result;
+                            setEditorContent(evt.target.result);
                             updateLineNumbers();
                             triggerLiveRender();
                             showToast(t('msg_external_file_loaded'));
