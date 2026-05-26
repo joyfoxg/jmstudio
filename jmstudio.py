@@ -772,6 +772,23 @@ HTML_CONTENT = """<!DOCTYPE html>
             securityLevel: 'loose',
             flowchart: { useMaxWidth: false, htmlLabels: true }
         });
+
+        // CodeMirror 6 모듈 가져오기 및 글로벌 바인딩
+        import { basicSetup, EditorView } from 'https://esm.sh/codemirror';
+        import { EditorState, Compartment } from 'https://esm.sh/@codemirror/state';
+        import { markdown } from 'https://esm.sh/@codemirror/lang-markdown';
+        import { placeholder } from 'https://esm.sh/@codemirror/view';
+
+        window.cm6 = {
+            basicSetup,
+            EditorView,
+            EditorState,
+            Compartment,
+            markdown,
+            placeholder
+        };
+        // 모듈 로드 완료 이벤트 발생
+        window.dispatchEvent(new Event('cm6-loaded'));
     </script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
     
@@ -1540,7 +1557,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             letter-spacing: 0.5px;
         }
 
-        /* 편집기 전용 스타일 */
+        /* 편집기 전용 스타일 - CodeMirror 6 최적화 */
         .editor-container {
             flex: 1;
             display: flex;
@@ -1548,38 +1565,46 @@ HTML_CONTENT = """<!DOCTYPE html>
             position: relative;
             overflow: hidden;
         }
-
-        .editor-gutter {
-            width: 45px;
-            background: var(--editor-gutter);
-            border-right: 1px solid var(--border);
-            padding: 16px 0;
-            text-align: right;
-            padding-right: 10px;
-            font-family: 'Fira Code', monospace;
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 20px;
-            user-select: none;
-            overflow: hidden;
+        
+        .cm-editor {
+            height: 100% !important;
+            width: 100% !important;
+            background: var(--editor-bg) !important;
+            color: var(--editor-text) !important;
+            font-family: 'Fira Code', monospace !important;
+            font-size: 13.5px !important;
         }
-
-        .editor-textarea {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--editor-text);
-            font-family: 'Fira Code', monospace;
-            font-size: 13.5px;
-            line-height: 20px;
-            padding: 16px;
-            resize: none;
-            overflow-y: auto;
-            white-space: pre;
-            word-wrap: normal;
-            tab-size: 4;
-            user-select: text;
+        .cm-scroller {
+            overflow-y: auto !important;
+            font-family: 'Fira Code', monospace !important;
+        }
+        .cm-gutters {
+            background: var(--editor-gutter) !important;
+            border-right: 1px solid var(--border) !important;
+            color: var(--text-muted) !important;
+            font-family: 'Fira Code', monospace !important;
+            font-size: 13px !important;
+            user-select: none;
+            padding-right: 4px;
+            border: none !important;
+        }
+        /* 현재 포커스된 줄 및 캐럿 형광/네온 보정 */
+        .cm-cursor {
+            border-left: 2px solid var(--accent) !important;
+        }
+        .cm-activeLine {
+            background-color: rgba(255, 255, 255, 0.02) !important;
+        }
+        .theme-light .cm-activeLine {
+            background-color: rgba(0, 0, 0, 0.01) !important;
+        }
+        .cm-activeLineGutter {
+            background-color: rgba(255, 255, 255, 0.04) !important;
+            color: var(--accent) !important;
+        }
+        /* 포커스시 파란색 브라우저 기본 아웃라인 제거 */
+        .cm-editor.cm-focused {
+            outline: none !important;
         }
 
         /* 프리뷰 영역 스타일 */
@@ -2794,9 +2819,8 @@ HTML_CONTENT = """<!DOCTYPE html>
                         <span style="font-size: 0.85em; opacity: 0.6; margin-left: 8px;">Editor</span>
                     </div>
                 </div>
-                <div class="editor-container">
-                    <div class="editor-gutter" id="editor-gutter">1</div>
-                    <textarea class="editor-textarea" id="editor" spellcheck="false" placeholder="마크다운 내용을 여기에 입력하거나 좌측 탐색기에서 파일을 선택해 주세요..." oninput="handleEditorInput()" onscroll="syncGutterScroll()"></textarea>
+                <div class="editor-container" id="editor-parent">
+                    <!-- CodeMirror 6 will be mounted here dynamically -->
                 </div>
             </div>
 
@@ -3651,9 +3675,10 @@ HTML_CONTENT = """<!DOCTYPE html>
             });
             
             // 4. Update editor placeholder
-            const editorEl = document.getElementById('editor');
-            if (editorEl) {
-                editorEl.setAttribute('placeholder', t('msg_editor_placeholder'));
+            if (window.cmEditor && window.cmPlaceholderConf && window.cm6) {
+                window.cmEditor.dispatch({
+                    effects: window.cmPlaceholderConf.reconfigure(window.cm6.placeholder(t('msg_editor_placeholder')))
+                });
             }
             
             // 5. Update active file title if it says "선택된 파일 없음" or similar
@@ -3664,7 +3689,8 @@ HTML_CONTENT = """<!DOCTYPE html>
             
             // 6. Update empty state if empty
             const previewContent = document.getElementById('preview-content');
-            if (previewContent && (!editorEl || !editorEl.value.trim())) {
+            const editorVal = getEditorContent();
+            if (previewContent && !editorVal.trim()) {
                 previewContent.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon"><i data-lucide="markdown" style="width: 64px; height: 64px;"></i></div>
@@ -3687,26 +3713,96 @@ HTML_CONTENT = """<!DOCTYPE html>
             showToast(t('toast_default'));
         }
 
+        // ----------------- CodeMirror 6 에디터 코어 고도화 및 헬퍼 -----------------
+        window.cmEditor = null;
+        window.cmPlaceholderConf = null;
+        window.pendingEditorContent = null;
+        
+        // 하위 호환성을 위한 Mock undoManager
+        window.undoManager = {
+            saveState: () => {},
+            history: [],
+            currentIndex: -1
+        };
+
+        function initCodeMirror() {
+            if (!window.cm6) {
+                // 모듈 로드 대기
+                window.addEventListener('cm6-loaded', initCodeMirror);
+                return;
+            }
+            
+            const cm = window.cm6;
+            window.cmPlaceholderConf = new cm.Compartment();
+            
+            const state = cm.EditorState.create({
+                doc: "",
+                extensions: [
+                    cm.basicSetup,
+                    cm.markdown(),
+                    window.cmPlaceholderConf.of(cm.placeholder(t('msg_editor_placeholder'))),
+                    cm.EditorView.updateListener.of((update) => {
+                        if (update.docChanged) {
+                            handleEditorInput();
+                        }
+                    })
+                ]
+            });
+            
+            const parentEl = document.getElementById('editor-parent');
+            if (!parentEl) return;
+            
+            const view = new cm.EditorView({
+                state,
+                parent: parentEl
+            });
+            
+            window.cmEditor = view;
+            
+            // 대기 중이던 텍스트 파일이 있다면 로드
+            if (window.pendingEditorContent !== null) {
+                setEditorContent(window.pendingEditorContent);
+                window.pendingEditorContent = null;
+            }
+        }
+
+        window.getEditorContent = function() {
+            if (window.cmEditor) {
+                return window.cmEditor.state.doc.toString();
+            }
+            return window.pendingEditorContent || "";
+        };
+
+        window.setEditorContent = function(text) {
+            if (window.cmEditor) {
+                window.cmEditor.dispatch({
+                    changes: { from: 0, to: window.cmEditor.state.doc.length, insert: text }
+                });
+            } else {
+                window.pendingEditorContent = text;
+            }
+        };
+
+        window.undoEditor = function() {
+            const view = window.cmEditor;
+            if (view && window.cm6) {
+                import("https://esm.sh/@codemirror/commands").then(cmds => {
+                    cmds.undo(view);
+                }).catch(err => console.error("Undo error:", err));
+            }
+        };
+
+        window.redoEditor = function() {
+            const view = window.cmEditor;
+            if (view && window.cm6) {
+                import("https://esm.sh/@codemirror/commands").then(cmds => {
+                    cmds.redo(view);
+                }).catch(err => console.error("Redo error:", err));
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', async () => {
-            // Undo Manager 초기화 및 이벤트 바인딩
-            const textareaEl = document.getElementById('editor');
-            window.undoManager = new UndoManager(textareaEl);
-            
-            let inputSaveTimeout;
-            textareaEl.addEventListener('input', () => {
-                clearTimeout(inputSaveTimeout);
-                inputSaveTimeout = setTimeout(() => {
-                    if (window.undoManager) {
-                        window.undoManager.saveState();
-                    }
-                }, 500);
-            });
-            
-            textareaEl.addEventListener('blur', () => {
-                if (window.undoManager) {
-                    window.undoManager.saveState();
-                }
-            });
+            initCodeMirror();
 
             if (window.pywebview) {
                 initApp();
@@ -4302,11 +4398,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const fullSavingPath = (workspaceRoot.replace(/\\\\/g, '/') + '/' + relPath).replace(/\\/+/g, '/');
                 titleEl.title = t('msg_active_file_tooltip') + fullSavingPath;
                 
-                const textarea = document.getElementById('editor');
-                textarea.value = res.content;
-                
-                // 라인 넘버 빌드
-                updateLineNumbers();
+                setEditorContent(res.content);
                 
                 // 마크다운 그래픽 파싱 & 렌더링
                 triggerLiveRender();
@@ -4322,25 +4414,9 @@ HTML_CONTENT = """<!DOCTYPE html>
             }
         }
 
-        // 라인 넘버 업데이트
-        function updateLineNumbers() {
-            const textarea = document.getElementById('editor');
-            const gutter = document.getElementById('editor-gutter');
-            const lines = textarea.value.split('\\n');
-            const count = Math.max(lines.length, 1);
-            
-            let numHtml = "";
-            for (let i = 1; i <= count; i++) {
-                numHtml += `<div>${i}</div>`;
-            }
-            gutter.innerHTML = numHtml;
-        }
-
-        function syncGutterScroll() {
-            const textarea = document.getElementById('editor');
-            const gutter = document.getElementById('editor-gutter');
-            gutter.scrollTop = textarea.scrollTop;
-        }
+        // 라인 넘버 및 gutter 스크롤 연동 (CodeMirror 6 네이티브 처리로 대체됨)
+        function updateLineNumbers() {}
+        function syncGutterScroll() {}
 
         // 실시간 미리보기 배율 제어 (확대/축소)
         let previewZoomLevel = 1.0;
@@ -4374,7 +4450,6 @@ HTML_CONTENT = """<!DOCTYPE html>
 
         // 실시간 미리보기 렌더링 제어
         function handleEditorInput() {
-            updateLineNumbers();
             triggerLiveRender();
         }
 
@@ -4383,7 +4458,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             
             // 타이핑 도중 렉 유발 방지를 위한 디바운싱 (300ms)
             renderTimeout = setTimeout(async () => {
-                const markdownText = document.getElementById('editor').value;
+                const markdownText = getEditorContent();
                 if (!markdownText.trim()) {
                     document.getElementById('preview-content').innerHTML = `
                         <div class="empty-state">
@@ -4963,14 +5038,52 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
 
         function insertMathSymbol(latex) {
-            const textarea = document.getElementById('editor');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
+            const view = window.cmEditor;
+            if (!view) {
+                // Fallback to legacy textarea if not initialized
+                const textarea = document.getElementById('editor');
+                if (!textarea) return;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                let replacement = latex;
+                if (start !== end) {
+                    const selected = text.substring(start, end);
+                    if (latex.includes('?')) {
+                        replacement = latex.replace('?', selected);
+                    } else {
+                        replacement = selected + latex;
+                    }
+                }
+                const before = text.substring(0, start);
+                const after = text.substring(end);
+                textarea.value = before + replacement + after;
+                const qIndex = replacement.indexOf('?');
+                textarea.focus();
+                if (replacement.includes('?') && qIndex !== -1) {
+                    const targetPos = start + qIndex;
+                    textarea.selectionStart = targetPos;
+                    textarea.selectionEnd = targetPos + 1;
+                } else {
+                    textarea.selectionStart = textarea.selectionEnd = start + replacement.length;
+                }
+                handleEditorInput();
+                showToast(t('msg_math_inserted'));
+                return;
+            }
+            
+            const state = view.state;
+            const ranges = state.selection.ranges;
+            if (ranges.length === 0) return;
+            
+            const range = ranges[0];
+            const start = range.from;
+            const end = range.to;
+            const text = state.doc.toString();
+            const selected = text.substring(start, end);
             
             let replacement = latex;
             if (start !== end) {
-                const selected = text.substring(start, end);
                 if (latex.includes('?')) {
                     replacement = latex.replace('?', selected);
                 } else {
@@ -4978,25 +5091,23 @@ HTML_CONTENT = """<!DOCTYPE html>
                 }
             }
             
-            if (window.undoManager) window.undoManager.saveState();
+            view.dispatch(view.state.replaceSelection(replacement));
             
-            const before = text.substring(0, start);
-            const after = text.substring(end);
-            textarea.value = before + replacement + after;
-            
-            // 물음표(?) 기호가 있으면 물음표를 블록 선택하여 사용자 편의 극대화
             const qIndex = replacement.indexOf('?');
-            textarea.focus();
+            view.focus();
             if (replacement.includes('?') && qIndex !== -1) {
                 const targetPos = start + qIndex;
-                textarea.selectionStart = targetPos;
-                textarea.selectionEnd = targetPos + 1;
+                view.dispatch({
+                    selection: { anchor: targetPos, head: targetPos + 1 }
+                });
             } else {
-                textarea.selectionStart = textarea.selectionEnd = start + replacement.length;
+                const newPos = start + replacement.length;
+                view.dispatch({
+                    selection: { anchor: newPos, head: newPos }
+                });
             }
             
             handleEditorInput();
-            if (window.undoManager) window.undoManager.saveState();
             showToast(t('msg_math_inserted'));
         }
 
@@ -5129,22 +5240,38 @@ HTML_CONTENT = """<!DOCTYPE html>
         // 에디터 커서 위치에 분자식 삽입
         function insertChemistryToEditor() {
             if (!currentSearchResultSmiles) return;
+            const view = window.cmEditor;
+            if (!view) {
+                // Fallback to legacy textarea if not initialized
+                const textarea = document.getElementById('editor');
+                if (!textarea) return;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const smilesBlock = "\n" + "```smiles\n" + currentSearchResultSmiles + "\n" + "```\n";
+                textarea.value = text.substring(0, start) + smilesBlock + text.substring(end);
+                textarea.selectionStart = textarea.selectionEnd = start + smilesBlock.length;
+                handleEditorInput();
+                showToast(t('msg_chem_inserted'));
+                return;
+            }
             
-            const textarea = document.getElementById('editor');
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const text = textarea.value;
+            const state = view.state;
+            const ranges = state.selection.ranges;
+            if (ranges.length === 0) return;
             
-            const smilesBlock = "\\n" + "```smiles\\n" + currentSearchResultSmiles + "\\n" + "```\\n";
+            const start = ranges[0].from;
+            const smilesBlock = "\n" + "```smiles\n" + currentSearchResultSmiles + "\n" + "```\n";
             
-            textarea.value = text.substring(0, start) + smilesBlock + text.substring(end);
+            view.dispatch(view.state.replaceSelection(smilesBlock));
             
-            // 커서 포지션 재정렬
-            textarea.selectionStart = textarea.selectionEnd = start + smilesBlock.length;
+            const newPos = start + smilesBlock.length;
+            view.dispatch({
+                selection: { anchor: newPos, head: newPos }
+            });
             
+            view.focus();
             handleEditorInput();
-            if (window.undoManager) window.undoManager.saveState();
-            
             showToast(t('msg_chem_inserted'));
         }
 
