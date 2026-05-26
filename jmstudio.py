@@ -753,11 +753,11 @@ HTML_CONTENT = """<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
         window.onerror = function(message, source, lineno, colno, error) {
-            alert("JS Error: " + message + " in " + source + " at line " + lineno + ":" + colno + "\nStack: " + (error ? error.stack : "N/A"));
+            alert("JS Error: " + message + " in " + source + " at line " + lineno + ":" + colno + "\\nStack: " + (error ? error.stack : "N/A"));
             return false;
         };
         window.onunhandledrejection = function(event) {
-            alert("Unhandled Promise Rejection: " + event.reason + "\nStack: " + (event.reason ? event.reason.stack : "N/A"));
+            alert("Unhandled Promise Rejection: " + event.reason + "\\nStack: " + (event.reason ? event.reason.stack : "N/A"));
         };
     </script>
     <title>Joy Markdown Studio v3.8.1</title>
@@ -5262,7 +5262,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const start = textarea.selectionStart;
                 const end = textarea.selectionEnd;
                 const text = textarea.value;
-                const smilesBlock = "\n" + "```smiles\n" + currentSearchResultSmiles + "\n" + "```\n";
+                const smilesBlock = "\\n" + "```smiles\\n" + currentSearchResultSmiles + "\\n" + "```\\n";
                 textarea.value = text.substring(0, start) + smilesBlock + text.substring(end);
                 textarea.selectionStart = textarea.selectionEnd = start + smilesBlock.length;
                 handleEditorInput();
@@ -5275,7 +5275,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             if (ranges.length === 0) return;
             
             const start = ranges[0].from;
-            const smilesBlock = "\n" + "```smiles\n" + currentSearchResultSmiles + "\n" + "```\n";
+            const smilesBlock = "\\n" + "```smiles\\n" + currentSearchResultSmiles + "\\n" + "```\\n";
             
             view.dispatch(view.state.replaceSelection(smilesBlock));
             
