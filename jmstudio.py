@@ -31,7 +31,7 @@ def save_config(config):
 
 # 설정 로드 및 환경변수 지정
 config = get_config()
-APP_NAME = "Joy Markdown Studio v3.7.9"
+APP_NAME = "Joy Markdown Studio v3.8.0"
 PORT = int(config.get("port", 58220))
 BIND_IP = config.get("bind_ip", "0.0.0.0")
 
@@ -751,7 +751,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Joy Markdown Studio v3.7.9</title>
+    <title>Joy Markdown Studio v3.8.0</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
@@ -1273,6 +1273,74 @@ HTML_CONTENT = """<!DOCTYPE html>
         }
         .theme-light .icon-btn-sm:hover {
             background: rgba(0, 0, 0, 0.04);
+        }
+        
+        /* 히스토리 네비게이션용 형광 글래스모피즘 버튼 스타일 */
+        .nav-glass-btn {
+            background: rgba(69, 243, 255, 0.12); /* 투명 형광 글래스 배경 */
+            border: 2px solid rgba(69, 243, 255, 0.85); /* 두껍고 선명한 형광 테두리 */
+            border-radius: 6px;
+            color: #45f3ff; /* 형광 Cyan */
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            /* 마우스를 올리지 않았을 때도 형광 자체 발광 느낌의 그림자 효과 적용 */
+            box-shadow: 0 0 10px rgba(69, 243, 255, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            text-shadow: 0 0 4px rgba(69, 243, 255, 0.6);
+        }
+        .nav-glass-btn i {
+            width: 14px;
+            height: 14px;
+            stroke-width: 3px !important; /* 아이콘 두께를 두껍게 하여 시인성 극대화 */
+        }
+        .nav-glass-btn:hover:not(:disabled) {
+            background: rgba(69, 243, 255, 0.25);
+            border-color: #ffffff;
+            color: #ffffff;
+            /* 호버 시 더 강렬하게 빛나는 네온 글로우 */
+            box-shadow: 0 0 15px rgba(69, 243, 255, 0.85), 0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: scale(1.08);
+            text-shadow: 0 0 8px #ffffff;
+        }
+        .nav-glass-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        /* 비활성화 상태에서도 글래스모피즘 특유의 반투명함과 구조가 아름답게 유지되도록 최적화 */
+        .nav-glass-btn:disabled {
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            color: rgba(255, 255, 255, 0.2) !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
+            opacity: 0.35 !important;
+            backdrop-filter: blur(4px);
+        }
+        
+        /* 라이트 모드 오버라이드 */
+        .theme-light .nav-glass-btn {
+            background: rgba(2, 132, 199, 0.1);
+            border: 2px solid rgba(2, 132, 199, 0.85); /* 라이트 모드용 선명한 블루 형광 테두리 */
+            color: #0284c7;
+            box-shadow: 0 0 8px rgba(2, 132, 199, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+            text-shadow: 0 0 2px rgba(2, 132, 199, 0.2);
+        }
+        .theme-light .nav-glass-btn:hover:not(:disabled) {
+            background: rgba(2, 132, 199, 0.2);
+            border-color: #0369a1;
+            color: #0369a1;
+            box-shadow: 0 0 12px rgba(2, 132, 199, 0.6), 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+        .theme-light .nav-glass-btn:disabled {
+            background: rgba(0, 0, 0, 0.02) !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+            color: rgba(0, 0, 0, 0.2) !important;
         }
         
         /* 수식 입력기 스타일 */
@@ -2706,7 +2774,15 @@ HTML_CONTENT = """<!DOCTYPE html>
             <!-- 편집기 패널 -->
             <div class="pane" id="pane-editor">
                 <div class="pane-header">
-                    <span id="active-file-title">선택된 파일 없음</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button class="nav-glass-btn" id="btn-nav-back" onclick="navigateHistory(-1)" title="뒤로가기" disabled>
+                            <i data-lucide="arrow-left"></i>
+                        </button>
+                        <button class="nav-glass-btn" id="btn-nav-forward" onclick="navigateHistory(1)" title="앞으로가기" disabled>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                        <span id="active-file-title" style="margin-left: 4px;">선택된 파일 없음</span>
+                    </div>
                     <div style="display: flex; gap: 6px; align-items: center;">
                         <button class="icon-btn-sm" onclick="undoEditor()" title="되돌리기 (Ctrl+Z)">
                             <i data-lucide="undo" style="width: 12px; height: 12px;"></i>
@@ -2729,7 +2805,15 @@ HTML_CONTENT = """<!DOCTYPE html>
             <!-- 프리뷰 패널 -->
             <div class="pane" id="pane-preview">
                 <div class="pane-header">
-                    <span data-i18n="preview_live">실시간 미리보기</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button class="nav-glass-btn" id="btn-preview-nav-back" onclick="navigateHistory(-1)" title="뒤로가기" disabled>
+                            <i data-lucide="arrow-left"></i>
+                        </button>
+                        <button class="nav-glass-btn" id="btn-preview-nav-forward" onclick="navigateHistory(1)" title="앞으로가기" disabled>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                        <span data-i18n="preview_live" style="margin-left: 4px;">실시간 미리보기</span>
+                    </div>
                     <span>Live Render</span>
                 </div>
                 <div class="preview-pane" id="preview-pane">
@@ -3074,6 +3158,36 @@ HTML_CONTENT = """<!DOCTYPE html>
 
         window.undoManager = null;
         let currentFilePath = "";
+        let fileHistory = [];
+        let fileHistoryIndex = -1;
+        let isNavigatingHistory = false;
+
+        function updateNavigationButtons() {
+            const backBtns = [document.getElementById('btn-nav-back'), document.getElementById('btn-preview-nav-back')];
+            const forwardBtns = [document.getElementById('btn-nav-forward'), document.getElementById('btn-preview-nav-forward')];
+            
+            backBtns.forEach(backBtn => {
+                if (!backBtn) return;
+                backBtn.disabled = (fileHistoryIndex <= 0);
+            });
+            
+            forwardBtns.forEach(forwardBtn => {
+                if (!forwardBtn) return;
+                forwardBtn.disabled = (fileHistoryIndex >= fileHistory.length - 1);
+            });
+        }
+
+        async function navigateHistory(direction) {
+            const newIndex = fileHistoryIndex + direction;
+            if (newIndex >= 0 && newIndex < fileHistory.length) {
+                isNavigatingHistory = true;
+                fileHistoryIndex = newIndex;
+                await openFile(fileHistory[fileHistoryIndex]);
+                isNavigatingHistory = false;
+                updateNavigationButtons();
+            }
+        }
+
         let currentViewMode = "split";
         let currentTheme = "dark";
         let currentLang = "ko";
@@ -3273,7 +3387,8 @@ HTML_CONTENT = """<!DOCTYPE html>
                 "mermaid_fullscreen": "전체화면",
                 "mermaid_close": "닫기 (Esc)",
                 "mermaid_syntax_error": "Mermaid 다이어그램 문법 오류",
-                "mermaid_syntax_error_desc": "오타가 있거나 문법 규격에 맞지 않습니다. 아래 에러 로그를 확인해 주세요:"
+                "mermaid_syntax_error_desc": "오타가 있거나 문법 규격에 맞지 않습니다. 아래 에러 로그를 확인해 주세요:",
+                "msg_wiki_create_confirm": "문서가 존재하지 않습니다. 새로 생성하시겠습니까?"
             },
             en: {
                 // Header
@@ -3464,7 +3579,8 @@ HTML_CONTENT = """<!DOCTYPE html>
                 "mermaid_fullscreen": "Fullscreen",
                 "mermaid_close": "Close (Esc)",
                 "mermaid_syntax_error": "Mermaid syntax error",
-                "mermaid_syntax_error_desc": "Typo or invalid syntax. Check the error log below:"
+                "mermaid_syntax_error_desc": "Typo or invalid syntax. Check the error log below:",
+                "msg_wiki_create_confirm": "This document does not exist. Would you like to create it?"
             }
         };
 
@@ -3949,11 +4065,23 @@ HTML_CONTENT = """<!DOCTYPE html>
 
 
         async function initApp() {
+            const hideSplash = () => {
+                const splash = document.getElementById('splash-screen');
+                if (splash && splash.style.display !== 'none') {
+                    splash.style.opacity = '0';
+                    setTimeout(() => { splash.style.display = 'none'; }, 800);
+                }
+            };
+
+            // 안전망: 8초 후에도 스플래시가 살아 있으면 강제 숨김
+            const splashSafetyTimer = setTimeout(hideSplash, 8000);
+
             try {
                 const state = await pywebview.api.get_initial_state();
                 
                 // HTTP API 보안 검증 통과 실패 시
                 if (state && state.status === 'auth_failed') {
+                    clearTimeout(splashSafetyTimer);
                     showAuthOverlay();
                     return;
                 }
@@ -3975,22 +4103,23 @@ HTML_CONTENT = """<!DOCTYPE html>
                 setLanguage(state.lang || 'ko', false);
                 renderFileTree(state.files);
                 
+                // last_file이 있으면 열기 (실패해도 스플래시는 반드시 숨김)
                 if (state.last_file) {
-                    openFile(state.last_file);
+                    try {
+                        await openFile(state.last_file);
+                    } catch (fileErr) {
+                        console.warn('Failed to open last_file on startup:', fileErr);
+                    }
                 }
                 
-                // 스플래시 화면 페이드아웃 (사용자가 타이틀과 로고 그라데이션 광채를 충분히 감상할 수 있도록 시간을 3초로 지정)
-                setTimeout(() => {
-                    const splash = document.getElementById('splash-screen');
-                    if (splash) {
-                        splash.style.opacity = '0';
-                        setTimeout(() => { splash.style.display = 'none'; }, 800);
-                    }
-                }, 3000);
+                // 정상 초기화 완료: 스플래시 3초 페이드아웃
+                clearTimeout(splashSafetyTimer);
+                setTimeout(hideSplash, 3000);
+
             } catch (err) {
+                clearTimeout(splashSafetyTimer);
                 console.error("Initialization error:", err);
-                const splash = document.getElementById('splash-screen');
-                if (splash) splash.style.display = 'none';
+                hideSplash();
                 if (err && err.message && (err.message.includes('401') || err.message.includes('auth_failed'))) {
                     showAuthOverlay();
                 }
@@ -4143,6 +4272,16 @@ HTML_CONTENT = """<!DOCTYPE html>
             const res = await pywebview.api.read_file(relPath);
             if (res.status === 'success') {
                 currentFilePath = relPath;
+                
+                // 파일 열기 성공 시 히스토리 기록
+                if (!isNavigatingHistory) {
+                    if (fileHistoryIndex === -1 || fileHistory[fileHistoryIndex] !== relPath) {
+                        fileHistory = fileHistory.slice(0, fileHistoryIndex + 1);
+                        fileHistory.push(relPath);
+                        fileHistoryIndex = fileHistory.length - 1;
+                    }
+                }
+                updateNavigationButtons();
                 
                 // 파일 이름만 노출하고 물리적 전체 저장 경로는 툴팁으로 우아하게 표시
                 const titleEl = document.getElementById('active-file-title');
@@ -4373,7 +4512,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 
         function parseCallouts(text) {
             // 1. Quarto 스타일 콜아웃: ::: {.callout-note} ... :::
-            const quartoRegex = /:::\\s*\\{\\s*\\.callout-(\\w+)\\s*\\}\\s*\\n([\\s\\S]*?)\\n\\s*:::/g;
+            const quartoRegex = new RegExp(":::[\\s]*[\\{][\\s]*[\\.]callout-([\\w]+)[\\s]*[\\}][\\s]*[\\n]([\\s\\S]*?)[\\n][\\s]*:::", "g");
             text = text.replace(quartoRegex, (match, type, content) => {
                 const title = type.charAt(0).toUpperCase() + type.slice(1);
                 return `<div class="callout callout-${type}">
@@ -4383,9 +4522,9 @@ HTML_CONTENT = """<!DOCTYPE html>
             });
 
             // 2. Github Alert 스타일 콜아웃: > [!NOTE]
-            const githubRegex = />\\s*\\[!(NOTE|TIP|WARNING|IMPORTANT|CAUTION)\\]\\s*\\n((?:>\\s*.*\\n?)*)/gi;
+            const githubRegex = new RegExp(">[ \\t]*\\[!(NOTE|TIP|WARNING|IMPORTANT|CAUTION)\\][ \\t]*\\n((?:>[ \\t]*.*\\n?)*)", "gi");
             text = text.replace(githubRegex, (match, type, content) => {
-                const cleanContent = content.replace(/^>\\s?/gm, '');
+                const cleanContent = content.replace(/^>[ \t]?/gm, '');
                 const lowerType = type.toLowerCase();
                 return `<div class="callout callout-${lowerType}">
                             <div class="callout-header"><span class="callout-icon"></span>${type.toUpperCase()}</div>
@@ -4554,6 +4693,15 @@ HTML_CONTENT = """<!DOCTYPE html>
             
             // SVG를 깊은 클론(Deep Clone)하여 주입
             content.innerHTML = svg.outerHTML;
+            
+            // 전체화면 모달 내 wiki-link 클릭 시 파일 이동 + 모달 닫기
+            content.querySelectorAll('.wiki-link').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    closeMermaidFullscreen();
+                    if (window.openWikiLink) window.openWikiLink(this.getAttribute('data-target'));
+                });
+            });
             
             // 모달 노출 및 애니메이션 트리거
             modal.style.display = 'flex';
