@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.8.5 🌟
+# 🧪 Joy Markdown Studio v3.8.6 🌟
 
 > **수학, 물리학, 화학을 아우르는 최상의 이공계 연구 및 학술용 마크다운 편집·시각화 스튜디오**  
 > Python (`PyWebView` + `Bottle`)과 모던 Vanilla CSS/JS로 직조된 프리미엄 데스크톱 마크다운 크리에이터 앱입니다.
@@ -12,7 +12,7 @@
 
 ## ✨ Key Features (핵심 기능)
 
-### 1. 📝 CodeMirror 6 에디터 코어 고도화 (v3.8.5 New)
+### 1. 📝 CodeMirror 6 에디터 코어 고도화 (v3.8.6 New)
 * **초고속 모던 에디터 엔진**: 기존 텍스트에리어를 대체하여 강력한 성능의 CodeMirror 6 엔진을 도입했습니다. 방대한 마크다운 문서에서도 빠르고 안정적인 타이핑 환경을 제공합니다.
 * **코딩 생산성 극대화**: 자동 괄호 닫기(Auto-close brackets), 히스토리 지원(Undo/Redo), 커스텀 단축키 등 모던 에디터에 필수적인 강력한 코딩 보조 기능들이 탑재되었습니다.
 

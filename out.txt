@@ -1,0 +1,9 @@
+175             # 윈도우 탐색기(Explorer)로 물리적 서재 폴더 열기
+235         # 실제 물리 디스크에 존재하는지 검사 및 누락 파일 자동 제거 (상대/절대 경로 통합)
+2637                     <button class="math-subtab-btn" id="subtab-math-physics" onclick="setMathSubTab('physics')" style="flex: 1; padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_physics">⚛️ 물리</button>
+2700                 <!-- 2. 물리학 서브탭 콘텐츠 -->
+2717                             <button class="math-item" onclick="insertMathSymbol('$i\\\\hbar\\\\frac{\\\\partial}{\\\\partial t}\\\\Psi = \\\\hat{H}\\\\Psi$')">$$i\\\\hbar\\\\frac{\\\\partial}{\\\\partial t}\\\\Psi = \\\\hat{H}\\\\Psi$$<span data-i18n="math_label_schrodinger">슈뢰딩거</span></button>
+3278                 "math_subtab_physics": "⚛️ 물리",
+3314                 "math_label_schrodinger": "슈뢰딩거",
+3943             // 물리엔진의 힘 설정은 언제나 슬라이더 값과 동기화시킵니다.
+4408                 // 파일 이름만 노출하고 물리적 전체 저장 경로는 툴팁으로 우아하게 표시

@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.8.5 🌟
+# 🧪 Joy Markdown Studio v3.8.6 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -12,7 +12,7 @@
 
 ## ✨ Key Features
 
-### 1. 📝 CodeMirror 6 Editor Core Enhancement (v3.8.5 New)
+### 1. 📝 CodeMirror 6 Editor Core Enhancement (v3.8.6 New)
 * **High-Speed Modern Editor Engine**: Replaced the standard textarea with the high-performance CodeMirror 6 engine. It provides a fast and stable typing environment even with massive markdown documents.
 * **Maximizing Coding Productivity**: Packed with essential coding assists such as auto-close brackets, robust undo/redo history, and custom shortcuts found in modern editors.
 
