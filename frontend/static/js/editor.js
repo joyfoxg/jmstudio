@@ -1513,6 +1513,22 @@ class UndoManager {
             insertMathSymbol(template);
         }
 
+        let mathDatabase = [];
+
+        // 비동기 수식 DB 로드
+        fetch('/static/data/math_db.json')
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch math_db.json');
+                return res.json();
+            })
+            .then(data => {
+                mathDatabase = data;
+            })
+            .catch(err => {
+                console.warn('Math database load failed, using local fallback:', err);
+                mathDatabase = [];
+            });
+
         const MATH_SUBTAB_CATEGORIES = {
             math: [
                 { value: 'basic', label: '기본 수식' },
@@ -1570,8 +1586,11 @@ class UndoManager {
             const activeContent = document.getElementById(`math-subtab-content-${subtabId}`);
             if (!activeContent) return;
             
+            // 1. 기존 정적 DOM 수식 항목 필터링
             const sections = activeContent.querySelectorAll('.math-section, details.math-section-accordion');
             sections.forEach(section => {
+                if (section.id === 'math-extended-search-accordion') return;
+                
                 let sectionMatchCount = 0;
                 const sectionId = section.getAttribute('data-section-id');
                 
@@ -1600,6 +1619,74 @@ class UndoManager {
                     section.style.display = 'none';
                 }
             });
+            
+            // 2. 확장 수식 DB 검색 및 결과 동적 렌더링
+            const existingExtended = activeContent.querySelector('#math-extended-search-accordion');
+            if (existingExtended) {
+                existingExtended.remove();
+            }
+            
+            if (query && mathDatabase.length > 0) {
+                // 현재 분야에 매칭되고 쿼리에 부합하는 항목 필터링
+                const matchedDbItems = mathDatabase.filter(item => {
+                    if (item.category !== subtabId) return false;
+                    if (subcategory !== 'all') return false;
+                    
+                    const nameMatch = item.name.toLowerCase().includes(query);
+                    const latexMatch = item.latex.toLowerCase().includes(query);
+                    const kwMatch = item.keywords.some(kw => kw.toLowerCase().includes(query));
+                    return nameMatch || latexMatch || kwMatch;
+                });
+                
+                if (matchedDbItems.length > 0) {
+                    const maxDisplay = 15;
+                    const displayItems = matchedDbItems.slice(0, maxDisplay);
+                    
+                    const extendedDetails = document.createElement('details');
+                    extendedDetails.className = 'math-section-accordion';
+                    extendedDetails.id = 'math-extended-search-accordion';
+                    extendedDetails.open = true;
+                    extendedDetails.setAttribute('data-section-id', 'extended');
+                    
+                    const extendedSummary = document.createElement('summary');
+                    extendedSummary.className = 'math-section-title';
+                    extendedSummary.innerHTML = `🔍 추가 검색 결과 (${matchedDbItems.length}개)`;
+                    extendedDetails.appendChild(extendedSummary);
+                    
+                    const extendedGrid = document.createElement('div');
+                    extendedGrid.className = 'math-grid';
+                    
+                    displayItems.forEach(dbItem => {
+                        const btn = document.createElement('button');
+                        btn.className = 'math-item';
+                        
+                        let latex = dbItem.latex;
+                        let insertVal = (latex.startsWith('$') && latex.endsWith('$')) ? latex : `\$${latex}\$`;
+                        
+                        btn.setAttribute('onclick', `insertMathSymbol(${JSON.stringify(insertVal)})`);
+                        btn.setAttribute('data-raw-math', dbItem.latex);
+                        
+                        const span = document.createElement('span');
+                        span.textContent = dbItem.name;
+                        btn.appendChild(span);
+                        
+                        extendedGrid.appendChild(btn);
+                    });
+                    
+                    if (matchedDbItems.length > maxDisplay) {
+                        const moreInfo = document.createElement('div');
+                        moreInfo.style.cssText = 'grid-column: 1 / -1; text-align: center; font-size: 0.78em; color: var(--text-muted); margin-top: 6px;';
+                        moreInfo.textContent = `...외 ${matchedDbItems.length - maxDisplay}개의 공식이 더 있습니다. 더 자세한 키워드로 검색해 보세요.`;
+                        extendedGrid.appendChild(moreInfo);
+                    }
+                    
+                    extendedDetails.appendChild(extendedGrid);
+                    activeContent.appendChild(extendedDetails);
+                    
+                    isSidebarMathRendered = false;
+                    renderSidebarMath();
+                }
+            }
         }
 
         function setMathSubTab(subtab) {
