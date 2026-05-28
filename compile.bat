@@ -6,25 +6,28 @@ echo   Joy Markdown Studio v3.5 Standalone Executable Compiler
 echo =======================================================================
 echo.
 echo [Step 1] Checking Python Environment...
+set PY_CMD=
 if exist .venv\Scripts\python.exe (
     echo Found virtual environment .venv. Using virtual environment.
     set PY_CMD=.venv\Scripts\python.exe
-) else (
+)
+if "%PY_CMD%"=="" (
     C:\Python\Python313\python.exe --version >nul 2>&1
-    if %errorlevel% neq 0 (
-        echo Python 3.13 was not found in C:\Python\Python313\.
-        echo Trying default system 'python' command instead...
-        python --version >nul 2>&1
-        if %errorlevel% neq 0 (
-            echo [ERROR] Python is not installed, not in system PATH, and .venv was not found!
-            echo Please install Python and try again.
-            pause
-            exit /b
-        )
-        set PY_CMD=python
-    ) else (
+    if not errorlevel 1 (
         set PY_CMD=C:\Python\Python313\python.exe
     )
+)
+if "%PY_CMD%"=="" (
+    python --version >nul 2>&1
+    if not errorlevel 1 (
+        set PY_CMD=python
+    )
+)
+if "%PY_CMD%"=="" (
+    echo [ERROR] Python is not installed, not in system PATH, and .venv was not found!
+    echo Please install Python and try again.
+    pause
+    exit /b
 )
 
 echo.
