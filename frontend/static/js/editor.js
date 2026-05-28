@@ -1513,6 +1513,95 @@ class UndoManager {
             insertMathSymbol(template);
         }
 
+        const MATH_SUBTAB_CATEGORIES = {
+            math: [
+                { value: 'basic', label: '기본 수식' },
+                { value: 'calculus', label: '미적분 및 극한' },
+                { value: 'greek', label: '그리스 문자' },
+                { value: 'symbols', label: '기본 수학 기호' },
+                { value: 'spec_operators', label: '전문 수학 연산자' },
+                { value: 'set_logic', label: '집합론 및 논리' },
+                { value: 'lin_alg', label: '선형대수 및 행렬' }
+            ],
+            physics: [
+                { value: 'phys_ops', label: '기본 연산자' },
+                { value: 'em_gravity', label: '전자기학 및 중력' },
+                { value: 'quantum', label: '양자 및 상대성' },
+                { value: 'fluid', label: '유체역학' },
+                { value: 'thermo', label: '열역학' }
+            ],
+            bio: [
+                { value: 'rxn', label: '화학 반응 및 평형' },
+                { value: 'genetics', label: '유전학 및 집단유전학' },
+                { value: 'molbio', label: '분자생물학' },
+                { value: 'protein', label: '단백질 및 생화학' }
+            ],
+            cs: [
+                { value: 'probability', label: '확률 및 정보이론' },
+                { value: 'ml_dl', label: '머신러닝/딥러닝' }
+            ],
+            ee: [
+                { value: 'ee_basic', label: '회로 및 신호이론' }
+            ]
+        };
+
+        function updateMathCategorySelect(subtab) {
+            const selectEl = document.getElementById('math-category-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="all">전체</option>';
+            const categories = MATH_SUBTAB_CATEGORIES[subtab];
+            if (categories) {
+                categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat.value;
+                    opt.textContent = cat.label;
+                    selectEl.appendChild(opt);
+                });
+            }
+        }
+
+        function filterMathSymbols() {
+            const query = (document.getElementById('math-search-input')?.value || '').toLowerCase().trim();
+            const subcategory = document.getElementById('math-category-select')?.value || 'all';
+            
+            const activeSubtab = document.querySelector('.math-subtab-btn.active');
+            if (!activeSubtab) return;
+            const subtabId = activeSubtab.id.replace('subtab-math-', '');
+            const activeContent = document.getElementById(`math-subtab-content-${subtabId}`);
+            if (!activeContent) return;
+            
+            const sections = activeContent.querySelectorAll('.math-section, details.math-section-accordion');
+            sections.forEach(section => {
+                let sectionMatchCount = 0;
+                const sectionId = section.getAttribute('data-section-id');
+                
+                const items = section.querySelectorAll('.math-item, .math-item-small');
+                items.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    const rawMath = (item.getAttribute('data-raw-math') || '').toLowerCase();
+                    
+                    const matchesQuery = !query || text.includes(query) || rawMath.includes(query);
+                    const matchesCategory = (subcategory === 'all' || sectionId === subcategory);
+                    
+                    if (matchesQuery && matchesCategory) {
+                        item.style.display = '';
+                        sectionMatchCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                if (sectionMatchCount > 0) {
+                    section.style.display = '';
+                    if (section.tagName === 'DETAILS' && query) {
+                        section.open = true;
+                    }
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
         function setMathSubTab(subtab) {
             const subtabMath = document.getElementById('subtab-math-math');
             const subtabPhysics = document.getElementById('subtab-math-physics');
@@ -1586,6 +1675,12 @@ class UndoManager {
                     subtabEe.style.color = 'var(--accent)';
                 }
             }
+            
+            // 카테고리 셀렉트 업데이트 및 검색필터 초기화
+            updateMathCategorySelect(subtab);
+            const searchInput = document.getElementById('math-search-input');
+            if (searchInput) searchInput.value = '';
+            filterMathSymbols();
             
             // KaTeX 렌더링 트리거 (렌더러 상태 플래그 초기화하여 새로운 영역도 렌더링되게 함)
             isSidebarMathRendered = false; 
@@ -2507,6 +2602,7 @@ window.closeMermaidFullscreen = closeMermaidFullscreen;
 window.closeSettingsModal = closeSettingsModal;
 window.exportGraphImage = exportGraphImage;
 window.exportToHtml = exportToHtml;
+window.filterMathSymbols = filterMathSymbols;
 window.insertChemistryToEditor = insertChemistryToEditor;
 window.insertDiagramTemplate = insertDiagramTemplate;
 window.insertMathSymbol = insertMathSymbol;

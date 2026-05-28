@@ -235,10 +235,18 @@
                     <button class="math-subtab-btn" id="subtab-math-ee" onclick="setMathSubTab('ee')" style="padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_ee">⚡ 전기/전자</button>
                 </div>
 
+                <!-- 검색 및 카테고리 필터 컨트롤 -->
+                <div class="math-filter-controls" style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <input type="text" id="math-search-input" placeholder="수식 키워드 검색..." oninput="filterMathSymbols()" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 6px 10px; font-size: 0.82em; outline: none; transition: border-color 0.2s;">
+                    <select id="math-category-select" onchange="filterMathSymbols()" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 6px 8px; font-size: 0.82em; outline: none; cursor: pointer; max-width: 120px;">
+                        <option value="all">전체</option>
+                    </select>
+                </div>
+
                 <!-- 1. 수학 서브탭 콘텐츠 -->
-                <div class="math-subtab-content" id="math-subtab-content-math" style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_basic">자주 쓰이는 기본 수식</div>
+                <div class="math-subtab-content" id="math-subtab-content-math" style="display: flex; flex-direction: column; gap: 8px;">
+                    <details class="math-section-accordion" data-section-id="basic" open>
+                        <summary class="math-section-title" data-i18n="math_title_basic">자주 쓰이는 기본 수식</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$\\frac{?}{?}$')" data-raw-math="\frac{a}{b}"><span data-i18n="math_label_fraction">분수</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\sqrt{?}$')" data-raw-math="\sqrt{x}"><span data-i18n="math_label_sqrt">루트</span></button>
@@ -247,10 +255,10 @@
                             <button class="math-item" onclick="insertMathSymbol('$\\sum_{i=1}^{n} ?_{i}$')" data-raw-math="\sum x_i"><span data-i18n="math_label_sum">합(Sum)</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\prod_{i=1}^{n} ?_{i}$')" data-raw-math="\prod x_i"><span data-i18n="math_label_prod">곱(Prod)</span></button>
                         </div>
-                    </div>
+                    </details>
                     
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_calculus">미적분 및 극한</div>
+                    <details class="math-section-accordion" data-section-id="calculus" open>
+                        <summary class="math-section-title" data-i18n="math_title_calculus">미적분 및 극한</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$\\frac{d?}{d?}$')" data-raw-math="\frac{dy}{dx}"><span data-i18n="math_label_diff">미분</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\frac{\\partial ?}{\\partial ?}$')" data-raw-math="\frac{\partial y}{\partial x}"><span data-i18n="math_label_partial">편미분</span></button>
@@ -258,10 +266,10 @@
                             <button class="math-item" onclick="insertMathSymbol('$\\int_{?}^{?} ?\\,d?$')" data-raw-math="\int_a^b f(x)\,dx"><span data-i18n="math_label_def_int">정적분</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\lim_{? \\to ?} ?$')" data-raw-math="\lim_{x \to \infty} f(x)"><span data-i18n="math_label_limit">극한</span></button>
                         </div>
-                    </div>
+                    </details>
 
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_greek">그리스 문자 (Greek)</div>
+                    <details class="math-section-accordion" data-section-id="greek" open>
+                        <summary class="math-section-title" data-i18n="math_title_greek">그리스 문자 (Greek)</summary>
                         <div class="math-grid-small">
                             <button class="math-item-small" onclick="insertMathSymbol('$\\alpha$')" data-raw-math="\alpha">&alpha;</button>
                             <button class="math-item-small" onclick="insertMathSymbol('$\\beta$')" data-raw-math="\beta">&beta;</button>
@@ -278,10 +286,10 @@
                             <button class="math-item-small" onclick="insertMathSymbol('$\\Omega$')" data-raw-math="\Omega">&Omega;</button>
                             <button class="math-item-small" onclick="insertMathSymbol('$\\Phi$')" data-raw-math="\Phi">&Phi;</button>
                         </div>
-                    </div>
+                    </details>
 
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_symbols">수학 기호</div>
+                    <details class="math-section-accordion" data-section-id="symbols" open>
+                        <summary class="math-section-title" data-i18n="math_title_symbols">기본 수학 기호</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$+$')" data-raw-math="+"><span data-i18n="math_label_plus">더하기</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$-$')" data-raw-math="-"><span data-i18n="math_label_minus">빼기</span></button>
@@ -293,38 +301,62 @@
                             <button class="math-item" onclick="insertMathSymbol('$\\vec{?}$')" data-raw-math="\vec{v}"><span data-i18n="math_label_vector">벡터</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\to$')" data-raw-math="\to"><span data-i18n="math_label_arrow">화살표</span></button>
                         </div>
-                    </div>
+                    </details>
 
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_spec_operators">전문 수학 연산자</div>
+                    <details class="math-section-accordion" data-section-id="spec_operators" open>
+                        <summary class="math-section-title" data-i18n="math_title_spec_operators">전문 수학 연산자</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$\\pm$')" data-raw-math="\pm"><span data-i18n="math_label_pm">플러스마이너스</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\mp$')" data-raw-math="\mp"><span data-i18n="math_label_mp">마이너스플러스</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\cdot$')" data-raw-math="\cdot"><span data-i18n="math_label_cdot">점곱(내적)</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\otimes$')" data-raw-math="\otimes"><span data-i18n="math_label_tensor">텐서곱(외적)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\otimes$')" data-raw-math="\otimes"><span data-i18n="math_label_tensor">텐서곱</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\oplus$')" data-raw-math="\oplus"><span data-i18n="math_label_direct_sum">직합</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\equiv$')" data-raw-math="\equiv"><span data-i18n="math_label_equiv">합동/정의</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\propto$')" data-raw-math="\propto"><span data-i18n="math_label_propto">비례</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\partial$')" data-raw-math="\partial"><span data-i18n="math_label_partial_sym">편미분기호</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\in$')" data-raw-math="\in"><span data-i18n="math_label_in">속함</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\notin$')" data-raw-math="\notin"><span data-i18n="math_label_notin">속하지않음</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\subset$')" data-raw-math="\subset"><span data-i18n="math_label_subset">부분집합</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\cup$')" data-raw-math="\cup"><span data-i18n="math_label_union">합집합</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\cap$')" data-raw-math="\cap"><span data-i18n="math_label_intersection">교집합</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\forall$')" data-raw-math="\forall"><span data-i18n="math_label_forall">모든</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\exists$')" data-raw-math="\exists"><span data-i18n="math_label_exists">존재</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\implies$')" data-raw-math="\implies"><span data-i18n="math_label_implies">함의</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\iff$')" data-raw-math="\iff"><span data-i18n="math_label_iff">동치</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\varnothing$')" data-raw-math="\varnothing"><span data-i18n="math_label_varnothing">공집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla$')" data-raw-math="\nabla"><span>나블라(역삼각형)</span></button>
                         </div>
-                    </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="set_logic" open>
+                        <summary class="math-section-title">집합론 및 수리 논리</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\cup$')" data-raw-math="\cup"><span>합집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\cap$')" data-raw-math="\cap"><span>교집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\subset$')" data-raw-math="\subset"><span>부분집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\subseteq$')" data-raw-math="\subseteq"><span>포함관계</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\in$')" data-raw-math="\in"><span>속함</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\notin$')" data-raw-math="\notin"><span>속하지않음</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\emptyset$')" data-raw-math="\emptyset"><span>공집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\forall$')" data-raw-math="\forall"><span>모든 (for all)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\exists$')" data-raw-math="\exists"><span>존재 (exists)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\neg$')" data-raw-math="\neg"><span>부정 (not)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lor$')" data-raw-math="\lor"><span>논리합 (or)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\land$')" data-raw-math="\land"><span>논리곱 (and)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\implies$')" data-raw-math="\implies"><span>함의 (implies)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\iff$')" data-raw-math="\iff"><span>동치 (iff)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\mathbb{U}$')" data-raw-math="\mathbb{U}"><span>전체집합</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="lin_alg" open>
+                        <summary class="math-section-title">선형대수 및 행렬 템플릿</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\begin{pmatrix} ? & ? \\\\ ? & ? \\end{pmatrix}$')" data-raw-math="matrix 2x2"><span>2x2 행렬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\begin{pmatrix} ? & ? & ? \\\\ ? & ? & ? \\\\ ? & ? & ? \\end{pmatrix}$')" data-raw-math="matrix 3x3"><span>3x3 행렬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\det(?)$')" data-raw-math="det"><span>행렬식 (det)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$?^T$')" data-raw-math="transpose"><span>전치행렬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$?^{-1}$')" data-raw-math="inverse"><span>역행렬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\langle ?, ? \\rangle$')" data-raw-math="inner product"><span>내적</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\|?\\|$')" data-raw-math="norm"><span>노름 (Norm)</span></button>
+                        </div>
+                    </details>
                 </div>
 
                 <!-- 2. 물리학 서브탭 콘텐츠 -->
-                <div class="math-subtab-content" id="math-subtab-content-physics" style="display: none; flex-direction: column; gap: 16px;">
-                    <!-- 자주 쓰이는 연산자 -->
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_physics_ops">자주 쓰이는 연산자</div>
+                <div class="math-subtab-content" id="math-subtab-content-physics" style="display: none; flex-direction: column; gap: 8px;">
+                    <details class="math-section-accordion" data-section-id="phys_ops" open>
+                        <summary class="math-section-title" data-i18n="math_title_physics_ops">기본 연산자</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$\\nabla$')" data-raw-math="\nabla"><span data-i18n="math_label_nabla">델/나블라</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\nabla ?$')" data-raw-math="\nabla f"><span data-i18n="math_label_grad">그라디언트</span></button>
@@ -333,33 +365,30 @@
                             <button class="math-item" onclick="insertMathSymbol('$\\nabla^2 ?$')" data-raw-math="\nabla^2 f"><span data-i18n="math_label_laplacian">라플라시안</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\oint \\vec{?} \\cdot d\\vec{r}$')" data-raw-math="\oint \vec{F} \cdot d\vec{r}"><span data-i18n="math_label_line_int">선적분</span></button>
                         </div>
-                    </div>
-
-                    <!-- 전자기학 및 중력 -->
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_em_gravity">전자기학 및 중력</div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="em_gravity" open>
+                        <summary class="math-section-title" data-i18n="math_title_em_gravity">전자기학 및 중력</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$F = k_e \\frac{q_1 q_2}{r^2}$')" data-raw-math="F = k_e \frac{q_1 q_2}{r^2}"><span data-i18n="math_label_coulomb">쿨롱 법칙</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\vec{F} = q(\\vec{E} + \\vec{v} \\times \\vec{B})$')" data-raw-math="\vec{F} = q(\vec{E} + \vec{v} × \vec{B})"><span data-i18n="math_label_lorentz">로런츠 힘</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\oint \\vec{E} \\cdot d\\vec{A} = \\frac{Q}{\\varepsilon_0}$')" data-raw-math="\oint \vec{E} \cdot d\vec{A} = \frac{Q}{\varepsilon_0}"><span data-i18n="math_label_gauss">가우스 법칙</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$F = G \\frac{m_1 m_2}{r^2}$')" data-raw-math="F = G \frac{m_1 m_2}{r^2}"><span data-i18n="math_label_gravity">만유인력</span></button>
                         </div>
-                    </div>
-
-                    <!-- 양자역학 및 상대성이론 -->
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_quantum">양자역학 및 상대성이론</div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="quantum" open>
+                        <summary class="math-section-title" data-i18n="math_title_quantum">양자 및 상대성</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$E = mc^2$')" data-raw-math="E = mc^2"><span data-i18n="math_label_mass_energy">질량-에너지</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$E = h\\nu$')" data-raw-math="E = h\nu"><span data-i18n="math_label_planck">플랑크-양자</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$')" data-raw-math="i\hbar\frac{\partial}{\partial t}\Psi = \hat{H}\Psi"><span data-i18n="math_label_schrodinger">슈뢰딩거</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\Delta x \\Delta p \\ge \\frac{\\hbar}{2}$')" data-raw-math="\Delta x \Delta p \ge \frac{\hbar}{2}"><span data-i18n="math_label_uncertainty">불확정성</span></button>
                         </div>
-                    </div>
-
-                    <!-- 유체역학 -->
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_fluid">유체역학</div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="fluid" open>
+                        <summary class="math-section-title" data-i18n="math_title_fluid">유체역학</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$\\frac{\\partial \\rho}{\\partial t} + \\nabla \\cdot (\\rho \\vec{v}) = 0$')" data-raw-math="\frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \vec{v}) = 0"><span data-i18n="math_label_fluid_cont">연속 방정식</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\frac{\\partial \\vec{v}}{\\partial t} + (\\vec{v} \\cdot \\nabla)\\vec{v} = -\\frac{1}{\\rho}\\nabla p + \\vec{g}$')" data-raw-math="\frac{\partial \vec{v}}{\partial t} + (\vec{v} \cdot \nabla)\vec{v} = -\frac{1}{\rho}\nabla p + \vec{g}"><span data-i18n="math_label_euler">오일러 방정식</span></button>
@@ -367,11 +396,10 @@
                             <button class="math-item" onclick="insertMathSymbol('$p + \\frac{1}{2}\\rho v^2 + \\rho gh = \\text{const}$')" data-raw-math="p + \frac{1}{2}\rho v^2 + \rho gh = \text{const}"><span data-i18n="math_label_bernoulli">베르누이 방정식</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$E = T + V = \\text{const}$')" data-raw-math="E = T + V = \text{const}"><span data-i18n="math_label_mech_energy">역학적보존법칙</span></button>
                         </div>
-                    </div>
-
-                    <!-- 열역학 -->
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_thermo">열역학</div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="thermo" open>
+                        <summary class="math-section-title" data-i18n="math_title_thermo">열역학</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$dU = \\delta Q - \\delta W$')" data-raw-math="dU = \delta Q - \delta W"><span data-i18n="math_label_thermo_1st_close">열역학 1법칙(폐계)</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\dot{Q} - \\dot{W}_s = \\dot{m}\\left( \\Delta h + \\Delta \\frac{v^2}{2} + g\\Delta z \\right)$')" data-raw-math="\dot{Q} - \dot{W}_s = \dot{m}\left( \Delta h + \Delta \frac{v^2}{2} + g\Delta z \right)"><span data-i18n="math_label_thermo_1st_open">열역학 1법칙(개방)</span></button>
@@ -382,21 +410,21 @@
                             <button class="math-item" onclick="insertMathSymbol('$PV = nRT$')" data-raw-math="PV = nRT"><span data-i18n="math_label_ideal_gas_eq">이상기체상태방정식</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$dU = C_v dT,\\, dH = C_p dT$')" data-raw-math="dU = C_v dT,\, dH = C_p dT"><span data-i18n="math_label_internal_enthalpy">내부에너지/엔탈피</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$C_p - C_v = R$')" data-raw-math="C_p - C_v = R"><span data-i18n="math_label_mayer">마이어 관계식</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\eta_c = 1 - \\frac{T_C}{T_H}$')" data-raw-math="\eta_c = 1 - \frac{T_C}{T_H}"><span data-i18n="math_label_carnot_eff">카르노 효율</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\eta_{\\text{Otto}} = 1 - \\frac{1}{r^{\\gamma-1}}$')" data-raw-math="\eta_{\text{Otto}} = 1 - \frac{1}{r^{\gamma-1}}"><span data-i18n="math_label_otto_eff">오토 효율</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\eta_{\\text{Diesel}} = 1 - \\frac{1}{r^{\\gamma-1}} \\left[ \\frac{r_c^\\gamma - 1}{\\gamma(r_c - 1)} \\right]$')" data-raw-math="\eta_{\text{Diesel}} = 1 - \frac{1}{r^{\gamma-1}} \left[ \frac{r_c^\gamma - 1}{\gamma(r_c - 1)} \right]"><span data-i18n="math_label_diesel_eff">디젤 효율</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$\\text{COP}_{\\text{ref}} = \\frac{T_C}{T_H - T_C}$')" data-raw-math="\text{COP}_{\text{ref}} = \frac{T_C}{T_H - T_C}"><span data-i18n="math_label_ref_cop">냉동 COP</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\eta_c = 1 - \\frac{T_C}{T_H}$')" data-raw-math="\eta_c = 1 - \frac{T_C}{T_H}" style="grid-column: span 2;"><span data-i18n="math_label_carnot_eff">카르노 효율</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\eta_{\\text{Otto}} = 1 - \\frac{1}{r^{\\gamma-1}}$')" data-raw-math="\eta_{\text{Otto}} = 1 - \frac{1}{r^{\gamma-1}}" style="grid-column: span 2;"><span data-i18n="math_label_otto_eff">오토 효율</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\eta_{\\text{Diesel}} = 1 - \\frac{1}{r^{\\gamma-1}} \\left[ \\frac{r_c^\\gamma - 1}{\\gamma(r_c - 1)} \\right]$')" data-raw-math="\eta_{\text{Diesel}} = 1 - \frac{1}{r^{\gamma-1}} \left[ \frac{r_c^\gamma - 1}{\gamma(r_c - 1)} \right]" style="grid-column: span 2;"><span data-i18n="math_label_diesel_eff">디젤 효율</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{COP}_{\\text{ref}} = \\frac{T_C}{T_H - T_C}$')" data-raw-math="\text{COP}_{\text{ref}} = \frac{T_C}{T_H - T_C}" style="grid-column: span 2;"><span data-i18n="math_label_ref_cop">냉동 COP</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$q = -k \\nabla T$')" data-raw-math="q = -k \nabla T"><span data-i18n="math_label_fourier_cond">Fourier 전도</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$q = h(T_s - T_{\\infty})$')" data-raw-math="q = h(T_s - T_{\infty})"><span data-i18n="math_label_newton_conv">Newton 대류</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$E = \\epsilon \\sigma T^4$')" data-raw-math="E = \epsilon \sigma T^4"><span data-i18n="math_label_stefan_rad">Stefan 복사</span></button>
                         </div>
-                    </div>
+                    </details>
                 </div>
 
                 <!-- 3. 화학/생명 서브탭 콘텐츠 -->
-                <div class="math-subtab-content" id="math-subtab-content-bio" style="display: none; flex-direction: column; gap: 16px;">
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_rxn">화학 반응 및 평형</div>
+                <div class="math-subtab-content" id="math-subtab-content-bio" style="display: none; flex-direction: column; gap: 8px;">
+                    <details class="math-section-accordion" data-section-id="rxn" open>
+                        <summary class="math-section-title" data-i18n="math_title_rxn">화학 반응 및 평형</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$k = A e^{-\\frac{E_a}{RT}}$')" data-raw-math="k = A e^{-\\frac{E_a}{RT}}"><span data-i18n="math_label_arrhenius">아레니우스</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$PV = nRT$')" data-raw-math="PV = nRT"><span data-i18n="math_label_ideal_gas">이상기체</span></button>
@@ -408,10 +436,10 @@
                             <button class="math-item" onclick="insertMathSymbol('$\\uparrow$')" data-raw-math="\\uparrow"><span data-i18n="math_label_gas_gen">기체발생</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\downarrow$')" data-raw-math="\\downarrow"><span data-i18n="math_label_precip">침전발생</span></button>
                         </div>
-                    </div>
+                    </details>
 
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_genetics">유전학 및 집단유전학</div>
+                    <details class="math-section-accordion" data-section-id="genetics" open>
+                        <summary class="math-section-title" data-i18n="math_title_genetics">유전학 및 집단유전학</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$3\\,\\text{A\\_} : 1\\,\\text{aa}$') " data-raw-math="3\\,\\text{A\\_} : 1\\,\\text{aa}"><span data-i18n="math_label_segregation">분리의 법칙</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\text{Aa} \\times \\text{Aa} \\rightarrow 1\\,\\text{AA} : 2\\,\\text{Aa} : 1\\,\\text{aa}$') " data-raw-math="\\text{Aa} \\times \\text{Aa} \\rightarrow 1\\,\\text{AA} : 2\\,\\text{Aa} : 1\\,\\text{aa}"><span data-i18n="math_label_monohybrid">단일형질교배</span></button>
@@ -420,11 +448,10 @@
                             <button class="math-item" onclick="insertMathSymbol('$p^2 + 2pq + q^2 = 1$')" data-raw-math="p^2 + 2pq + q^2 = 1"><span data-i18n="math_label_hardy">하디-바인베르크</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$p + q = 1$')" data-raw-math="p + q = 1"><span data-i18n="math_label_allele_freq">대립유전자 빈도</span></button>
                         </div>
-                    </div>
+                    </details>
 
-                    <!-- 분자생물학 및 qPCR -->
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_molbio">분자생물학 및 유전자 분석</div>
+                    <details class="math-section-accordion" data-section-id="molbio" open>
+                        <summary class="math-section-title" data-i18n="math_title_molbio">분자생물학 및 유전자 분석</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$N_t = N_0 \\times 2^n$')" data-raw-math="N_t = N_0 \\times 2^n"><span data-i18n="math_label_pcr_amp">PCR 증폭 공식</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$T_m = 64.9 + \\frac{41 \\times (G+C - 16.4)}{A+T+G+C}$') " data-raw-math="T_m = 64.9 + \\frac{41 \\times (G+C - 16.4)}{A+T+G+C}"><span data-i18n="math_label_tm_calc">DNA 용융온도 (Tm)</span></button>
@@ -434,11 +461,10 @@
                             <button class="math-item" onclick="insertMathSymbol('$\\text{A} = \\text{T}$') " data-raw-math="\\text{A} = \\text{T}"><span data-i18n="math_label_at_pair">A-T 염기쌍</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\text{G} \\equiv \\text{C}$') " data-raw-math="\\text{G} \\equiv \\text{C}"><span data-i18n="math_label_gc_pair">G-C 염기쌍</span></button>
                         </div>
-                    </div>
+                    </details>
 
-                    <!-- 단백질 및 생화학 -->
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_biochem">생화학 및 효소 반응</div>
+                    <details class="math-section-accordion" data-section-id="protein" open>
+                        <summary class="math-section-title" data-i18n="math_title_biochem">생화학 및 효소 반응</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$v = \\frac{V_{\\max}[S]}{K_m + [S]}$')" data-raw-math="v = \\frac{V_{\\max}[S]}{K_m + [S]}"><span data-i18n="math_label_menten">미하엘리스-멘텐 식</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\frac{1}{v} = \\frac{K_m}{V_{\\max}}\\frac{1}{[S]} + \\frac{1}{V_{\\max}}$')" data-raw-math="\\frac{1}{v} = \\frac{K_m}{V_{\\max}}\\frac{1}{[S]} + \\frac{1}{V_{\\max}}"><span data-i18n="math_label_lineweaver">이중역수 플롯</span></button>
@@ -447,29 +473,38 @@
                             <button class="math-item" onclick="insertMathSymbol('$\\Delta G = \\Delta H - T\\Delta S$')" data-raw-math="\\Delta G = \\Delta H - T\\Delta S"><span data-i18n="math_label_gibbs">깁스 자유에너지</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\text{pH} = \\text{p}K_a + \\log\\left(\\frac{[\\text{A}^-]}{[\\text{HA}]}\\right)$')" data-raw-math="\\text{pH} = \\text{p}K_a + \\log\\left(\\frac{[\\text{A}^-]}{[\\text{HA}]}\\right)"><span data-i18n="math_label_henderson">핸더슨-하셀바흐</span></button>
                         </div>
-                    </div>
+                    </details>
                 </div>
 
                 <!-- 4. 컴공/AI 서브탭 콘텐츠 -->
-                <div class="math-subtab-content" id="math-subtab-content-cs" style="display: none; flex-direction: column; gap: 16px;">
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_cs_basic">이론 및 머신러닝</div>
+                <div class="math-subtab-content" id="math-subtab-content-cs" style="display: none; flex-direction: column; gap: 8px;">
+                    <details class="math-section-accordion" data-section-id="probability" open>
+                        <summary class="math-section-title">확률 및 정보이론</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$H(X) = -\\sum P(x_i)\\log P(x_i)$')" data-raw-math="H(X) = -\sum P(x_i)\log P(x_i)"><span data-i18n="math_label_entropy">샤논 엔트로피</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$P(A|B) = \\frac{P(B|A)P(A)}{P(B)}$')" data-raw-math="P(A|B) = \frac{P(B|A)P(A)}{P(B)}"><span data-i18n="math_label_bayes">베이즈 정리</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$D_{\\text{KL}}(P \\parallel Q) = \\sum P(x) \\log \\frac{P(x)}{Q(x)}$')" data-raw-math="KL divergence"><span>KL 발산</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$f(x) = \\frac{1}{\\sigma \\sqrt{2\\pi}} e^{-\\frac{1}{2}(\\frac{x-\\mu}{\\sigma})^2}$')" data-raw-math="Gaussian distribution"><span>가우시안 분포</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="ml_dl" open>
+                        <summary class="math-section-title">머신러닝/딥러닝</summary>
+                        <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$\\sigma(\\vec{z})_i = \\frac{e^{z_i}}{\\sum e^{z_j}}$')" data-raw-math="\sigma(\vec{z})_i = \frac{e^{z_i}}{\sum e^{z_j}}"><span data-i18n="math_label_softmax">소프트맥스</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$S(x) = \\frac{1}{1 + e^{-x}}$')" data-raw-math="S(x) = \frac{1}{1 + e^{-x}}"><span data-i18n="math_label_sigmoid">시그모이드</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$f(x) = \\max(0, x)$')" data-raw-math="f(x) = \max(0, x)"><span data-i18n="math_label_relu">ReLU</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$L = -\\sum y_i \\log \\hat{y}_i$')" data-raw-math="L = -\sum y_i \log \hat{y}_i"><span data-i18n="math_label_cross_entropy">크로스 엔트로피</span></button>
-                            <button class="math-item" onclick="insertMathSymbol('$P(A|B) = \\frac{P(B|A)P(A)}{P(B)}$')" data-raw-math="P(A|B) = \frac{P(B|A)P(A)}{P(B)}"><span data-i18n="math_label_bayes">베이즈 정리</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\theta = \\theta - \\eta \\nabla_\\theta L$')" data-raw-math="\theta = \theta - \eta \nabla_\theta L"><span data-i18n="math_label_grad_descent">경사 하강법</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$w_{t+1} = w_t - \\eta \\frac{\\partial L}{\\partial w}$')" data-raw-math="weight update"><span>가중치 업데이트</span></button>
                         </div>
-                    </div>
+                    </details>
                 </div>
 
                 <!-- 5. 전기/전자 서브탭 콘텐츠 -->
-                <div class="math-subtab-content" id="math-subtab-content-ee" style="display: none; flex-direction: column; gap: 16px;">
-                    <div class="math-section">
-                        <div class="math-section-title" data-i18n="math_title_ee_basic">회로 및 신호이론</div>
+                <div class="math-subtab-content" id="math-subtab-content-ee" style="display: none; flex-direction: column; gap: 8px;">
+                    <details class="math-section-accordion" data-section-id="ee_basic" open>
+                        <summary class="math-section-title" data-i18n="math_title_ee_basic">회로 및 신호이론</summary>
                         <div class="math-grid">
                             <button class="math-item" onclick="insertMathSymbol('$V = IR$')" data-raw-math="V = IR"><span data-i18n="math_label_ohm">옴의 법칙</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$\\sum V_k = 0$')" data-raw-math="\sum V_k = 0"><span data-i18n="math_label_kvl">KVL (전압 법칙)</span></button>
@@ -480,7 +515,7 @@
                             <button class="math-item" onclick="insertMathSymbol('$F(\\omega) = \\int f(t)e^{-j\\omega t}dt$')" data-raw-math="F(\omega) = \int f(t)e^{-j\omega t}dt"><span data-i18n="math_label_fourier_trans">푸리에 변환</span></button>
                             <button class="math-item" onclick="insertMathSymbol('$F(s) = \\int f(t)e^{-st}dt$')" data-raw-math="F(s) = \int f(t)e^{-st}dt"><span data-i18n="math_label_laplace_trans">라플라스 변환</span></button>
                         </div>
-                    </div>
+                    </details>
                 </div>
             </div>
             <!-- 화학식 검색 패널 -->

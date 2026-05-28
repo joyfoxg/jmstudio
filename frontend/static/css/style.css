@@ -580,6 +580,77 @@
             letter-spacing: 0.5px;
             margin-bottom: 4px;
         }
+        
+        /* details/summary 아코디언 스타일 */
+        details.math-section-accordion {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.01);
+            margin-bottom: 8px;
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .theme-light details.math-section-accordion {
+            background: rgba(0, 0, 0, 0.01);
+        }
+        details.math-section-accordion[open] {
+            border-color: rgba(69, 243, 255, 0.25);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .theme-light details.math-section-accordion[open] {
+            border-color: rgba(2, 132, 199, 0.2);
+        }
+        
+        details.math-section-accordion summary.math-section-title {
+            padding: 10px 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.82em;
+            font-weight: 600;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            outline: none;
+            background: rgba(255, 255, 255, 0.02);
+            transition: background 0.2s, color 0.2s;
+            margin-bottom: 0;
+        }
+        .theme-light details.math-section-accordion summary.math-section-title {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        details.math-section-accordion summary.math-section-title:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--accent);
+        }
+        .theme-light details.math-section-accordion summary.math-section-title:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        
+        /* 아코디언 화살표 표시 */
+        details.math-section-accordion summary.math-section-title::-webkit-details-marker {
+            display: none;
+        }
+        details.math-section-accordion summary.math-section-title::after {
+            content: '➔';
+            font-size: 0.8em;
+            transition: transform 0.2s ease;
+            transform: rotate(90deg);
+            color: var(--text-muted);
+        }
+        details.math-section-accordion[open] summary.math-section-title::after {
+            transform: rotate(270deg);
+            color: var(--accent);
+        }
+        
+        details.math-section-accordion .math-grid,
+        details.math-section-accordion .math-grid-small {
+            padding: 12px;
+            border-top: 1px solid var(--border);
+        }
         .math-subtabs {
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
