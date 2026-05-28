@@ -154,6 +154,7 @@
             border-radius: 8px;
             overflow: hidden;
             transition: border-color 0.2s, box-shadow 0.2s;
+            flex-shrink: 0 !important; /* Force accordion header to never collapse */
         }
 
         details[open] {
@@ -8082,26 +8083,47 @@
             const symbol = card.getAttribute('data-symbol');
             const previewBox = card.querySelector('.preview-box');
             try {
+                // If it's an environment or template command, use fallback text directly
+                if (symbol.includes('\\begin') || 
+                    symbol.includes('\\end') || 
+                    symbol.includes('\\def') || 
+                    symbol.includes('\\newcommand') || 
+                    symbol.includes('\\let') || 
+                    symbol.includes('\\futurelet') || 
+                    symbol.includes('\\global') || 
+                    symbol === '\\left' || 
+                    symbol === '\\right' || 
+                    symbol === '\\left.' || 
+                    symbol === '\\right.' || 
+                    symbol === '\\middle' ||
+                    symbol === '\\hdashline' ||
+                    symbol === '\\cr' ||
+                    symbol === '\\cline' ||
+                    symbol === '\\multicolumn' ||
+                    symbol === '\\Alpha' ||
+                    symbol === '\\Beta' ||
+                    symbol === '\\html' ||
+                    symbol.includes('\\htmlStyle') ||
+                    symbol.includes('\\htmlClass') ||
+                    symbol.includes('\\htmlId') ||
+                    symbol.includes('\\htmlData')) {
+                    previewBox.innerHTML = `<span class="katex-fallback">${escapeHtml(symbol)}</span>`;
+                    return;
+                }
+
                 let renderStr = symbol;
-                // 미완성된 괄호나 기호들 보정
+                // Add closing brace if unclosed
                 if (symbol.includes('{') && !symbol.includes('}')) {
                     renderStr = symbol + '}';
                 }
-                if (symbol.includes('\\begin') && !symbol.includes('\\end')) {
-                    previewBox.innerHTML = `<span class="katex-fallback">${escapeHtml(symbol)}</span>`;
-                    return;
-                }
-                if (symbol === '\\left' || symbol === '\\right') {
-                    previewBox.innerHTML = `<span class="katex-fallback">${escapeHtml(symbol)}</span>`;
-                    return;
-                }
-                // KaTeX 수동 렌더링
+
+                // Render with throwOnError: true to catch KaTeX syntax errors
                 katex.render(renderStr, previewBox, {
-                    throwOnError: false,
+                    throwOnError: true,
                     displayMode: false
                 });
             } catch (e) {
-                previewBox.textContent = symbol;
+                previewBox.innerHTML = `<span class="katex-fallback">${escapeHtml(symbol)}</span>`;
             }
         });
 
