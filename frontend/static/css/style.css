@@ -1457,8 +1457,16 @@
             font-size: 0.9em;
             outline: none;
         }
+        .modal-input option {
+            background-color: var(--bg-card);
+            color: var(--text-main);
+        }
         .theme-light .modal-input {
             background: rgba(0,0,0,0.02);
+        }
+        .theme-light .modal-input option {
+            background-color: var(--bg-card);
+            color: var(--text-main);
         }
         .modal-input:focus {
             border-color: var(--accent);
