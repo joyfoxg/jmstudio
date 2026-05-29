@@ -4,6 +4,7 @@ import webview
 import socket
 import urllib.parse
 from app_config import get_config, save_config, PORT, BIND_IP
+from gdrive_sync import GoogleDriveSync
 
 # 전역 window 레퍼런스 (main.py에서 주입)
 window = None
@@ -25,6 +26,9 @@ class MdViewerApi:
         self.workspace = os.path.abspath(os.getcwd())
         if "last_workspace" in config and os.path.exists(config["last_workspace"]):
             self.workspace = os.path.abspath(config["last_workspace"])
+
+        # google drive sync 객체 생성
+        self.gdrive = GoogleDriveSync(self.workspace)
 
     def get_initial_state(self):
         files_tree = self.list_files()
@@ -644,5 +648,225 @@ class MdViewerApi:
             return {"status": "not_found"}
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+    def gdrive_login(self):
+        return self.gdrive.authenticate()
+
+    def gdrive_logout(self):
+        return self.gdrive.disconnect()
+
+    def gdrive_get_status(self):
+        is_auth = self.gdrive.is_authenticated()
+        user_info = self.gdrive.get_user_info() if is_auth else None
+        return {
+            "status": "success",
+            "authenticated": is_auth,
+            "user": user_info
+        }
+
+    def gdrive_sync_active_file(self, rel_path):
+        if not self.gdrive.is_authenticated():
+            return {"status": "error", "message": "구글 계정 연동이 필요합니다."}
+        
+        if os.path.isabs(rel_path):
+            full_path = rel_path
+        else:
+            full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+        
+        if not os.path.exists(full_path) or not os.path.isfile(full_path):
+            return {"status": "error", "message": "파일을 찾을 수 없습니다."}
+            
+        try:
+            cfg = get_config()
+            sync_map = cfg.get("google_drive_sync_map", {})
+            file_info = sync_map.get(rel_path, {})
+            file_id = file_info.get("file_id")
+            
+            # Check remote update to detect conflict
+            if file_id:
+                remote_mtime = self.gdrive.get_remote_modified_time(file_id)
+                last_synced_mtime = file_info.get("last_synced_mtime", 0)
+                local_mtime = os.path.getmtime(full_path)
+                
+                # If remote is newer and was modified since last sync
+                if remote_mtime > last_synced_mtime + 2:
+                    return {
+                        "status": "conflict", 
+                        "message": "구글 드라이브에 더 최신 버전이 있습니다. 어떻게 하시겠습니까?",
+                        "local_mtime": local_mtime,
+                        "remote_mtime": remote_mtime
+                    }
+            
+            new_file_id = self.gdrive.upload_file(full_path, file_id)
+            
+            sync_map[rel_path] = {
+                "file_id": new_file_id,
+                "last_synced_mtime": os.path.getmtime(full_path),
+                "auto_sync": file_info.get("auto_sync", True)
+            }
+            cfg["google_drive_sync_map"] = sync_map
+            save_config(cfg)
+            
+            return {"status": "success", "file_id": new_file_id}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def gdrive_resolve_conflict(self, rel_path, resolution):
+        if not self.gdrive.is_authenticated():
+            return {"status": "error", "message": "구글 계정 연동이 필요합니다."}
+            
+        if os.path.isabs(rel_path):
+            full_path = rel_path
+        else:
+            full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+            
+        try:
+            cfg = get_config()
+            sync_map = cfg.get("google_drive_sync_map", {})
+            file_info = sync_map.get(rel_path, {})
+            file_id = file_info.get("file_id")
+            
+            if resolution == "upload":
+                new_file_id = self.gdrive.upload_file(full_path, file_id)
+                sync_map[rel_path] = {
+                    "file_id": new_file_id,
+                    "last_synced_mtime": os.path.getmtime(full_path),
+                    "auto_sync": file_info.get("auto_sync", True)
+                }
+                cfg["google_drive_sync_map"] = sync_map
+                save_config(cfg)
+                return {"status": "success", "action": "uploaded"}
+                
+            elif resolution == "download":
+                if not file_id:
+                    return {"status": "error", "message": "구글 드라이브 파일 ID를 찾을 수 없습니다."}
+                self.gdrive.download_file(file_id, full_path)
+                sync_map[rel_path] = {
+                    "file_id": file_id,
+                    "last_synced_mtime": os.path.getmtime(full_path),
+                    "auto_sync": file_info.get("auto_sync", True)
+                }
+                cfg["google_drive_sync_map"] = sync_map
+                save_config(cfg)
+                
+                with open(full_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    
+                return {"status": "success", "action": "downloaded", "content": content}
+            
+            return {"status": "cancel"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def gdrive_get_file_sync_status(self, rel_path):
+        cfg = get_config()
+        sync_map = cfg.get("google_drive_sync_map", {})
+        if rel_path in sync_map:
+            return {"status": "success", "synced": True, "auto_sync": sync_map[rel_path].get("auto_sync", True)}
+        return {"status": "success", "synced": False, "auto_sync": False}
+
+    def gdrive_toggle_file_auto_sync(self, rel_path, enabled):
+        cfg = get_config()
+        sync_map = cfg.get("google_drive_sync_map", {})
+        if rel_path in sync_map:
+            sync_map[rel_path]["auto_sync"] = enabled
+            cfg["google_drive_sync_map"] = sync_map
+            save_config(cfg)
+            return {"status": "success"}
+        return {"status": "error", "message": "동기화된 파일 기록을 찾을 수 없습니다. 먼저 업로드를 진행해 주세요."}
+
+    def gdrive_list_remote_files(self):
+        if not self.gdrive.is_authenticated():
+            return {"status": "error", "message": "구글 계정 연동이 필요합니다."}
+        try:
+            folder_id = self.gdrive.get_or_create_app_folder()
+            query = f"'{folder_id}' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed = false"
+            results = self.gdrive.service.files().list(
+                q=query, 
+                spaces='drive', 
+                fields="files(id, name, modifiedTime, size)"
+            ).execute()
+            
+            files_list = []
+            for f in results.get('files', []):
+                files_list.append({
+                    "id": f.get("id"),
+                    "name": f.get("name"),
+                    "modifiedTime": f.get("modifiedTime"),
+                    "size": int(f.get("size", 0))
+                })
+            return {"status": "success", "files": files_list}
+        except Exception as e:
+            return {"status": "error", "message": f"클라우드 목록 조회 실패: {str(e)}"}
+
+    def gdrive_download_remote_file(self, file_id, filename):
+        if not self.gdrive.is_authenticated():
+            return {"status": "error", "message": "구글 계정 연동이 필요합니다."}
+        
+        full_path = os.path.abspath(os.path.join(self.workspace, filename))
+        if not full_path.startswith(self.workspace):
+            return {"status": "error", "message": "Access denied"}
+            
+        try:
+            self.gdrive.download_file(file_id, full_path)
+            
+            cfg = get_config()
+            added_docs = cfg.get("added_documents", [])
+            
+            rel_path = os.path.relpath(full_path, self.workspace).replace('\\', '/')
+            if rel_path not in added_docs:
+                added_docs.append(rel_path)
+                cfg["added_documents"] = added_docs
+            
+            sync_map = cfg.get("google_drive_sync_map", {})
+            sync_map[rel_path] = {
+                "file_id": file_id,
+                "last_synced_mtime": os.path.getmtime(full_path),
+                "auto_sync": True
+            }
+            cfg["google_drive_sync_map"] = sync_map
+            save_config(cfg)
+            
+            return {
+                "status": "success", 
+                "rel_path": rel_path,
+                "files": self.list_files()
+            }
+        except Exception as e:
+            return {"status": "error", "message": f"클라우드 파일 다운로드 실패: {str(e)}"}
+
+    def gdrive_import_client_secrets(self):
+        global window
+        if window is None:
+            return {"status": "error", "message": "Window instance not bound"}
+        try:
+            file_paths = window.create_file_dialog(
+                webview.OPEN_DIALOG,
+                allow_multiple=False,
+                file_types=('JSON Files (*.json)', 'All files (*.*)')
+            )
+            if not file_paths:
+                return {"status": "cancel", "message": "취소되었습니다."}
+                
+            path = file_paths[0]
+            if os.path.exists(path) and os.path.isfile(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                
+                if "installed" not in data or "client_id" not in data["installed"]:
+                    return {"status": "error", "message": "올바른 구글 클라이언트 인증키(JSON) 파일이 아닙니다."}
+                
+                # Save to workspace root
+                target_path = os.path.join(self.workspace, "client_secrets.json")
+                with open(target_path, "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=4)
+                    
+                self.gdrive.load_credentials()
+                return {"status": "success", "message": "인증키를 성공적으로 가져왔습니다."}
+            else:
+                return {"status": "error", "message": "파일을 찾을 수 없습니다."}
+        except Exception as e:
+            return {"status": "error", "message": f"인증키 가져오기 실패: {str(e)}"}
+
 
 

@@ -97,6 +97,7 @@ class UndoManager {
         let currentViewMode = "split";
         let currentTheme = "dark";
         let currentLang = "ko";
+        let localFiles = [];
         let isSyncScrolling = true;
         let renderTimeout;
         let isCreatingType = "file"; // 'file' or 'folder'
@@ -699,6 +700,9 @@ class UndoManager {
                 setTheme(currentTheme);
                 setLanguage(state.lang || 'ko', false);
                 
+                // 구글 드라이브 연동 상태 초기 로드 및 확인
+                await updateGoogleDriveStatus();
+                
                 const blueLightStored = localStorage.getItem('blue_light_active') === 'true';
                 if (blueLightStored) {
                     document.body.classList.add('blue-light-active');
@@ -844,7 +848,25 @@ class UndoManager {
         }
 
         // 파일 트리 렌더링
+        function collectLocalFiles(items) {
+            let res = [];
+            if (!items) return res;
+            items.forEach(item => {
+                if (item.type === 'file') {
+                    let name = item.name;
+                    if (name.startsWith('📄 ')) {
+                        name = name.substring(2);
+                    }
+                    res.push(name.toLowerCase());
+                } else if (item.children) {
+                    res = res.concat(collectLocalFiles(item.children));
+                }
+            });
+            return res;
+        }
+
         function renderFileTree(files) {
+            localFiles = collectLocalFiles(files);
             const container = document.getElementById('file-tree-container');
             container.innerHTML = "";
             
@@ -855,6 +877,10 @@ class UndoManager {
             
             container.appendChild(createTreeDOM(files));
             lucide.createIcons();
+            
+            if (gdriveAuthenticated) {
+                refreshRemoteFiles().catch(e => console.error(e));
+            }
         }
 
         function createTreeDOM(items) {
@@ -943,6 +969,9 @@ class UndoManager {
                 
                 // 마크다운 그래픽 파싱 & 렌더링
                 triggerLiveRender();
+                
+                // 구글 드라이브 동기화 상태 갱신
+                await updateActiveFileSyncStatus();
                 
                 // Undo Manager 초기화 및 첫 스냅샷 기록
                 if (window.undoManager) {
@@ -2330,6 +2359,22 @@ class UndoManager {
             const res = await pywebview.api.save_file(currentFilePath, content);
             if (res.status === 'success') {
                 showToast(t('msg_save_success'));
+                
+                // 구글 드라이브 자동 동기화 처리
+                if (gdriveAuthenticated) {
+                    const statusRes = await pywebview.api.gdrive_get_file_sync_status(currentFilePath);
+                    if (statusRes.status === 'success' && statusRes.auto_sync) {
+                        pywebview.api.gdrive_sync_active_file(currentFilePath).then(syncRes => {
+                            if (syncRes.status === 'success') {
+                                updateActiveFileSyncStatus();
+                            } else if (syncRes.status === 'conflict') {
+                                openGdriveConflictModal();
+                            }
+                        }).catch(e => console.error("Auto-sync error:", e));
+                    } else {
+                        updateActiveFileSyncStatus();
+                    }
+                }
             } else {
                 alert(t('msg_save_failed') + res.message);
             }
@@ -2715,6 +2760,325 @@ if (window.lucide) {
             lucide.createIcons();
         }
 
+        // ==========================================
+        // Google Drive Synchronization JavaScript API
+        // ==========================================
+
+        let gdriveAuthenticated = false;
+
+        async function updateGoogleDriveStatus() {
+            if (!window.pywebview) return;
+            try {
+                const res = await pywebview.api.gdrive_get_status();
+                if (res.status === 'success') {
+                    gdriveAuthenticated = res.authenticated;
+                    const disconnectedDiv = document.getElementById('gdrive-status-disconnected');
+                    const connectedDiv = document.getElementById('gdrive-status-connected');
+                    const emailDiv = document.getElementById('gdrive-account-email');
+                    const fileSyncSection = document.getElementById('gdrive-file-sync-section');
+                    const remoteSection = document.getElementById('gdrive-remote-files-section');
+                    const indicator = document.getElementById('active-file-cloud-indicator');
+
+                    if (res.authenticated) {
+                        if (disconnectedDiv) disconnectedDiv.style.display = 'none';
+                        if (connectedDiv) connectedDiv.style.display = 'flex';
+                        if (emailDiv) emailDiv.innerText = res.user ? res.user.emailAddress : '-';
+                        if (fileSyncSection) fileSyncSection.style.display = 'flex';
+                        if (remoteSection) remoteSection.style.display = 'flex';
+                        if (indicator) indicator.style.display = 'inline-flex';
+                        
+                        await updateActiveFileSyncStatus();
+                        await refreshRemoteFiles();
+                    } else {
+                        if (disconnectedDiv) disconnectedDiv.style.display = 'flex';
+                        if (connectedDiv) connectedDiv.style.display = 'none';
+                        if (fileSyncSection) fileSyncSection.style.display = 'none';
+                        if (remoteSection) remoteSection.style.display = 'none';
+                        if (indicator) indicator.style.display = 'none';
+                    }
+                }
+            } catch (err) {
+                console.error("Error updating Google Drive status:", err);
+            }
+        }
+
+        async function refreshRemoteFiles() {
+            if (!window.pywebview || !gdriveAuthenticated) return;
+            const container = document.getElementById('gdrive-remote-files-list');
+            if (!container) return;
+            
+            container.innerHTML = `<div style="text-align: center; padding: 10px;"><i data-lucide="loader" class="spinner" style="width: 16px; height: 16px; color: var(--text-muted);"></i></div>`;
+            if (window.lucide) lucide.createIcons();
+            
+            try {
+                const res = await pywebview.api.gdrive_list_remote_files();
+                if (res.status === 'success') {
+                    container.innerHTML = "";
+                    const files = res.files || [];
+                    if (files.length === 0) {
+                        container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.8em; text-align: center; padding: 10px;">클라우드에 저장된 문서가 없습니다.</div>`;
+                        return;
+                    }
+                    
+                    files.forEach(f => {
+                        const itemEl = document.createElement('div');
+                        itemEl.style.display = 'flex';
+                        itemEl.style.alignItems = 'center';
+                        itemEl.style.justifyContent = 'space-between';
+                        itemEl.style.padding = '8px 10px';
+                        itemEl.style.background = 'rgba(255,255,255,0.02)';
+                        itemEl.style.border = '1px solid var(--border)';
+                        itemEl.style.borderRadius = '6px';
+                        itemEl.style.fontSize = '0.82em';
+                        
+                        const isLocal = localFiles.includes(f.name.toLowerCase());
+                        
+                        let actionHtml = "";
+                        if (isLocal) {
+                            actionHtml = `<span class="badge" style="font-size: 0.7em; padding: 2px 6px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); font-weight: 500;" data-i18n="status_local_exists">${t('status_local_exists')}</span>`;
+                        } else {
+                            actionHtml = `
+                                <button class="icon-btn-sm" onclick="downloadRemoteFile('${f.id}', '${f.name}')" title="${t('btn_import_cloud')}" style="padding: 4px; background: rgba(69, 243, 255, 0.1); border: 1px solid rgba(69, 243, 255, 0.2); border-radius: 4px; cursor: pointer;">
+                                    <i data-lucide="download-cloud" style="width: 14px; height: 14px; color: var(--accent);"></i>
+                                </button>
+                            `;
+                        }
+                        
+                        const sizeKb = (f.size / 1024).toFixed(1);
+                        
+                        itemEl.innerHTML = `
+                            <div style="display: flex; flex-direction: column; gap: 2px; max-width: 70%; overflow: hidden; text-align: left;">
+                                <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main);">${f.name}</span>
+                                <span style="font-size: 0.72em; color: var(--text-muted); font-family: monospace;">${sizeKb} KB</span>
+                            </div>
+                            <div>
+                                ${actionHtml}
+                            </div>
+                        `;
+                        container.appendChild(itemEl);
+                    });
+                    if (window.lucide) lucide.createIcons();
+                } else {
+                    container.innerHTML = `<div style="color: #ef4444; font-size: 0.8em; text-align: center; padding: 10px;">${res.message}</div>`;
+                }
+            } catch (err) {
+                container.innerHTML = `<div style="color: #ef4444; font-size: 0.8em; text-align: center; padding: 10px;">에러: ${err.message}</div>`;
+            }
+        }
+
+        async function downloadRemoteFile(fileId, filename) {
+            if (!window.pywebview) return;
+            
+            if (localFiles.includes(filename.toLowerCase())) {
+                const overwrite = confirm(t('msg_file_exists_warn'));
+                if (!overwrite) return;
+            }
+            
+            showToast(t('msg_sync_in_progress'));
+            try {
+                const res = await pywebview.api.gdrive_download_remote_file(fileId, filename);
+                if (res.status === 'success') {
+                    showToast(t('msg_import_success'));
+                    if (res.files) {
+                        renderFileTree(res.files);
+                    }
+                    if (res.rel_path) {
+                        await openFile(res.rel_path);
+                    }
+                    await refreshRemoteFiles();
+                } else {
+                    alert(res.message);
+                }
+            } catch (err) {
+                alert("다운로드 실패: " + err.message);
+            }
+        }
+
+        async function connectGoogleDrive() {
+            if (!window.pywebview) return;
+            showToast(t('msg_sync_in_progress'));
+            try {
+                const res = await pywebview.api.gdrive_login();
+                if (res.status === 'success') {
+                    showToast(res.message || t('msg_save_success'));
+                    await updateGoogleDriveStatus();
+                } else if (res.message && res.message.includes("client_secrets.json")) {
+                    openGdriveSetupModal();
+                } else {
+                    alert(res.message);
+                }
+            } catch (err) {
+                alert("연동 실패: " + err.message);
+            }
+        }
+
+        function openGdriveSetupModal() {
+            const modal = document.getElementById('gdrive-setup-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        function closeGdriveSetupModal() {
+            const modal = document.getElementById('gdrive-setup-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function importGdriveClientSecrets() {
+            if (!window.pywebview) return;
+            try {
+                const res = await pywebview.api.gdrive_import_client_secrets();
+                if (res.status === 'success') {
+                    showToast(res.message);
+                    closeGdriveSetupModal();
+                    setTimeout(connectGoogleDrive, 500);
+                } else if (res.status === 'error') {
+                    alert(res.message);
+                }
+            } catch (err) {
+                alert("가져오기 실패: " + err.message);
+            }
+        }
+
+        async function disconnectGoogleDrive() {
+            if (!window.pywebview) return;
+            try {
+                const res = await pywebview.api.gdrive_logout();
+                if (res.status === 'success') {
+                    showToast(res.message);
+                    await updateGoogleDriveStatus();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function updateActiveFileSyncStatus() {
+            if (!window.pywebview || !gdriveAuthenticated || !currentFilePath) {
+                const indicator = document.getElementById('active-file-cloud-indicator');
+                if (indicator) indicator.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const res = await pywebview.api.gdrive_get_file_sync_status(currentFilePath);
+                const pathEl = document.getElementById('active-file-sync-path');
+                const badgeEl = document.getElementById('active-file-sync-badge');
+                const toggle = document.getElementById('gdrive-auto-sync-toggle');
+                const indicator = document.getElementById('active-file-cloud-indicator');
+                const icon = document.getElementById('cloud-indicator-icon');
+
+                if (pathEl) pathEl.innerText = currentFilePath.substring(currentFilePath.lastIndexOf('/') + 1);
+                
+                if (indicator) indicator.style.display = 'inline-flex';
+
+                if (res.status === 'success') {
+                    if (toggle) toggle.checked = res.auto_sync;
+                    
+                    if (res.synced) {
+                        if (badgeEl) {
+                            badgeEl.innerText = t('cloud_sync_status_synced');
+                            badgeEl.className = 'badge badge-success';
+                            badgeEl.style.backgroundColor = '#10b981';
+                        }
+                        if (icon) {
+                            icon.setAttribute('data-lucide', 'cloud');
+                            icon.style.color = '#10b981';
+                            icon.parentElement.title = "구글 드라이브와 동기화됨";
+                        }
+                    } else {
+                        if (badgeEl) {
+                            badgeEl.innerText = t('cloud_sync_status_not_synced');
+                            badgeEl.className = 'badge badge-warning';
+                            badgeEl.style.backgroundColor = '#f59e0b';
+                        }
+                        if (icon) {
+                            icon.setAttribute('data-lucide', 'cloud-off');
+                            icon.style.color = 'var(--text-muted)';
+                            icon.parentElement.title = "구글 드라이브와 동기화되지 않음";
+                        }
+                    }
+                    if (window.lucide) lucide.createIcons();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function syncActiveFileNow() {
+            if (!window.pywebview || !currentFilePath) return;
+            
+            const btn = document.getElementById('btn-sync-file-now');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="spinner" style="width: 14px; height: 14px;"></i> <span data-i18n="msg_sync_in_progress">${t('msg_sync_in_progress')}</span>`;
+            if (window.lucide) lucide.createIcons();
+
+            try {
+                const res = await pywebview.api.gdrive_sync_active_file(currentFilePath);
+                if (res.status === 'success') {
+                    showToast(t('msg_sync_success'));
+                    await updateActiveFileSyncStatus();
+                } else if (res.status === 'conflict') {
+                    openGdriveConflictModal();
+                } else {
+                    alert(t('msg_sync_failed') + res.message);
+                }
+            } catch (err) {
+                alert(t('msg_sync_failed') + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        async function toggleFileAutoSync(enabled) {
+            if (!window.pywebview || !currentFilePath) return;
+            try {
+                const res = await pywebview.api.gdrive_toggle_file_auto_sync(currentFilePath, enabled);
+                if (res.status !== 'success') {
+                    alert(res.message);
+                    document.getElementById('gdrive-auto-sync-toggle').checked = !enabled;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function openGdriveConflictModal() {
+            const modal = document.getElementById('gdrive-conflict-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeGdriveConflictModal() {
+            const modal = document.getElementById('gdrive-conflict-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function resolveGdriveConflict(resolution) {
+            closeGdriveConflictModal();
+            if (!window.pywebview || !currentFilePath) return;
+            
+            showToast(t('msg_sync_in_progress'));
+            try {
+                const res = await pywebview.api.gdrive_resolve_conflict(currentFilePath, resolution);
+                if (res.status === 'success') {
+                    showToast(t('msg_sync_success'));
+                    if (resolution === 'download' && res.content !== undefined) {
+                        setEditorContent(res.content);
+                        triggerLiveRender();
+                    }
+                    await updateActiveFileSyncStatus();
+                } else if (res.status === 'error') {
+                    alert(res.message);
+                }
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
 
 
 
@@ -2756,3 +3120,18 @@ window.toggleToc = toggleToc;
 window.undoEditor = undoEditor;
 window.zoomGraph = zoomGraph;
 window.zoomPreview = zoomPreview;
+
+// 구글 드라이브 동기화 관련 기능 전역 바인딩
+window.connectGoogleDrive = connectGoogleDrive;
+window.disconnectGoogleDrive = disconnectGoogleDrive;
+window.syncActiveFileNow = syncActiveFileNow;
+window.toggleFileAutoSync = toggleFileAutoSync;
+window.resolveGdriveConflict = resolveGdriveConflict;
+window.closeGdriveConflictModal = closeGdriveConflictModal;
+window.openGdriveSetupModal = openGdriveSetupModal;
+window.closeGdriveSetupModal = closeGdriveSetupModal;
+window.importGdriveClientSecrets = importGdriveClientSecrets;
+window.updateGoogleDriveStatus = updateGoogleDriveStatus;
+window.updateActiveFileSyncStatus = updateActiveFileSyncStatus;
+window.refreshRemoteFiles = refreshRemoteFiles;
+window.downloadRemoteFile = downloadRemoteFile;

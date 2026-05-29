@@ -50,7 +50,7 @@ for /f "tokens=2 delims=v" %%a in ('findstr /C:"APP_NAME =" app_config.py') do (
 )
 set APP_VER=v%TMP_VER:~0,-1%
 
-%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "frontend;frontend" --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" main.py
+%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "frontend;frontend" --add-data "client_secrets.json;." --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" main.py
 if %errorlevel% neq 0 (
     echo [ERROR] PyInstaller compilation failed!
     pause

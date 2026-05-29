@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.8.9 🌟
+# 🧪 Joy Markdown Studio v3.9.0 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -62,6 +62,14 @@
 ### 10. 🌐 Bilingual UI Language Toggle
 * **Real-time UI Translation**: Switch the entire application interface (sidebar tabs, header buttons, labels, placeholders, tooltips, and dialog alerts) between Korean and English instantly via the **KR/EN** toggle button in the header.
 * **Settings Persistence**: The selected language is saved in real time to the local browser's `localStorage` and the `md_viewer_config.json` configuration file, automatically restoring the last state on startup.
+
+### 11. ☁️ Bidirectional Real-time Google Drive Sync & Remote Browsing (v3.9.0 New)
+* **Easy Cloud Connection**: Seamlessly connect to Google Drive using the dedicated 'Cloud Sync' accordion menu located right under your local file tree.
+* **Zero-Configuration Browser Login**: Standard credentials are built directly into the compiled application. General users do not need to download or manually configure client_secrets.json files; clicking connect immediately opens their system web browser for OAuth.
+* **App-Specific Scope for Safety**: Operates under the drive.file scope, meaning it can only see and manage files created by this application. Your other personal Google Drive folders remain completely isolated and secure.
+* **Smart Syncing & Conflict Resolution**: Supports automatic background syncing on save as well as manual triggers. Detects local/remote modified time (mtime) differences and prompts an intelligent conflict resolution modal if a newer file exists on the cloud.
+* **Remote File Browser & Import**: View markdown documents safely stored in your Google Drive cloud workspace. Import any file that is not yet locally registered with a single click.
+* **Custom Credentials Override**: If you wish to use your own private GCP project keys, you can easily load your custom client_secrets.json file directly through the in-app setup guide dialog.
 
 ---
 
