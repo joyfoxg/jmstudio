@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.6 🌟
+# 🧪 Joy Markdown Studio v3.9.7 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -97,6 +97,12 @@
 * **Resolved External Absolute Path Document Loading Crash**: Fixed a critical frontend TypeError where opening a file located outside the active workspace directory (with path like `C:/...`) triggered a crash due to `workspaceRoot` being Falsy (null/undefined) during replacement operations. Built bulletproof exception fallback handling for all file openings.
 * **Normalized Windows Paths**: Standardized Windows-style backslashes (`\`) to slashes (`/`) when paths are received from the backend, ensuring flawless filename substring parsing and accurate physical path tooltips.
 * **Optimized Backend API Bridge Binding**: Resolved the backend bottleneck where browsing via external web browsers caused an `AttributeError: Window object has no attribute js_api` error at the Bottle API endpoint. Bound the main API instance directly to the `api_bridge` module for maximum stability and speed.
+
+### 17. 📝 Document Template Helper (9 Templates) and Smart Insertion UX (v3.9.7 New)
+* **9 Built-in Standard Templates**: Provides 9 professionally designed templates including Academic Thesis (incorporating abstract, KaTeX formulas, and Mermaid architecture graphs), University & Business Report, Knowledge & Wiki Note, Task Checklist (TODO), Shopping List, Life Bucket List, Detailed Travel Planner, Weekly Timetable (markdown table scheduler), and Idea Quick Memo.
+* **Independent Source Code Isolation (`templates.js`)**: Isolated large markdown template data and dedicated rendering logic from `editor.js` into a standalone `templates.js` module, greatly improving code readability and application startup performance.
+* **Compact Sidebar-Integrated Selector UX**: Moved away from the bulky tab layout. Added a `Create from Template` button directly in the `My Library` explorer header next to the `New File` button. Clicking it instantly switches the library tree into a highly compact, sidebar-optimized card list of the 9 templates.
+* **One-Click Localized File Creation & Split-View Auto-Open**: Clicking any template immediately opens a file creation dialog, prefilled with a localized default filename based on language settings (e.g., `학술논문_템플릿.md` or `thesis_template.md`). On creation, the template content is auto-injected and saved, and the editor automatically switches to Split View mode for instant editing, while returning the sidebar to standard folder tree view.
 
 ---
 

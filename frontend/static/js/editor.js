@@ -153,6 +153,7 @@ class UndoManager {
 
         function setLanguage(lang, saveConfig = true) {
             currentLang = lang;
+            window.currentLang = lang;
             const body = document.body;
             
             if (lang === 'en') {
@@ -227,6 +228,10 @@ class UndoManager {
             }
             
             lucide.createIcons();
+            
+            if (typeof window.renderTemplates === 'function') {
+                window.renderTemplates();
+            }
             
             if (window.pywebview && saveConfig) {
                 pywebview.api.save_lang(lang);
@@ -2583,8 +2588,20 @@ class UndoManager {
         
         function openCreateModal(type) {
             isCreatingType = type;
-            document.getElementById('modal-card-title').innerText = type === 'folder' ? t('create_modal_title_folder') : t('create_modal_title_file');
-            document.getElementById('modal-card-input').value = type === 'folder' ? 'new_folder' : 'document.md';
+            let titleText = t('create_modal_title_file');
+            let defaultName = 'document.md';
+            
+            if (type === 'folder') {
+                titleText = t('create_modal_title_folder');
+                defaultName = 'new_folder';
+            } else if (type === 'file_template') {
+                titleText = t('create_modal_title_template');
+                const tId = window.selectedTemplateId || 'thesis';
+                defaultName = t('template_' + tId + '_filename') || (tId + '_template.md');
+            }
+            
+            document.getElementById('modal-card-title').innerText = titleText;
+            document.getElementById('modal-card-input').value = defaultName;
             document.getElementById('create-modal').style.display = 'flex';
             document.getElementById('modal-card-input').focus();
         }
@@ -2600,14 +2617,42 @@ class UndoManager {
                 return;
             }
             
-            // 현재 활성화된 폴더나 루트에 생성
-            const res = await pywebview.api.create_item(name, isCreatingType);
+            const actualType = isCreatingType === 'file_template' ? 'file' : isCreatingType;
+            const res = await pywebview.api.create_item(name, actualType);
+            
             if (res.status === 'success') {
                 renderFileTree(res.files);
                 closeCreateModal();
-                showToast(t('msg_create_success'));
-                if (isCreatingType === 'file') {
-                    openFile(name);
+                
+                if (isCreatingType === 'file_template' && window.selectedTemplateId) {
+                    const content = window.DOCUMENT_TEMPLATES ? window.DOCUMENT_TEMPLATES[window.selectedTemplateId] : "";
+                    await openFile(name);
+                    
+                    if (content) {
+                        if (typeof setEditorContent === 'function') {
+                            setEditorContent(content);
+                        } else if (typeof window.setEditorContent === 'function') {
+                            window.setEditorContent(content);
+                        }
+                        await saveActiveFile();
+                    }
+                    
+                    if (typeof setViewMode === 'function') {
+                        setViewMode('split');
+                    } else if (typeof window.setViewMode === 'function') {
+                        window.setViewMode('split');
+                    }
+                    
+                    if (typeof window.toggleTemplateSelector === 'function') {
+                        window.toggleTemplateSelector(false);
+                    }
+                    
+                    showToast(t('msg_create_success'));
+                } else {
+                    showToast(t('msg_create_success'));
+                    if (isCreatingType === 'file') {
+                        openFile(name);
+                    }
                 }
             } else {
                 alert(t('msg_create_failed') + res.message);
@@ -2851,6 +2896,7 @@ class UndoManager {
                 toast.classList.remove('show');
             }, 3000);
         }
+        window.showToast = showToast;
         
         // ----------------- 외부 드래그 앤 드롭 파일 로드 -----------------
         function setupDragAndDrop() {

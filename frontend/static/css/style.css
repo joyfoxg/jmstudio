@@ -428,12 +428,23 @@
             pointer-events: none;
         }
 
-        /* 사이드바 탭 버튼 텍스트 줄바꿈 방지 */
+        /* 사이드바 탭 버튼 텍스트 줄바꿈 방지 및 가로 스크롤 지원 */
+        .sidebar-tabs {
+            display: flex !important;
+            overflow-x: auto !important;
+            white-space: nowrap !important;
+            scrollbar-width: none !important; /* Firefox */
+            -ms-overflow-style: none !important; /* IE 10+ */
+        }
+        .sidebar-tabs::-webkit-scrollbar {
+            display: none !important; /* Safari and Chrome */
+        }
         .sidebar-tab-btn {
             white-space: nowrap !important;
             font-size: 0.72em !important;
-            padding: 12px 2px !important;
+            padding: 12px 6px !important;
             gap: 4px !important;
+            flex-shrink: 0 !important; /* 좁을 때 찌그러짐 방지 */
         }
 
         .sidebar-header {

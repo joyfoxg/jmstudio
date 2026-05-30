@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Joy Markdown Studio v3.9.6</title>
+    <title>Joy Markdown Studio v3.9.7</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css">
@@ -20,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css?v=3.9.6_emoji_fix_v11">
+    <link rel="stylesheet" href="/static/css/style.css?v=3.9.7_template_helper_v1">
 </head>
 <body>
 
@@ -140,6 +140,9 @@
                         <button class="icon-btn" onclick="openCreateModal('file')" title="새 파일 생성" data-i18n-title="tooltip_create_file">
                             <i data-lucide="file-plus" style="width: 16px; height: 16px;"></i>
                         </button>
+                        <button class="icon-btn" onclick="toggleTemplateSelector()" title="템플릿으로 새 파일 생성" data-i18n-title="tooltip_template_create" id="template-create-btn">
+                            <i data-lucide="layout-template" style="width: 16px; height: 16px;"></i>
+                        </button>
                         <button class="icon-btn" onclick="openCreateModal('folder')" title="새 폴더 생성" data-i18n-title="tooltip_create_folder">
                             <i data-lucide="folder-plus" style="width: 16px; height: 16px;"></i>
                         </button>
@@ -148,6 +151,20 @@
                         </button>
                     </div>
                 </div>
+                
+                <!-- 템플릿 셀렉터 패널 (기본 숨김) -->
+                <div id="sidebar-template-selector" style="display: none; flex: 1; flex-direction: column; overflow-y: auto; padding: 12px; gap: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--border);">
+                        <span style="font-size: 0.82em; font-weight: 600; color: var(--accent);" data-i18n="templates_select_title">템플릿 문서 만들기</span>
+                        <button class="icon-btn" onclick="toggleTemplateSelector(false)" title="템플릿 선택 닫기" style="padding: 2px;">
+                            <i data-lucide="x" style="width: 12px; height: 12px;"></i>
+                        </button>
+                    </div>
+                    <div id="sidebar-templates-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- templates.js에서 콤팩트 카드형태로 주입됨 -->
+                    </div>
+                </div>
+
                 <!-- 트리 뷰 목록 -->
                 <div class="file-tree" id="file-tree-container"></div>
 
@@ -813,6 +830,8 @@
             </div>
         </div>
 
+
+
         <!-- 슬라이딩 숨기기/나오기 핸들 (사이드바 바로 뒤 인접 형제로 배치) -->
         <button class="sidebar-slide-toggle" onclick="toggleSidebar()" id="sidebar-slide-btn" title="사이드바 열기/접기" data-i18n-title="tooltip_toggle_sidebar">
             <i id="sidebar-slide-icon" data-lucide="chevron-left" style="width: 12px; height: 12px;"></i>
@@ -1220,6 +1239,32 @@
         </div>
     </div>
 
+    <!-- 템플릿 주입 확인 모달 -->
+    <div class="modal" id="template-confirm-modal" style="display: none; z-index: 99997;">
+        <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <i data-lucide="help-circle" style="width: 20px; height: 20px; color: var(--accent);"></i>
+                <div class="modal-title" style="margin: 0; font-size: 1.15em; text-align: left;" data-i18n="template_confirm_title">템플릿 삽입 방식 선택</div>
+            </div>
+            <div style="font-size: 0.88em; line-height: 1.5; color: var(--text-main); text-align: left;" data-i18n="template_confirm_desc">
+                에디터에 기존 작성 중인 내용이 있습니다. 템플릿을 현재 커서 위치에 추가로 삽입하시겠습니까, 아니면 기존 내용을 지우고 전체 덮어쓰시겠습니까?
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                <button class="btn btn-accent" onclick="applyTemplate('insert')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;">
+                    <i data-lucide="file-input" style="width: 16px; height: 16px;"></i>
+                    <span data-i18n="btn_template_insert">현재 위치에 삽입</span>
+                </button>
+                <button class="btn" onclick="applyTemplate('overwrite')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25);">
+                    <i data-lucide="file-output" style="width: 16px; height: 16px;"></i>
+                    <span data-i18n="btn_template_overwrite">전체 덮어쓰기 (기존 내용 삭제)</span>
+                </button>
+            </div>
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn" onclick="closeTemplateConfirmModal()" data-i18n="btn_cancel">취소</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 구글 드라이브 동기화 충돌 해결 모달 -->
     <div class="modal" id="gdrive-conflict-modal" style="display: none; z-index: 99998;">
         <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px;">
@@ -1289,9 +1334,10 @@
     
 
     <!-- 모듈화된 JavaScript 자산 로드 (캐시 무력화 버전 적용) -->
-    <script src="/static/js/translations.js?v=3.9.6_emoji_fix_v11"></script>
-    <script type="module" src="/static/js/editor.js?v=3.9.6_emoji_fix_v11"></script>
-    <script type="module" src="/static/js/emoji.js?v=3.9.6_emoji_fix_v11"></script>
+    <script src="/static/js/translations.js?v=3.9.7_template_helper_v1"></script>
+    <script type="module" src="/static/js/editor.js?v=3.9.7_template_helper_v1"></script>
+    <script type="module" src="/static/js/emoji.js?v=3.9.7_template_helper_v1"></script>
+    <script type="module" src="/static/js/templates.js?v=3.9.7_template_helper_v1"></script>
 
 </body>
 </html>
