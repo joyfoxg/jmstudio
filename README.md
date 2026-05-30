@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.5 🌟
+# 🧪 Joy Markdown Studio v3.9.6 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -92,6 +92,11 @@
 ### 15. 🎨 Emoji Grid Layout Optimization & Category Tab Fix (v3.9.5 New)
 * **Expanded Dropdown Container**: Fixed the layout issue where the 10th column in the 10-column layout got truncated at the right border by expanding the dropdown menu width to `398px` and perfectly synchronizing the component's parent container width.
 * **Fine-Tuned Emojis and Button Sizing**: Adjusted individual emoji rendering size to `22px` and button bounding grid boxes to `34px`. Emojis, borders, and top category icons (including flags) now render beautifully with appropriate side padding and zero edge clipping.
+
+### 16. 🐛 External Absolute Path Document Loading & Backend API Bridge Crash Fix (v3.9.6 New)
+* **Resolved External Absolute Path Document Loading Crash**: Fixed a critical frontend TypeError where opening a file located outside the active workspace directory (with path like `C:/...`) triggered a crash due to `workspaceRoot` being Falsy (null/undefined) during replacement operations. Built bulletproof exception fallback handling for all file openings.
+* **Normalized Windows Paths**: Standardized Windows-style backslashes (`\`) to slashes (`/`) when paths are received from the backend, ensuring flawless filename substring parsing and accurate physical path tooltips.
+* **Optimized Backend API Bridge Binding**: Resolved the backend bottleneck where browsing via external web browsers caused an `AttributeError: Window object has no attribute js_api` error at the Bottle API endpoint. Bound the main API instance directly to the `api_bridge` module for maximum stability and speed.
 
 ---
 

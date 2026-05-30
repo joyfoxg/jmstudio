@@ -9,8 +9,9 @@ from app_config import (
 )
 from gdrive_sync import GoogleDriveSync
 
-# 전역 window 레퍼런스 (main.py에서 주입)
+# 전역 window 및 API 레퍼런스 (main.py에서 주입)
 window = None
+api_instance = None
 
 def get_local_ip():
     try:

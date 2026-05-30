@@ -8,6 +8,7 @@ import api_bridge
 def main():
     # 1. API 인스턴스 초기 생성
     api = MdViewerApi()
+    api_bridge.api_instance = api
     
     # 2. Bottle 로컬 서버 백그라운드 구동 (상대 경로 리소스/이미지 서빙용)
     server_thread = threading.Thread(target=run_server, daemon=True)

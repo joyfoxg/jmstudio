@@ -65,10 +65,9 @@ def serve_workspace_file(filepath):
 @app.post('/api/<action>')
 def api_endpoint(action):
     # HTTP API 브릿지 (브라우저 직접 접속 원격 환경 지원)
-    if api_bridge.window is None:
+    api_instance = api_bridge.api_instance
+    if api_instance is None:
         return HTTPResponse(status=500, body="API instance not initialized")
-        
-    api_instance = api_bridge.window.js_api
     
     cfg = get_config()
     configured_password = cfg.get("access_password", "")

@@ -1112,9 +1112,11 @@ class UndoManager {
                 
                 // 파일 이름만 노출하고 물리적 전체 저장 경로는 툴팁으로 우아하게 표시
                 const titleEl = document.getElementById('active-file-title');
-                const fileName = relPath.substring(relPath.lastIndexOf('/') + 1);
+                const normalizedRelPath = relPath.replace(/\\/g, '/');
+                const fileName = normalizedRelPath.substring(normalizedRelPath.lastIndexOf('/') + 1);
                 titleEl.innerText = fileName;
-                const fullSavingPath = (workspaceRoot.replace(/\\/g, '/') + '/' + relPath).replace(/\/+/g, '/');
+                const safeRoot = (workspaceRoot || "").replace(/\\/g, '/');
+                const fullSavingPath = (safeRoot + '/' + normalizedRelPath).replace(/\/+/g, '/');
                 titleEl.title = t('msg_active_file_tooltip') + fullSavingPath;
                 
                 setEditorContent(res.content);

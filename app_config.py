@@ -22,7 +22,7 @@ def save_config(config):
 
 # 설정 로드 및 전역 환경변수 관리
 config = get_config()
-APP_NAME = "Joy Markdown Studio v3.9.5"
+APP_NAME = "Joy Markdown Studio v3.9.6"
 PORT = int(config.get("port", 58220))
 BIND_IP = config.get("bind_ip", "0.0.0.0")
 
