@@ -3569,6 +3569,8 @@ window.copyPipCommand = copyPipCommand;
 
 let activeTagFilter = null;
 let modalEditedTags = [];
+let cachedWorkspaceTags = {};
+let tagSearchQuery = "";
 
 function openTagsManager() {
     const sidebar = document.getElementById('sidebar-panel');
@@ -3583,11 +3585,35 @@ async function loadWorkspaceTags() {
     try {
         const res = await pywebview.api.get_workspace_tags();
         if (res.status === 'success') {
-            renderTagsCloud(res.tags);
-            renderFilteredFiles(res.tags);
+            cachedWorkspaceTags = res.tags;
+            filterAndRenderTags();
         }
     } catch (err) {
         console.error("Error loading workspace tags:", err);
+    }
+}
+
+function filterAndRenderTags() {
+    let filteredTags = {};
+    if (tagSearchQuery) {
+        Object.keys(cachedWorkspaceTags).forEach(tag => {
+            if (tag.toLowerCase().includes(tagSearchQuery)) {
+                filteredTags[tag] = cachedWorkspaceTags[tag];
+            }
+        });
+    } else {
+        filteredTags = cachedWorkspaceTags;
+    }
+    
+    renderTagsCloud(filteredTags);
+    renderFilteredFiles(filteredTags);
+}
+
+function onTagSearchInput() {
+    const input = document.getElementById('tags-search-input');
+    if (input) {
+        tagSearchQuery = input.value.trim().toLowerCase();
+        filterAndRenderTags();
     }
 }
 
@@ -4016,3 +4042,4 @@ window.addHashtag = addHashtag;
 window.loadWorkspaceTags = loadWorkspaceTags;
 window.filterFilesByTag = filterFilesByTag;
 window.clearTagFilter = clearTagFilter;
+window.onTagSearchInput = onTagSearchInput;

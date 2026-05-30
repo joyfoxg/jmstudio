@@ -844,6 +844,12 @@
                     서재 파일들의 해시태그를 모아보고 탐색합니다.
                 </div>
                 
+                <!-- 태그 검색 입력창 -->
+                <div style="display: flex; position: relative;">
+                    <input type="text" id="tags-search-input" placeholder="태그 이름 검색..." oninput="onTagSearchInput()" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 8px 12px 8px 32px; font-size: 0.85em; outline: none; transition: border-color 0.2s;" data-i18n-placeholder="placeholder_tags_search">
+                    <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-muted); pointer-events: none;"></i>
+                </div>
+                
                 <!-- 태그 클라우드/목록 영역 -->
                 <div id="tags-list-container" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: rgba(0,0,0,0.15); scrollbar-width: thin;">
                     <!-- 자바스크립트로 태그들이 추가될 영역 -->
