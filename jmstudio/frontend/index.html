@@ -886,22 +886,22 @@
             <div class="pane" id="pane-editor">
                 <div class="pane-header">
                     <div style="display: flex; align-items: center; gap: 6px;">
-                        <button class="nav-glass-btn" id="btn-nav-back" onclick="navigateHistory(-1)" title="뒤로가기" disabled>
+                        <button class="nav-glass-btn" id="btn-nav-back" onclick="navigateHistory(-1)" data-i18n-title="tooltip_back" title="뒤로가기" disabled>
                             <i data-lucide="arrow-left"></i>
                         </button>
-                        <button class="nav-glass-btn" id="btn-nav-forward" onclick="navigateHistory(1)" title="앞으로가기" disabled>
+                        <button class="nav-glass-btn" id="btn-nav-forward" onclick="navigateHistory(1)" data-i18n-title="tooltip_forward" title="앞으로가기" disabled>
                             <i data-lucide="arrow-right"></i>
                         </button>
                         <span id="active-file-title" style="margin-left: 4px;">선택된 파일 없음</span>
-                        <span id="active-file-cloud-indicator" style="display: none; align-items: center; justify-content: center; margin-left: 6px; color: var(--text-muted);" title="구글 드라이브 동기화 상태">
+                        <span id="active-file-cloud-indicator" style="display: none; align-items: center; justify-content: center; margin-left: 6px; color: var(--text-muted);" data-i18n-title="tooltip_gdrive_sync" title="구글 드라이브 동기화 상태">
                             <i id="cloud-indicator-icon" data-lucide="cloud-off" style="width: 14px; height: 14px;"></i>
                         </span>
                     </div>
                     <div style="display: flex; gap: 6px; align-items: center;">
-                        <button class="icon-btn-sm" onclick="undoEditor()" title="되돌리기 (Ctrl+Z)">
+                        <button class="icon-btn-sm" onclick="undoEditor()" data-i18n-title="tooltip_undo" title="되돌리기 (Ctrl+Z)">
                             <i data-lucide="undo" style="width: 12px; height: 12px;"></i>
                         </button>
-                        <button class="icon-btn-sm" onclick="redoEditor()" title="다시 실행 (Ctrl+Y)">
+                        <button class="icon-btn-sm" onclick="redoEditor()" data-i18n-title="tooltip_redo" title="다시 실행 (Ctrl+Y)">
                             <i data-lucide="redo" style="width: 12px; height: 12px;"></i>
                         </button>
                         <span style="font-size: 0.85em; opacity: 0.6; margin-left: 8px;">Editor</span>
@@ -912,16 +912,24 @@
                     <!-- 드롭다운: 단락 / 머리글 -->
                     <div class="toolbar-dropdown" id="toolbar-heading-dropdown">
                         <button class="toolbar-dropdown-btn" id="toolbar-heading-btn">
-                            <span id="heading-btn-text">단락</span>
+                            <span id="heading-btn-text" data-active-level="0" data-i18n="heading_p">단락</span>
                             <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
                         </button>
                         <div class="toolbar-dropdown-menu" id="toolbar-heading-menu">
-                            <div class="dropdown-item" onclick="setHeading(1)">머리글 1</div>
-                            <div class="dropdown-item" onclick="setHeading(2)">머리글 2</div>
-                            <div class="dropdown-item" onclick="setHeading(3)">머리글 3</div>
-                            <div class="dropdown-item" onclick="setHeading(4)">머리글 4</div>
+                            <div class="dropdown-item" onclick="setHeading(1)">
+                                <span data-i18n="heading_h1">머리글 1</span>
+                            </div>
+                            <div class="dropdown-item" onclick="setHeading(2)">
+                                <span data-i18n="heading_h2">머리글 2</span>
+                            </div>
+                            <div class="dropdown-item" onclick="setHeading(3)">
+                                <span data-i18n="heading_h3">머리글 3</span>
+                            </div>
+                            <div class="dropdown-item" onclick="setHeading(4)">
+                                <span data-i18n="heading_h4">머리글 4</span>
+                            </div>
                             <div class="dropdown-item active" onclick="setHeading(0)">
-                                <span>단락</span>
+                                <span data-i18n="heading_p">단락</span>
                                 <i data-lucide="check" style="width: 14px; height: 14px;"></i>
                             </div>
                         </div>
@@ -930,43 +938,43 @@
                     <div class="toolbar-divider"></div>
                     
                     <!-- 굵게 / 기울이기 버튼 -->
-                    <button class="toolbar-btn" onclick="insertFormatting('bold')" title="굵게 (Ctrl+B)">
+                    <button class="toolbar-btn" onclick="insertFormatting('bold')" data-i18n-title="tooltip_bold" title="굵게 (Ctrl+B)">
                         <i data-lucide="bold" style="width: 14px; height: 14px;"></i>
                     </button>
-                    <button class="toolbar-btn" onclick="insertFormatting('italic')" title="기울이기 (Ctrl+I)">
+                    <button class="toolbar-btn" onclick="insertFormatting('italic')" data-i18n-title="tooltip_italic" title="기울이기 (Ctrl+I)">
                         <i data-lucide="italic" style="width: 14px; height: 14px;"></i>
                     </button>
                     
                     <!-- 드롭다운: 목록 스타일 -->
                     <div class="toolbar-dropdown" id="toolbar-list-dropdown">
-                        <button class="toolbar-dropdown-btn" id="toolbar-list-btn" title="목록 스타일">
+                        <button class="toolbar-dropdown-btn" id="toolbar-list-btn" data-i18n-title="tooltip_list" title="목록 스타일">
                             <i data-lucide="list" style="width: 14px; height: 14px;"></i>
                             <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
                         </button>
                         <div class="toolbar-dropdown-menu" id="toolbar-list-menu">
                             <div class="dropdown-item" onclick="insertListStyle('unordered')">
                                 <i data-lucide="list" style="width: 14px; height: 14px; margin-right: 6px;"></i>
-                                <span>글머리 기호 목록</span>
+                                <span data-i18n="list_unordered">글머리 기호 목록</span>
                             </div>
                             <div class="dropdown-item" onclick="insertListStyle('ordered')">
                                 <i data-lucide="list-ordered" style="width: 14px; height: 14px; margin-right: 6px;"></i>
-                                <span>순서가 지정된 목록</span>
+                                <span data-i18n="list_ordered">순서가 지정된 목록</span>
                             </div>
                             <div class="dropdown-item" onclick="insertListStyle('checklist')">
                                 <i data-lucide="check-square" style="width: 14px; height: 14px; margin-right: 6px;"></i>
-                                <span>체크리스트</span>
+                                <span data-i18n="list_checklist">체크리스트</span>
                             </div>
                         </div>
                     </div>
                     
                     <!-- 코드 블록 버튼 -->
-                    <button class="toolbar-btn" onclick="insertFormatting('code')" title="코드 블록">
+                    <button class="toolbar-btn" onclick="insertFormatting('code')" data-i18n-title="tooltip_code" title="코드 블록">
                         <i data-lucide="code" style="width: 14px; height: 14px;"></i>
                     </button>
                     
                     <!-- 이모지 버튼 -->
                     <div class="toolbar-dropdown" id="toolbar-emoji-dropdown">
-                        <button class="toolbar-btn" id="toolbar-emoji-btn" title="이모지 삽입">
+                        <button class="toolbar-btn" id="toolbar-emoji-btn" data-i18n-title="tooltip_emoji" title="이모지 삽입">
                             <i data-lucide="smile" style="width: 14px; height: 14px;"></i>
                         </button>
                         <div class="toolbar-dropdown-menu emoji-picker-menu" id="toolbar-emoji-menu" style="padding: 0; border: none; overflow: hidden; width: 398px; max-height: none;">

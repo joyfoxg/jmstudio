@@ -99,6 +99,7 @@ class UndoManager {
         let currentTheme = "dark";
         let currentLang = "ko";
         let localFiles = [];
+        let currentFilesData = null;
         let isSyncScrolling = true;
         let renderTimeout;
         let isCreatingType = "file"; // 'file' or 'folder'
@@ -239,6 +240,18 @@ class UndoManager {
             if (activeSubtab && typeof updateMathCategorySelect === 'function') {
                 const subtabId = activeSubtab.id.replace('subtab-math-', '');
                 updateMathCategorySelect(subtabId);
+            }
+            
+            // 7. Update heading button text based on active level
+            const btnText = document.getElementById('heading-btn-text');
+            if (btnText) {
+                const activeLevel = btnText.getAttribute('data-active-level') || '0';
+                btnText.innerText = activeLevel === '0' ? t('heading_p') : t('heading_h' + activeLevel);
+            }
+            
+            // 8. Re-render file tree to apply translations to delete button titles or "No files found" message
+            if (typeof renderFileTree === 'function' && currentFilesData !== null) {
+                renderFileTree(currentFilesData);
             }
             
             if (window.pywebview && saveConfig) {
@@ -1101,6 +1114,7 @@ class UndoManager {
         }
 
         function renderFileTree(files) {
+            currentFilesData = files;
             localFiles = collectLocalFiles(files);
             const container = document.getElementById('file-tree-container');
             container.innerHTML = "";
@@ -2819,7 +2833,7 @@ class UndoManager {
             }
         }
 
-        async function deleteWorkspaceItem(event, relPath) {
+        window.deleteWorkspaceItem = async function(event, relPath) {
             event.stopPropagation();
             const fileName = relPath.substring(relPath.lastIndexOf('/') + 1);
             if (confirm(t('msg_delete_confirm').replace('{fileName}', fileName))) {
@@ -3542,7 +3556,8 @@ if (window.lucide) {
             // UI 텍스트 갱신
             const btnText = document.getElementById('heading-btn-text');
             if (btnText) {
-                btnText.innerText = level === 0 ? "단락" : `머리글 ${level}`;
+                btnText.setAttribute('data-active-level', level);
+                btnText.innerText = level === 0 ? t('heading_p') : t('heading_h' + level);
             }
             
             // 활성화 스타일 체크 표시 갱신
