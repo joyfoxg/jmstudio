@@ -4117,7 +4117,7 @@ function updateActiveDocumentTags(newTags) {
             if (!modal || !container) return;
             
             if (titleEl) {
-                titleEl.innerText = `${t('hashtag_modal_title') || '태그 관련 문서'} (#${tag})`;
+                titleEl.innerText = `${t('tag_select_modal_title') || '해시태그 문서선택'} (#${tag})`;
             }
             
             container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 10px; font-size: 0.85em;">조회 중...</div>`;
