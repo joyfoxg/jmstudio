@@ -225,6 +225,7 @@ const translations = {
                 "templates_select_title": "템플릿 문서 만들기",
                 "placeholder_name": "이름을 입력해 주세요...",
                 "btn_cancel": "취소",
+                "btn_confirm": "확인",
                 "btn_create": "생성",
                 
                 // Update Modal
@@ -752,6 +753,7 @@ const translations = {
                 "templates_select_title": "Templates Selector",
                 "placeholder_name": "Please enter a name...",
                 "btn_cancel": "Cancel",
+                "btn_confirm": "Confirm",
                 "btn_create": "Create",
                 
                 // Update Modal
