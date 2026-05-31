@@ -67,6 +67,7 @@ class UndoManager {
         let fileHistory = [];
         let fileHistoryIndex = -1;
         let isNavigatingHistory = false;
+        let activeDocumentTags = []; // 현재 열린 문서의 해시태그 상태
 
         function updateNavigationButtons() {
             const backBtns = [document.getElementById('btn-nav-back'), document.getElementById('btn-preview-nav-back')];
@@ -399,13 +400,66 @@ class UndoManager {
             return window.pendingEditorContent || "";
         };
 
+        function parseTagsFromFmText(fmText) {
+            const lines = fmText.split(/\r?\n/);
+            let inTags = false;
+            let tags = [];
+            
+            for (let line of lines) {
+                line = line.trim();
+                if (line === '---') continue;
+                
+                if (line.startsWith('tags:')) {
+                    const val = line.substring(5).trim();
+                    if (val) {
+                        if (val.startsWith('[') && val.endsWith(']')) {
+                            tags = val.substring(1, val.length - 1)
+                                      .split(',')
+                                      .map(t => t.trim().replace(/^['"]|['"]$/g, ''))
+                                      .filter(t => t.length > 0);
+                        } else {
+                            tags = val.split(',')
+                                      .map(t => t.trim().replace(/^['"]|['"]$/g, ''))
+                                      .filter(t => t.length > 0);
+                        }
+                    } else {
+                        inTags = true;
+                    }
+                } else if (inTags) {
+                    if (line.startsWith('-')) {
+                        tags.push(line.substring(1).trim().replace(/^['"]|['"]$/g, ''));
+                    } else if (line.includes(':')) {
+                        inTags = false;
+                    }
+                }
+            }
+            return Array.from(new Set(tags));
+        }
+
         window.setEditorContent = function(text) {
+            let cleanText = text;
+            let parsedTags = [];
+            if (text.startsWith('---')) {
+                const fmMatch = text.match(/^---[\s\S]*?\r?\n---(\r?\n)?/);
+                if (fmMatch) {
+                    const fmText = fmMatch[0];
+                    parsedTags = parseTagsFromFmText(fmText);
+                    cleanText = text.substring(fmText.length);
+                }
+            }
+            activeDocumentTags = parsedTags;
+            
+            // 플로팅 태그 컨테이너 업데이트
+            if (typeof updateFloatingTagsContainer === 'function') {
+                updateFloatingTagsContainer();
+            }
+            
             if (window.cmEditor) {
                 window.cmEditor.dispatch({
-                    changes: { from: 0, to: window.cmEditor.state.doc.length, insert: text }
+                    changes: { from: 0, to: window.cmEditor.state.doc.length, insert: cleanText }
                 });
             } else {
-                window.pendingEditorContent = text;
+                window.pendingEditorContent = cleanText;
             }
         };
 
@@ -2613,8 +2667,13 @@ class UndoManager {
                 alert(t('msg_save_no_file'));
                 return;
             }
-            const content = getEditorContent();
-            const res = await pywebview.api.save_file(currentFilePath, content);
+            const editorContent = getEditorContent();
+            let finalContent = editorContent;
+            if (activeDocumentTags && activeDocumentTags.length > 0) {
+                const tagsStr = `tags: [${activeDocumentTags.join(', ')}]`;
+                finalContent = `---\n${tagsStr}\n---\n\n` + editorContent;
+            }
+            const res = await pywebview.api.save_file(currentFilePath, finalContent);
             if (res.status === 'success') {
                 showToast(t('msg_save_success'));
                 loadWorkspaceTags(); // Refresh tags index on save
@@ -3836,102 +3895,15 @@ function clearTagFilter() {
 }
 
 function getActiveDocumentTags() {
-    const content = getEditorContent();
-    if (!content.startsWith('---')) return [];
-    
-    const fmMatch = content.match(/^---[\s\S]*?\r?\n---(\r?\n)?/);
-    if (!fmMatch) return [];
-    
-    const fmText = fmMatch[0];
-    const lines = fmText.split(/\r?\n/);
-    let inTags = false;
-    let tags = [];
-    
-    for (let line of lines) {
-        line = line.trim();
-        if (line === '---') continue;
-        
-        if (line.startsWith('tags:')) {
-            const val = line.substring(5).trim();
-            if (val) {
-                if (val.startsWith('[') && val.endsWith(']')) {
-                    tags = val.substring(1, val.length - 1)
-                              .split(',')
-                              .map(t => t.trim().replace(/^['"]|['"]$/g, ''))
-                              .filter(t => t.length > 0);
-                } else {
-                    tags = val.split(',')
-                              .map(t => t.trim().replace(/^['"]|['"]$/g, ''))
-                              .filter(t => t.length > 0);
-                }
-            } else {
-                inTags = true;
-            }
-        } else if (inTags) {
-            if (line.startsWith('-')) {
-                tags.push(line.substring(1).trim().replace(/^['"]|['"]$/g, ''));
-            } else if (line.includes(':')) {
-                inTags = false;
-            }
-        }
-    }
-    return Array.from(new Set(tags));
+    return activeDocumentTags || [];
 }
 
 function updateActiveDocumentTags(newTags) {
-    const view = window.cmEditor;
-    if (!view) return;
-    
-    const content = view.state.doc.toString();
-    const tagsStr = `tags: [${newTags.join(', ')}]`;
-    
-    if (content.startsWith('---')) {
-        const fmMatch = content.match(/^---[\s\S]*?\r?\n---(\r?\n)?/);
-        if (fmMatch) {
-            const fmFullText = fmMatch[0];
-            const lines = fmFullText.split(/\r?\n/);
-            let tagsReplaced = false;
-            let newLines = [];
-            let inTags = false;
-            
-                    for (let line of lines) {
-                        const trimmed = line.trim();
-                        if (trimmed.startsWith('tags:')) {
-                            newLines.push(`tags: [${newTags.join(', ')}]`);
-                            tagsReplaced = true;
-                            const val = trimmed.substring(5).trim();
-                            if (!val) {
-                                inTags = true;
-                            }
-                        } else if (inTags) {
-                            if (trimmed.startsWith('-')) {
-                                continue;
-                            } else if (trimmed.includes(':') || trimmed === '---') {
-                                inTags = false;
-                                newLines.push(line);
-                            }
-                        } else {
-                            newLines.push(line);
-                        }
-                    }
-                    
-                    if (!tagsReplaced) {
-                        newLines.splice(1, 0, tagsStr);
-                    }
-                    
-                    const newFmText = newLines.join('\n');
-                    view.dispatch({
-                        changes: { from: 0, to: fmFullText.length, insert: newFmText }
-                    });
-                    return;
-                }
-            }
-            
-            const newContent = `---\n${tagsStr}\n---\n\n` + content;
-            view.dispatch({
-                changes: { from: 0, to: content.length, insert: newContent }
-            });
-        }
+    activeDocumentTags = newTags;
+    if (typeof updateFloatingTagsContainer === 'function') {
+        updateFloatingTagsContainer();
+    }
+}
 
         async function openHashtagModal() {
             if (!currentFilePath) {
@@ -4114,6 +4086,107 @@ function updateActiveDocumentTags(newTags) {
             triggerLiveRender();
         }
 
+        // 플로팅 태그 UI 갱신 함수
+        function updateFloatingTagsContainer() {
+            const container = document.getElementById('floating-hashtag-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (!activeDocumentTags || activeDocumentTags.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'flex';
+            activeDocumentTags.forEach(tag => {
+                const chip = document.createElement('span');
+                chip.className = 'floating-tag-chip';
+                chip.innerText = `#${tag}`;
+                chip.onclick = () => openTagSelectModal(tag);
+                container.appendChild(chip);
+            });
+        }
+
+        // 태그별 문서 선택 모달 제어 함수
+        async function openTagSelectModal(tag) {
+            const modal = document.getElementById('tag-select-modal');
+            const titleEl = document.getElementById('tag-select-modal-title');
+            const container = document.getElementById('tag-select-files-container');
+            
+            if (!modal || !container) return;
+            
+            if (titleEl) {
+                titleEl.innerText = `${t('hashtag_modal_title') || '태그 관련 문서'} (#${tag})`;
+            }
+            
+            container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 10px; font-size: 0.85em;">조회 중...</div>`;
+            modal.style.display = 'flex';
+            
+            if (window.pywebview) {
+                try {
+                    const res = await pywebview.api.get_workspace_tags();
+                    if (res.status === 'success') {
+                        container.innerHTML = '';
+                        const files = res.tags[tag] || [];
+                        if (files.length === 0) {
+                            container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em; width: 100%; text-align: center; padding: 10px;">이 태그에 속한 파일이 없습니다.</span>`;
+                        } else {
+                            files.forEach(f => {
+                                const itemEl = document.createElement('div');
+                                itemEl.style.display = 'flex';
+                                itemEl.style.alignItems = 'center';
+                                itemEl.style.justifyContent = 'space-between';
+                                itemEl.style.padding = '8px 10px';
+                                itemEl.style.background = 'rgba(255,255,255,0.02)';
+                                itemEl.style.border = '1px solid var(--border)';
+                                itemEl.style.borderRadius = '6px';
+                                itemEl.style.fontSize = '0.85em';
+                                itemEl.style.cursor = 'pointer';
+                                itemEl.style.transition = 'all 0.2s';
+                                
+                                itemEl.innerHTML = `
+                                    <div style="display: flex; align-items: center; gap: 8px; width: 100%; overflow: hidden;">
+                                        <i data-lucide="file-text" style="width: 14px; height: 14px; color: var(--accent); flex-shrink: 0;"></i>
+                                        <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-main);">${f.name}</span>
+                                    </div>
+                                `;
+                                
+                                itemEl.onclick = () => {
+                                    openFile(f.path);
+                                    closeTagSelectModal();
+                                };
+                                
+                                itemEl.onmouseover = () => {
+                                    itemEl.style.borderColor = 'var(--accent)';
+                                    itemEl.style.background = 'rgba(69, 243, 255, 0.05)';
+                                };
+                                itemEl.onmouseout = () => {
+                                    itemEl.style.borderColor = 'var(--border)';
+                                    itemEl.style.background = 'rgba(255,255,255,0.02)';
+                                };
+                                
+                                container.appendChild(itemEl);
+                            });
+                            if (window.lucide) lucide.createIcons();
+                        }
+                    } else {
+                        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em; width: 100%; text-align: center; padding: 10px;">태그 조회 실패</span>`;
+                    }
+                } catch (err) {
+                    console.error("Error loading tag select files:", err);
+                    container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85em; width: 100%; text-align: center; padding: 10px;">태그 조회 실패</span>`;
+                }
+            }
+        }
+
+        function closeTagSelectModal() {
+            const modal = document.getElementById('tag-select-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
 // 해시태그 전역 바인딩
 window.openTagsManager = openTagsManager;
 window.openHashtagModal = openHashtagModal;
@@ -4127,3 +4200,6 @@ window.filterFilesByTag = filterFilesByTag;
 window.clearTagFilter = clearTagFilter;
 window.onTagSearchInput = onTagSearchInput;
 window.clearTagSearch = clearTagSearch;
+window.updateFloatingTagsContainer = updateFloatingTagsContainer;
+window.openTagSelectModal = openTagSelectModal;
+window.closeTagSelectModal = closeTagSelectModal;
