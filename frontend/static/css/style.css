@@ -55,6 +55,12 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* 셀렉트 박스 및 옵션 리스트 시인성 개선 */
+        select, select option {
+            background-color: var(--bg-card) !important;
+            color: var(--text-main) !important;
+        }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
