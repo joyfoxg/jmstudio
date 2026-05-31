@@ -1324,6 +1324,23 @@
         </div>
     </div>
 
+    <!-- 내서재 제외 확인 모달 -->
+    <div class="modal" id="delete-confirm-modal" style="display: none; z-index: 99999;">
+        <div class="modal-card" style="width: 440px; max-width: 90%; padding: 32px; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <i data-lucide="help-circle" style="width: 20px; height: 20px; color: var(--accent);"></i>
+                <div class="modal-title" style="margin: 0; font-size: 1.15em; text-align: left;" data-i18n="delete_confirm_title">내 서재에서 내릴까요?</div>
+            </div>
+            <div id="delete-confirm-desc" style="font-size: 0.88em; line-height: 1.5; color: var(--text-main); text-align: left;">
+                <!-- 동적으로 생성되는 제외 메시지 -->
+            </div>
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button class="btn" onclick="closeDeleteConfirmModal()" data-i18n="btn_cancel">취소</button>
+                <button class="btn btn-accent" onclick="submitDeleteWorkspaceItem()" data-i18n="btn_confirm">확인</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 구글 드라이브 동기화 충돌 해결 모달 -->
     <div class="modal" id="gdrive-conflict-modal" style="display: none; z-index: 99998;">
         <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px;">

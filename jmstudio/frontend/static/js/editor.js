@@ -100,6 +100,7 @@ class UndoManager {
         let currentLang = "ko";
         let localFiles = [];
         let currentFilesData = null;
+        let pendingDeletePath = "";
         let isSyncScrolling = true;
         let renderTimeout;
         let isCreatingType = "file"; // 'file' or 'folder'
@@ -2833,31 +2834,60 @@ class UndoManager {
             }
         }
 
-        window.deleteWorkspaceItem = async function(event, relPath) {
+        window.deleteWorkspaceItem = function(event, relPath) {
             event.stopPropagation();
+            pendingDeletePath = relPath;
+            
             const fileName = relPath.substring(relPath.lastIndexOf('/') + 1);
-            if (confirm(t('msg_delete_confirm').replace('{fileName}', fileName))) {
-                const res = await pywebview.api.delete_item(relPath);
-                if (res.status === 'success') {
-                    renderFileTree(res.files);
-                    loadWorkspaceTags(); // Refresh tags index on deletion
-                    if (currentFilePath === relPath || currentFilePath.startsWith(relPath + "/")) {
-                        currentFilePath = "";
-                        document.getElementById('active-file-title').innerText = t('msg_no_active_file');
-                        setEditorContent("");
-                        updateLineNumbers();
-                        document.getElementById('preview-content').innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon"><i data-lucide="markdown" style="width: 64px; height: 64px;"></i></div>
-                                <div style="font-size: 1.1em; font-weight: 500;">${t('empty_removed')}</div>
-                            </div>
-                        `;
-                        lucide.createIcons();
-                    }
-                    showToast(t('msg_delete_success'));
-                } else {
-                    alert(t('msg_delete_failed') + res.message);
+            const descEl = document.getElementById('delete-confirm-desc');
+            if (descEl) {
+                descEl.innerHTML = t('delete_confirm_body').replace('{fileName}', fileName);
+            }
+            
+            // Re-translate title and buttons instantly
+            const modalTitleEl = document.querySelector('#delete-confirm-modal [data-i18n="delete_confirm_title"]');
+            if (modalTitleEl) modalTitleEl.innerText = t('delete_confirm_title');
+            
+            const cancelBtnEl = document.querySelector('#delete-confirm-modal [data-i18n="btn_cancel"]');
+            if (cancelBtnEl) cancelBtnEl.innerText = t('btn_cancel');
+            
+            const confirmBtnEl = document.querySelector('#delete-confirm-modal [data-i18n="btn_confirm"]');
+            if (confirmBtnEl) confirmBtnEl.innerText = t('btn_confirm');
+            
+            document.getElementById('delete-confirm-modal').style.display = 'flex';
+            if (window.lucide) lucide.createIcons();
+        }
+        
+        window.closeDeleteConfirmModal = function() {
+            document.getElementById('delete-confirm-modal').style.display = 'none';
+            pendingDeletePath = "";
+        }
+        
+        window.submitDeleteWorkspaceItem = async function() {
+            if (!pendingDeletePath) return;
+            const relPath = pendingDeletePath;
+            window.closeDeleteConfirmModal();
+            
+            const res = await pywebview.api.delete_item(relPath);
+            if (res.status === 'success') {
+                renderFileTree(res.files);
+                loadWorkspaceTags(); // Refresh tags index on deletion
+                if (currentFilePath === relPath || currentFilePath.startsWith(relPath + "/")) {
+                    currentFilePath = "";
+                    document.getElementById('active-file-title').innerText = t('msg_no_active_file');
+                    setEditorContent("");
+                    updateLineNumbers();
+                    document.getElementById('preview-content').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon"><i data-lucide="markdown" style="width: 64px; height: 64px;"></i></div>
+                            <div style="font-size: 1.1em; font-weight: 500;">${t('empty_removed')}</div>
+                        </div>
+                    `;
+                    lucide.createIcons();
                 }
+                showToast(t('msg_delete_success'));
+            } else {
+                alert(t('msg_delete_failed') + res.message);
             }
         }
 
