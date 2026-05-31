@@ -224,6 +224,9 @@ class UndoManager {
                     </div>
                 `;
                 lucide.createIcons();
+                if (typeof generateTOC === 'function') {
+                    generateTOC(previewContent);
+                }
             }
             // 이모지 피커 다국어 로케일 동기화 (재렌더링 - 상태 인자 명시 주입)
             if (window.renderEmojiPicker) {
@@ -2884,6 +2887,9 @@ class UndoManager {
                         </div>
                     `;
                     lucide.createIcons();
+                    if (typeof generateTOC === 'function') {
+                        generateTOC(document.getElementById('preview-content'));
+                    }
                 }
                 showToast(t('msg_delete_success'));
             } else {
