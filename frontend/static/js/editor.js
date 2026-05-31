@@ -1767,21 +1767,60 @@ class UndoManager {
         }
 
         let mathDatabase = [];
+        let mathTranslations = {};
         let hasExternalMathDb = false;
 
-        // 비동기 수식 DB 로드
-        fetch('/static/data/math_db.json')
-            .then(res => {
+        // 비동기 수식 DB 및 번역 맵 로드
+        Promise.all([
+            fetch('/static/data/math_db.json').then(res => {
                 if (!res.ok) throw new Error('Failed to fetch math_db.json');
                 return res.json();
-            })
-            .then(data => {
-                mathDatabase = data;
-            })
-            .catch(err => {
-                console.warn('Math database load failed, using local fallback:', err);
-                mathDatabase = [];
-            });
+            }),
+            fetch('/static/data/math_db_translations.json').then(res => {
+                if (!res.ok) throw new Error('Failed to fetch math_db_translations.json');
+                return res.json();
+            }).catch(() => ({}))
+        ])
+        .then(([db, trans]) => {
+            mathDatabase = db;
+            mathTranslations = trans;
+        })
+        .catch(err => {
+            console.warn('Math database or translations load failed, using local fallback:', err);
+            mathDatabase = [];
+            mathTranslations = {};
+        });
+
+        function formatFormulaName(name, keywords, lang) {
+            const parenRegex = /\s*\(\s*([A-Za-z0-9\s\-',]+)\s*\)/;
+            const match = name.match(parenRegex);
+            
+            if (lang === 'en') {
+                if (match) {
+                    return match[1].trim();
+                } else {
+                    const trimmedName = name.trim();
+                    if (mathTranslations && mathTranslations[trimmedName]) {
+                        return mathTranslations[trimmedName];
+                    }
+                    if (keywords && keywords.length > 0) {
+                        const engKws = keywords.filter(kw => /^[a-zA-Z0-9\+\-]+$/.test(kw));
+                        if (engKws.length > 0) {
+                            const words = engKws.slice(0, 3).map(kw => {
+                                return kw.charAt(0).toUpperCase() + kw.slice(1);
+                            });
+                            return words.join(' ');
+                        }
+                    }
+                    return name;
+                }
+            } else {
+                if (match) {
+                    return name.replace(parenRegex, '').trim();
+                }
+                return name;
+            }
+        }
 
         const MATH_SUBTAB_CATEGORIES = {
             math: [
@@ -1928,7 +1967,9 @@ class UndoManager {
                     
                     const extendedSummary = document.createElement('summary');
                     extendedSummary.className = 'math-section-title';
-                    extendedSummary.innerHTML = `🔍 추가 검색 결과 (${matchedDbItems.length}개)`;
+                    const searchResultsText = currentLang === 'en' ? 'Extra Search Results' : '추가 검색 결과';
+                    const itemsText = currentLang === 'en' ? 'items' : '개';
+                    extendedSummary.innerHTML = `🔍 ${searchResultsText} (${matchedDbItems.length}${itemsText})`;
                     extendedDetails.appendChild(extendedSummary);
                     
                     const extendedGrid = document.createElement('div');
@@ -1945,7 +1986,7 @@ class UndoManager {
                         btn.setAttribute('data-raw-math', dbItem.latex);
                         
                         const span = document.createElement('span');
-                        span.textContent = dbItem.name;
+                        span.textContent = formatFormulaName(dbItem.name, dbItem.keywords, currentLang);
                         btn.appendChild(span);
                         
                         extendedGrid.appendChild(btn);
@@ -1954,7 +1995,11 @@ class UndoManager {
                     if (matchedDbItems.length > maxDisplay) {
                         const moreInfo = document.createElement('div');
                         moreInfo.style.cssText = 'grid-column: 1 / -1; text-align: center; font-size: 0.78em; color: var(--text-muted); margin-top: 6px;';
-                        moreInfo.textContent = `...외 ${matchedDbItems.length - maxDisplay}개의 공식이 더 있습니다. 더 자세한 키워드로 검색해 보세요.`;
+                        if (currentLang === 'en') {
+                            moreInfo.textContent = `...and ${matchedDbItems.length - maxDisplay} more formulas. Search with more specific keywords.`;
+                        } else {
+                            moreInfo.textContent = `...외 ${matchedDbItems.length - maxDisplay}개의 공식이 더 있습니다. 더 자세한 키워드로 검색해 보세요.`;
+                        }
                         extendedGrid.appendChild(moreInfo);
                     }
                     
