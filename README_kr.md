@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.19 🌟
+# 🧪 Joy Markdown Studio v3.9.20 🌟
 
 > **수학, 물리학, 화학을 아우르는 최상의 이공계 연구 및 학술용 마크다운 편집·시각화 스튜디오**  
 > Python (`PyWebView` + `Bottle`)과 모던 Vanilla CSS/JS로 직조된 프리미엄 데스크톱 마크다운 크리에이터 앱입니다.
