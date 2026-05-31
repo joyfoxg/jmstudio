@@ -1,0 +1,2150 @@
+[
+  {
+    "category": "math",
+    "name": "베셀 함수 (Bessel Function)",
+    "latex": "J_\\alpha(x) = \\sum_{m=0}^\\infty \\frac{(-1)^m}{m! \\Gamma(m+\\alpha+1)} \\left(\\frac{x}{2}\\right)^{2m+\\alpha}",
+    "keywords": ["bessel", "function", "math", "mathematics", "미분방정식", "베셀", "특수함수"]
+  },
+  {
+    "category": "math",
+    "name": "오일러-라그랑주 방정식 (Euler-Lagrange)",
+    "latex": "\\frac{d}{dt}\\left(\\frac{\\partial L}{\\partial \\dot{q}_i}\\right) - \\frac{\\partial L}{\\partial q_i} = 0",
+    "keywords": ["euler", "euler-lagrange", "lagrange", "math", "mathematics", "라그랑주", "변분법", "역학", "오일러"]
+  },
+  {
+    "category": "math",
+    "name": "감마 함수 (Gamma Function)",
+    "latex": "\\Gamma(z) = \\int_0^\\infty x^{z-1} e^{-x} \\, dx",
+    "keywords": ["function", "gamma", "math", "mathematics", "감마", "특수함수", "팩토리얼"]
+  },
+  {
+    "category": "math",
+    "name": "디락 델타 함수 (Dirac Delta)",
+    "latex": "\\delta(x) = \\frac{1}{2\\pi} \\int_{-\\infty}^{\\infty} e^{ikx} \\, dk",
+    "keywords": ["delta", "dirac", "math", "mathematics", "델타", "디락", "분포"]
+  },
+  {
+    "category": "math",
+    "name": "푸리에 급수 (Fourier Series)",
+    "latex": "f(x) = \\frac{a_0}{2} + \\sum_{n=1}^\\infty \\left( a_n \\cos\\left(\\frac{n\\pi x}{L}\\right) + b_n \\sin\\left(\\frac{n\\pi x}{L}\\right) \\right)",
+    "keywords": ["fourier", "math", "mathematics", "series", "급수", "신호", "푸리에"]
+  },
+  {
+    "category": "math",
+    "name": "리만 제타 함수 (Riemann Zeta)",
+    "latex": "\\zeta(s) = \\sum_{n=1}^\\infty \\frac{1}{n^s}",
+    "keywords": ["math", "mathematics", "riemann", "zeta", "리만", "소수", "제타", "해석학"]
+  },
+  {
+    "category": "math",
+    "name": "가우스 적분 (Gaussian Integral)",
+    "latex": "\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}",
+    "keywords": ["gaussian", "integral", "math", "mathematics", "가우스", "적분", "확률"]
+  },
+  {
+    "category": "math",
+    "name": "테일러 급수 (Taylor Series)",
+    "latex": "f(x) = \\sum_{n=0}^{\\infty} \\frac{f^{(n)}(a)}{n!} (x-a)^n",
+    "keywords": ["math", "mathematics", "series", "taylor", "근사", "급수", "테일러"]
+  },
+  {
+    "category": "physics",
+    "name": "맥스웰 방정식 - 가우스 전기 법칙",
+    "latex": "\\nabla \\cdot \\mathbf{E} = \\frac{\\rho}{\\varepsilon_0}",
+    "keywords": ["electric", "gauss", "maxwell", "physical", "physics", "가우스", "맥스웰", "전기", "전자기학"]
+  },
+  {
+    "category": "physics",
+    "name": "맥스웰 방정식 - 가우스 자기 법칙",
+    "latex": "\\nabla \\cdot \\mathbf{B} = 0",
+    "keywords": ["magnet", "magnetic", "maxwell", "physical", "physics", "가우스", "맥스웰", "자기", "전자기학"]
+  },
+  {
+    "category": "physics",
+    "name": "맥스웰 방정식 - 패러데이 법칙",
+    "latex": "\\nabla \\times \\mathbf{E} = -\\frac{\\partial \\mathbf{B}}{\\partial t}",
+    "keywords": ["faraday", "induction", "maxwell", "physical", "physics", "맥스웰", "유도", "전자기학", "패러데이"]
+  },
+  {
+    "category": "physics",
+    "name": "맥스웰 방정식 - 앙페르-맥스웰 법칙",
+    "latex": "\\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J} + \\mu_0 \\varepsilon_0 \\frac{\\partial \\mathbf{E}}{\\partial t}",
+    "keywords": ["ampere", "current", "maxwell", "physical", "physics", "맥스웰", "앙페르", "전자기학"]
+  },
+  {
+    "category": "physics",
+    "name": "아인슈타인 중력장 방정식",
+    "latex": "R_{\\mu\\nu} - \\frac{1}{2}R g_{\\mu\\nu} + \\Lambda g_{\\mu\\nu} = \\frac{8\\pi G}{c^4} T_{\\mu\\nu}",
+    "keywords": ["einstein", "gravity", "physical", "physics", "relativity", "상대성이론", "아인슈타인", "중력장"]
+  },
+  {
+    "category": "physics",
+    "name": "압축성 나비에-스토크스 방정식",
+    "latex": "\\rho \\left( \\frac{\\partial \\mathbf{u}}{\\partial t} + \\mathbf{u} \\cdot \\nabla \\mathbf{u} \\right) = -\\nabla p + \\mu \\nabla^2 \\mathbf{u} + \\frac{1}{3}\\mu \\nabla (\\nabla \\cdot \\mathbf{u}) + \\rho \\mathbf{g}",
+    "keywords": ["compress", "fluid", "navier", "physical", "physics", "stokes", "나비에", "스토크스", "유체"]
+  },
+  {
+    "category": "physics",
+    "name": "해밀턴 정해 방정식 (Hamiltonian)",
+    "latex": "\\dot{q}_i = \\frac{\\partial H}{\\partial p_i}, \\quad \\dot{p}_i = -\\frac{\\partial H}{\\partial q_i}",
+    "keywords": ["hamilton", "hamiltonian", "mechanics", "physical", "physics", "고전역학", "궤도", "해밀턴"]
+  },
+  {
+    "category": "physics",
+    "name": "하이젠베르크 불확정성 원리",
+    "latex": "\\sigma_x \\sigma_p \\ge \\frac{\\hbar}{2}",
+    "keywords": ["heisenberg", "physical", "physics", "quantum", "uncertainty", "불확정성", "양자", "하이젠베르크"]
+  },
+  {
+    "category": "bio",
+    "name": "헨더슨-하셀바흐 방정식",
+    "latex": "\\text{pH} = \\text{pK}_a + \\log_{10} \\left( \\frac{[\\text{A}^-]}{[\\text{HA}]} \\right)",
+    "keywords": ["acid", "bio", "biology", "buffer", "hasselbalch", "henderson", "ph", "완충", "하셀바흐", "헨더슨"]
+  },
+  {
+    "category": "bio",
+    "name": "깁스-헬름홀츠 방정식",
+    "latex": "\\left( \\frac{\\partial (\\Delta G / T)}{\\partial T} \\right)_p = -\\frac{\\Delta H}{T^2}",
+    "keywords": ["bio", "biology", "gibbs", "helmholtz", "thermo", "깁스", "자유에너지", "헬름홀츠"]
+  },
+  {
+    "category": "bio",
+    "name": "클라우지우스-클라페이론 식",
+    "latex": "\\ln \\left( \\frac{P_2}{P_1} \\right) = -\\frac{\\Delta H_{\\text{vap}}}{R} \\left( \\frac{1}{T_2} - \\frac{1}{T_1} \\right)",
+    "keywords": ["bio", "biology", "clapeyron", "clausius", "phase", "vapor", "상평형", "클라우지우스", "클라페이론"]
+  },
+  {
+    "category": "bio",
+    "name": "골드만-호지킨-카츠 방정식",
+    "latex": "E_m = \\frac{RT}{F} \\ln \\left( \\frac{P_{\\text{Na}}[\\text{Na}^+]_o + P_{\\text{K}}[\\text{K}^+]_o + P_{\\text{Cl}}[\\text{Cl}^-]_i}{P_{\\text{Na}}[\\text{Na}^+]_i + P_{\\text{K}}[\\text{K}^+]_i + P_{\\text{Cl}}[\\text{Cl}^-]_o} \\right)",
+    "keywords": ["bio", "biology", "goldman", "hodgkin", "katz", "membrane", "neuron", "골드만", "세포막", "카츠", "호지킨"]
+  },
+  {
+    "category": "bio",
+    "name": "하디-바인베르크 대립유전자 공식 (3중)",
+    "latex": "p^2 + 2pq + q^2 + 2pr + 2qr + r^2 = 1",
+    "keywords": ["allele", "bio", "biology", "gene", "hardy", "weinberg", "바인베르크", "유전", "하디"]
+  },
+  {
+    "category": "cs",
+    "name": "정보 획득량 (Information Gain)",
+    "latex": "IG(T, a) = H(T) - H(T|a)",
+    "keywords": ["algorithm", "computer", "cs", "decision", "entropy", "gain", "information", "tree", "의사결정나무", "정보획득량"]
+  },
+  {
+    "category": "cs",
+    "name": "구글 페이지랭크 알고리즘 (PageRank)",
+    "latex": "PR(A) = (1-d) + d \\sum_{i} \\frac{PR(T_i)}{C(T_i)}",
+    "keywords": ["algorithm", "computer", "cs", "google", "graph", "link", "pagerank", "구글", "페이지랭크"]
+  },
+  {
+    "category": "cs",
+    "name": "역전파 오차 수식 (Backpropagation)",
+    "latex": "\\delta_j^{(l)} = \\left( \\sum_{k} w_{kj}^{(l)} \\delta_k^{(l+1)} \\right) \\cdot f'(z_j^{(l)})",
+    "keywords": ["algorithm", "backprop", "backpropagation", "computer", "cs", "error", "gradient", "network", "neural", "신경망", "역전파", "오차"]
+  },
+  {
+    "category": "cs",
+    "name": "코사인 유사도 (Cosine Similarity)",
+    "latex": "\\text{similarity} = \\cos(\\theta) = \\frac{\\mathbf{A} \\cdot \\mathbf{B}}{\\|\\mathbf{A}\\| \\|\\mathbf{B}\\|}",
+    "keywords": ["algorithm", "computer", "cosine", "cs", "distance", "similarity", "vector", "유사도", "임베딩", "코사인"]
+  },
+  {
+    "category": "cs",
+    "name": "어텐션 메커니즘 (Transformer Attention)",
+    "latex": "\\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V",
+    "keywords": ["algorithm", "attention", "computer", "cs", "key", "query", "transformer", "value", "어텐션", "트랜스포머"]
+  },
+  {
+    "category": "cs",
+    "name": "Adam 옵티마이저 가중치 업데이트",
+    "latex": "\\theta_{t+1} = \\theta_t - \\frac{\\eta}{\\sqrt{\\hat{v}_t} + \\epsilon} \\hat{m}_t",
+    "keywords": ["adam", "algorithm", "computer", "cs", "gradient", "momentum", "optimizer", "아담", "최적화"]
+  },
+  {
+    "category": "ee",
+    "name": "특성 임피던스 (Transmission Line)",
+    "latex": "Z_0 = \\sqrt{\\frac{R + j\\omega L}{G + j\\omega C}}",
+    "keywords": ["circuit", "ee", "electronics", "impedance", "line", "transmission", "송전선", "임피던스", "특성"]
+  },
+  {
+    "category": "ee",
+    "name": "섀넌-하틀리 정리 (채널 용량)",
+    "latex": "C = B \\log_2 \\left( 1 + \\frac{S}{N} \\right)",
+    "keywords": ["bandwidth", "capacity", "circuit", "ee", "electronics", "hartley", "noise", "shannon", "대역폭", "섀넌", "하틀리"]
+  },
+  {
+    "category": "ee",
+    "name": "도함수의 라플라스 변환",
+    "latex": "\\mathcal{L}\\{f'(t)\\} = sF(s) - f(0)",
+    "keywords": ["circuit", "derivative", "ee", "electronics", "laplace", "transform", "도함수", "라플라스", "변환"]
+  },
+  {
+    "category": "ee",
+    "name": "나퀴스트 샘플링 주파수 (Nyquist Rate)",
+    "latex": "f_s = 2 f_{\\max}",
+    "keywords": ["circuit", "ee", "electronics", "frequency", "nyquist", "rate", "sampling", "나퀴스트", "샘플링"]
+  },
+  {
+    "category": "math",
+    "name": "대분수",
+    "latex": "a \\frac{b}{c}",
+    "keywords": ["math", "mathematics", "대분수", "표현"]
+  },
+  {
+    "category": "math",
+    "name": "분수 곱셈",
+    "latex": "\\frac{a}{b} \\times \\frac{c}{d} = \\frac{ac}{bd}",
+    "keywords": ["math", "mathematics", "곱셈", "분수", "분수 곱셈"]
+  },
+  {
+    "category": "math",
+    "name": "분수 나누기",
+    "latex": "\\frac{a}{b} \\div \\frac{c}{d} = \\frac{a}{b} \\times \\frac{d}{c}",
+    "keywords": ["math", "mathematics", "나누기", "분수", "분수 나누기"]
+  },
+  {
+    "category": "math",
+    "name": "분수 덧셈",
+    "latex": "\\frac{a}{b} + \\frac{c}{d} = \\frac{ad + bc}{bd}",
+    "keywords": ["math", "mathematics", "덧셈", "분수", "분수 덧셈"]
+  },
+  {
+    "category": "math",
+    "name": "분수 빼기",
+    "latex": "\\frac{a}{b} - \\frac{c}{d} = \\frac{ad - bc}{bd}",
+    "keywords": ["math", "mathematics", "분수", "분수 빼기", "빼기"]
+  },
+  {
+    "category": "math",
+    "name": "기본 분수",
+    "latex": "\\frac{a}{b}",
+    "keywords": ["math", "mathematics", "기본", "기본 분수", "분수", "일반", "표현하기"]
+  },
+  {
+    "category": "math",
+    "name": "가분수",
+    "latex": "\\frac{7}{3}",
+    "keywords": ["math", "mathematics", "가분수", "분모보다", "분수", "분자", "표현하기"]
+  },
+  {
+    "category": "math",
+    "name": "단순화된 분수",
+    "latex": "\\frac{6}{8} = \\frac{3}{4}",
+    "keywords": ["math", "mathematics", "단순화된", "단순화된 분수", "단순화하세요", "분수", "줄여서"]
+  },
+  {
+    "category": "math",
+    "name": "소수를 분수로 변환",
+    "latex": "0.75 = \\frac{3}{4}",
+    "keywords": ["math", "mathematics", "변환", "분수로", "소수", "소수를", "소수를 분수로 변환"]
+  },
+  {
+    "category": "math",
+    "name": "직사각형의 면적",
+    "latex": "S = a \\times b",
+    "keywords": ["math", "mathematics", "넓이", "면적", "직사각형", "직사각형의", "직사각형의 면적"]
+  },
+  {
+    "category": "math",
+    "name": "직사각형의 둘레",
+    "latex": "C = 2(a+b)",
+    "keywords": ["math", "mathematics", "둘레", "직사각형", "직사각형의", "직사각형의 둘레"]
+  },
+  {
+    "category": "math",
+    "name": "평행사변형의 면적",
+    "latex": "S = a h",
+    "keywords": ["math", "mathematics", "면적", "평행사변형", "평행사변형의", "평행사변형의 면적"]
+  },
+  {
+    "category": "math",
+    "name": "삼각형의 면적",
+    "latex": "S = \\frac{1}{2} a h",
+    "keywords": ["math", "mathematics", "넓이", "면적", "삼각형", "삼각형의", "삼각형의 면적"]
+  },
+  {
+    "category": "math",
+    "name": "삼각형의 둘레",
+    "latex": "C = a + b + c",
+    "keywords": ["math", "mathematics", "둘레", "삼각형", "삼각형의", "삼각형의 둘레"]
+  },
+  {
+    "category": "math",
+    "name": "원의 면적",
+    "latex": "S = \\pi r^2",
+    "keywords": ["math", "mathematics", "넓이", "면적", "원의", "원의 면적"]
+  },
+  {
+    "category": "math",
+    "name": "원의 둘레",
+    "latex": "C = 2 \\pi r",
+    "keywords": ["math", "mathematics", "둘레", "원의", "원의 둘레"]
+  },
+  {
+    "category": "math",
+    "name": "정사각형의 면적",
+    "latex": "S = a^2",
+    "keywords": ["math", "mathematics", "면적", "정사각형", "정사각형의", "정사각형의 면적"]
+  },
+  {
+    "category": "math",
+    "name": "정사각형의 둘레",
+    "latex": "C = 4a",
+    "keywords": ["math", "mathematics", "둘레", "정사각형", "정사각형의", "정사각형의 둘레"]
+  },
+  {
+    "category": "math",
+    "name": "평균",
+    "latex": "\\bar{x} = \\frac{\\sum x}{n}",
+    "keywords": ["math", "mathematics", "평균"]
+  },
+  {
+    "category": "math",
+    "name": "속도 계산",
+    "latex": "速度 = 路程 \\div 时间",
+    "keywords": ["math", "mathematics", "계산", "속도", "속도 계산"]
+  },
+  {
+    "category": "math",
+    "name": "비율",
+    "latex": "速率 = \\frac{距离}{时间}",
+    "keywords": ["math", "mathematics", "비율"]
+  },
+  {
+    "category": "math",
+    "name": "곱셈 항등식",
+    "latex": "a \\times 1 = a",
+    "keywords": ["math", "mathematics", "1입니다", "곱셈", "곱셈 항등식", "항등식"]
+  },
+  {
+    "category": "math",
+    "name": "곱셈 0",
+    "latex": "a \\times 0 = 0",
+    "keywords": ["math", "mathematics", "0이다", "곱셈", "곱셈 0"]
+  },
+  {
+    "category": "math",
+    "name": "곱셈의 교환법칙",
+    "latex": "a \\times b = b \\times a",
+    "keywords": ["math", "mathematics", "곱셈", "곱셈의", "곱셈의 교환법칙", "교환", "교환법칙"]
+  },
+  {
+    "category": "math",
+    "name": "곱셈의 결합법칙",
+    "latex": "(a \\times b) \\times c = a \\times (b \\times c)",
+    "keywords": ["math", "mathematics", "결합", "결합법칙", "곱셈", "곱셈의", "곱셈의 결합법칙"]
+  },
+  {
+    "category": "math",
+    "name": "분배법칙",
+    "latex": "a(b + c) = ab + ac",
+    "keywords": ["math", "mathematics", "곱셈", "대한", "덧셈", "분배", "분배법칙"]
+  },
+  {
+    "category": "math",
+    "name": "부가적인 정체성",
+    "latex": "a + 0 = a",
+    "keywords": ["math", "mathematics", "0입니다", "덧셈", "부가적인", "부가적인 정체성", "정체성", "항등식"]
+  },
+  {
+    "category": "math",
+    "name": "덧셈의 ​​교환법칙",
+    "latex": "a + b = b + a",
+    "keywords": ["math", "mathematics", "교환", "교환법칙", "덧셈", "덧셈의", "덧셈의 교환법칙"]
+  },
+  {
+    "category": "math",
+    "name": "덧셈의 ​​결합법칙",
+    "latex": "(a + b) + c = a + (b + c)",
+    "keywords": ["math", "mathematics", "결합", "결합법칙", "덧셈", "덧셈의", "덧셈의 결합법칙"]
+  },
+  {
+    "category": "math",
+    "name": "같은 용어를 결합하여",
+    "latex": "ax + bx = (a+b)x",
+    "keywords": ["math", "mathematics", "같은", "같은 용어를 결합하여", "결합하", "결합하여", "용어", "용어를"]
+  },
+  {
+    "category": "math",
+    "name": "비율 문제",
+    "latex": "\\frac{a}{b} = \\frac{c}{d}",
+    "keywords": ["math", "mathematics", "관계", "문제", "비례", "비율", "비율 문제"]
+  },
+  {
+    "category": "math",
+    "name": "시간 문제",
+    "latex": "t = s \\div v",
+    "keywords": ["math", "mathematics", "문제", "시간", "시간 문제"]
+  },
+  {
+    "category": "math",
+    "name": "평가 문제",
+    "latex": "v = \\frac{s}{t}",
+    "keywords": ["math", "mathematics", "문제", "비율", "평가", "평가 문제"]
+  },
+  {
+    "category": "math",
+    "name": "볼륨 문제",
+    "latex": "V = a \\times b \\times c",
+    "keywords": ["math", "mathematics", "문제", "볼륨", "볼륨 문제", "부피", "직사각형", "프리즘"]
+  },
+  {
+    "category": "math",
+    "name": "곱셈식",
+    "latex": "(a - b)^2 = a^2 - 2ab + b^2",
+    "keywords": ["math", "mathematics", "곱셈식"]
+  },
+  {
+    "category": "math",
+    "name": "큐브 공식의 차이",
+    "latex": "a^3 - b^3 = (a - b)(a^2 + ab + b^2)",
+    "keywords": ["math", "mathematics", "공식", "공식의", "인수분해", "차이", "큐브", "큐브 공식의 차이"]
+  },
+  {
+    "category": "math",
+    "name": "큐브의 합 공식",
+    "latex": "a^3 + b^3 = (a + b)(a^2 - ab + b^2)",
+    "keywords": ["math", "mathematics", "공식", "세제곱합", "인수분해", "큐브", "큐브의", "큐브의 합 공식"]
+  },
+  {
+    "category": "math",
+    "name": "완전제곱식",
+    "latex": "(a + b)^2 = a^2 + 2ab + b^2",
+    "keywords": ["math", "mathematics", "완전제곱식"]
+  },
+  {
+    "category": "math",
+    "name": "채권 차압 통고",
+    "latex": "a^2 - b^2 = (a + b)(a - b)",
+    "keywords": ["math", "mathematics", "수식", "인수분해", "차압", "채권", "채권 차압 통고", "통고"]
+  },
+  {
+    "category": "math",
+    "name": "단항식",
+    "latex": "ax^n",
+    "keywords": ["math", "mathematics", "단항식", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "다항식",
+    "latex": "P(x) = a_n x^n + a_{n-1} x^{n-1} + ... + a_1 x + a_0",
+    "keywords": ["math", "mathematics", "다항식", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "음수 지수 규칙",
+    "latex": "a^{-n} = \\frac{1}{a^n}",
+    "keywords": ["math", "mathematics", "규칙", "음수", "음수 지수 규칙", "지수"]
+  },
+  {
+    "category": "math",
+    "name": "급진적인 규칙",
+    "latex": "\\sqrt{a^2} = a",
+    "keywords": ["math", "mathematics", "규칙", "급진적인", "급진적인 규칙", "연산", "제곱근"]
+  },
+  {
+    "category": "math",
+    "name": "지수 규칙",
+    "latex": "a^m \\times a^n = a^{m+n}",
+    "keywords": ["math", "mathematics", "곱셈", "규칙", "지수", "지수 규칙", "하나인"]
+  },
+  {
+    "category": "math",
+    "name": "기하학적 순서",
+    "latex": "a_n = a_1 \\cdot r^{n-1}",
+    "keywords": ["math", "mathematics", "기하학적", "기하학적 순서", "등비수열", "비율인", "순서", "일반항"]
+  },
+  {
+    "category": "math",
+    "name": "산술 수열",
+    "latex": "a_n = a_1 + (n-1)d",
+    "keywords": ["math", "mathematics", "등차수열", "산술", "산술 수열", "수열", "일반항", "차이인"]
+  },
+  {
+    "category": "math",
+    "name": "등차수열의 합",
+    "latex": "S_n = \\frac{n}{2} (a_1 + a_n)",
+    "keywords": ["math", "mathematics", "n항", "등차수열", "등차수열의", "등차수열의 합", "처음"]
+  },
+  {
+    "category": "math",
+    "name": "다각형의 둘레",
+    "latex": "P = a_1 + a_2 + a_3 +\\cdots + a_n",
+    "keywords": ["math", "mathematics", "다각형", "다각형의", "다각형의 둘레", "둘레"]
+  },
+  {
+    "category": "math",
+    "name": "사다리꼴의 면적",
+    "latex": "S = \\frac{(a + b)}{2} h",
+    "keywords": ["math", "mathematics", "면적", "사다리꼴", "사다리꼴의", "사다리꼴의 면적"]
+  },
+  {
+    "category": "math",
+    "name": "두 점 사이의 거리",
+    "latex": "d = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}",
+    "keywords": ["math", "mathematics", "거리", "두 점 사이의 거리", "사이", "사이의"]
+  },
+  {
+    "category": "math",
+    "name": "경사 계산",
+    "latex": "m = \\frac{y_2 - y_1}{x_2 - x_1}",
+    "keywords": ["math", "mathematics", "경사", "경사 계산", "계산", "기울기"]
+  },
+  {
+    "category": "math",
+    "name": "선의 방정식",
+    "latex": "y = mx + b",
+    "keywords": ["math", "mathematics", "기울기이고", "기울기절편", "방정식", "선의", "선의 방정식", "여기서", "절편입니다", "직선", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "중간점 좌표",
+    "latex": "M = \\left(\\frac{x_1 + x_2}{2}, \\frac{y_1 + y_2}{2}\\right)",
+    "keywords": ["math", "mathematics", "선분", "좌표", "중간점", "중간점 좌표"]
+  },
+  {
+    "category": "math",
+    "name": "역삼각형 부등식",
+    "latex": "a + b < c, \\quad b + c < a, \\quad c + a < b",
+    "keywords": ["math", "mathematics", "만들", "번째", "부등식", "삼각형", "선분", "선분보다", "없습니다", "역삼각형", "역삼각형 부등식", "작으면"]
+  },
+  {
+    "category": "math",
+    "name": "피타고라스 정리(부등식)",
+    "latex": "a^2 + b^2 > c^2",
+    "keywords": ["math", "mathematics", "번째", "삼각형", "예각삼각형입니다", "정리부등식", "제곱", "제곱보다", "크면", "피타고라스", "피타고라스 정리부등식"]
+  },
+  {
+    "category": "math",
+    "name": "평행사변형 부등식",
+    "latex": "2(a^2 + b^2) \\geqslant (a+b)^2",
+    "keywords": ["math", "mathematics", "같습니다", "대각선", "부등식", "제곱", "크거나", "평행사변형", "평행사변형 부등식", "평행사변형에서", "합보다"]
+  },
+  {
+    "category": "math",
+    "name": "삼각형 부등식(각도 합)",
+    "latex": "A + B + C = 180^\\circ",
+    "keywords": ["math", "mathematics", "180도입니다", "내각", "모든", "부등식각도", "삼각형", "삼각형 부등식각도 합"]
+  },
+  {
+    "category": "math",
+    "name": "삼각형 부등식",
+    "latex": "a + b > c, \\quad b + c > a, \\quad c + a > b",
+    "keywords": ["math", "mathematics", "번째", "변보다", "부등식", "삼각형", "삼각형 부등식", "삼각형이든", "어떤", "크다"]
+  },
+  {
+    "category": "math",
+    "name": "삼각형 각도 부등식",
+    "latex": "0^\\circ < A, B, C < 180^\\circ",
+    "keywords": ["math", "mathematics", "0보다", "180보다", "각도", "내각", "모든", "부등식", "삼각형", "삼각형 각도 부등식", "삼각형에서", "작습니다", "크고"]
+  },
+  {
+    "category": "math",
+    "name": "심슨의 부등식",
+    "latex": "a^2 + b^2 \\geqslant \\frac{(a+b)^2}{2}",
+    "keywords": ["math", "mathematics", "a와", "같습니다", "대해", "부등식", "실수", "심슨", "심슨의", "심슨의 부등식", "임의", "제곱보다", "제곱합", "크거나", "평균"]
+  },
+  {
+    "category": "math",
+    "name": "코사인 법칙(부등식)",
+    "latex": "c^2 < a^2 + b^2 - 2ab\\cos C",
+    "keywords": ["math", "mathematics", "법칙부등식", "코사인", "코사인 법칙부등식"]
+  },
+  {
+    "category": "math",
+    "name": "사인 부등식",
+    "latex": "\\sin A + \\sin B + \\sin C \\leqslant \\frac{3\\sqrt{3}}{2}",
+    "keywords": ["math", "mathematics", "부등식", "사인", "사인 부등식"]
+  },
+  {
+    "category": "math",
+    "name": "삼각 함수의 값",
+    "latex": "\\sin 30^\\circ = \\frac{1}{2}, \\cos 30^\\circ = \\frac{\\sqrt{3}}{2}",
+    "keywords": ["math", "mathematics", "각도", "삼각", "삼각 함수의 값", "삼각함수", "일반적인", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "삼각관계",
+    "latex": "\\sin^2 \\theta + \\cos^2 \\theta = 1",
+    "keywords": ["math", "mathematics", "관계", "기본", "삼각관계", "삼각함수"]
+  },
+  {
+    "category": "math",
+    "name": "코사인의 정의",
+    "latex": "\\cos \\theta = \\frac{H}{A}",
+    "keywords": ["math", "mathematics", "정의", "코사인", "코사인의", "코사인의 정의"]
+  },
+  {
+    "category": "math",
+    "name": "접선의 정의",
+    "latex": "\\tan \\theta = \\frac{\\sin \\theta}{\\cos \\theta}",
+    "keywords": ["math", "mathematics", "접선", "접선의", "접선의 정의", "정의"]
+  },
+  {
+    "category": "math",
+    "name": "사인의 정의",
+    "latex": "\\sin \\theta = \\frac{O}{H}",
+    "keywords": ["math", "mathematics", "사인", "사인의", "사인의 정의", "정의"]
+  },
+  {
+    "category": "math",
+    "name": "뿌리의 합",
+    "latex": "x_1 + x_2 = -\\frac{b}{a}",
+    "keywords": ["math", "mathematics", "방정식", "뿌리", "뿌리의", "뿌리의 합", "이차"]
+  },
+  {
+    "category": "math",
+    "name": "뿌리의 산물",
+    "latex": "x_1 \\cdot x_2 = \\frac{c}{a}",
+    "keywords": ["math", "mathematics", "방정식", "뿌리", "뿌리의", "뿌리의 산물", "산물", "이차"]
+  },
+  {
+    "category": "math",
+    "name": "솔루션 공식",
+    "latex": "x = \\frac{-b \\pm \\sqrt{D}}{2a}",
+    "keywords": ["math", "mathematics", "공식", "방정식", "솔루션", "솔루션 공식", "이차"]
+  },
+  {
+    "category": "math",
+    "name": "판별자",
+    "latex": "D = b^2 - 4ac",
+    "keywords": ["math", "mathematics", "판별식", "판별자"]
+  },
+  {
+    "category": "math",
+    "name": "이차방정식의 표준형",
+    "latex": "ax^2 + bx + c = 0",
+    "keywords": ["math", "mathematics", "이차방정식", "이차방정식의", "이차방정식의 표준형", "표준형"]
+  },
+  {
+    "category": "math",
+    "name": "베르누이 부등식",
+    "latex": "(1 + x)^n \\geqslant 1 + nx \\quad (x > -1, \\ n \\in \\mathbb{N}^+ )",
+    "keywords": ["math", "mathematics", "고전적인", "대수학", "베르누", "베르누이", "베르누이 부등식", "부등식", "부등식입니다", "초등"]
+  },
+  {
+    "category": "math",
+    "name": "2차 부등식(판별)",
+    "latex": "ax^2 + bx + c \\geqslant 0 \\text{ 或 } ax^2 + bx + c \\leqslant 0",
+    "keywords": ["math", "mathematics", "2차", "2차 부등식판별", "결정합니다", "부등식판별", "부호", "사용하여", "속성", "이차", "판별식", "함수"]
+  },
+  {
+    "category": "math",
+    "name": "코시 부등식(제곱 평균 부등식)",
+    "latex": "(a_1^2 + a_2^2 + \\cdots + a_n^2)(b_1^2 + b_2^2 + \\cdots + b_n^2) \\geqslant (a_1b_1 + a_2b_2 + \\cdots + a_nb_n)^2",
+    "keywords": ["math", "mathematics", "부등식", "부등식제곱", "코시", "코시 부등식제곱 평균 부등식", "평균"]
+  },
+  {
+    "category": "math",
+    "name": "로피탈의 법칙(불평등 제한)",
+    "latex": "\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\lim_{x \\to a} \\frac{f'(x)}{g'(x)} \\quad \\text{当 } g'(x) \\neq 0",
+    "keywords": ["math", "mathematics", "극한", "도구", "로피탈", "로피탈의", "로피탈의 법칙불평등 제한", "법칙불평등", "부등식", "부정형", "사용하여", "제한", "해결하"]
+  },
+  {
+    "category": "math",
+    "name": "민코프스키 부등식",
+    "latex": "( \\sum\\limits_{i=1}^n (a_i + b_i)^p )^{1/p} \\leqslant ( \\sum\\limits_{i=1}^n a_i^p )^{1/p} + ( \\sum\\limits_{i=1}^n b_i^p )^{1/p}",
+    "keywords": ["math", "mathematics", "민코프스키", "민코프스키 부등식", "부등식"]
+  },
+  {
+    "category": "math",
+    "name": "체비쇼프 부등식",
+    "latex": "\\frac{a_1}{b_1} + \\frac{a_2}{b_2} + \\cdots + \\frac{a_n}{b_n} \\geqslant \\frac{a_1 + a_2 + \\cdots + a_n}{b_1 + b_2 + \\cdots + b_n}",
+    "keywords": ["math", "mathematics", "부등식", "체비쇼프", "체비쇼프 부등식"]
+  },
+  {
+    "category": "math",
+    "name": "삼각형 부등식(벡터 형식)",
+    "latex": "| \\boldsymbol{a} + \\boldsymbol{b} | \\leqslant | \\boldsymbol{a} | + | \\boldsymbol{b} |",
+    "keywords": ["math", "mathematics", "공간에서", "노름", "벡터", "부등식과", "부등식벡터", "삼각형", "삼각형 부등식벡터 형식", "않습니다기하삼각형", "유사", "크지", "합보다", "형식"]
+  },
+  {
+    "category": "math",
+    "name": "스털링의 공식",
+    "latex": "n! \\approx \\sqrt{2\\pi n} \\left( \\frac{n}{\\rm e} \\right)^n",
+    "keywords": ["math", "mathematics", "계승", "공식", "사용됩니다", "스털링", "스털링의", "스털링의 공식", "추정하", "크기"]
+  },
+  {
+    "category": "math",
+    "name": "산술-기하-고조파 평균 불평등",
+    "latex": "\\frac{a + b}{2} \\geqslant \\sqrt{ab} \\geqslant \\frac{2ab}{a+b}",
+    "keywords": ["math", "mathematics", "a와", "경우", "기하", "불평등", "산술", "산술-기하-고조파", "산술-기하-고조파 평균 불평등", "산술기하고조파", "않고", "않습니다", "양수", "작지", "조화", "평균", "평균보다"]
+  },
+  {
+    "category": "math",
+    "name": "산술 평균은 기하 평균보다 작지 않습니다.",
+    "latex": "\\frac{a_1 + a_2 + \\cdots + a_n}{n} \\geqslant \\sqrt[n]{a_1 a_2 \\cdots a_n}",
+    "keywords": ["math", "mathematics", "같습니다", "경우", "기하", "모든", "산술", "산술 평균은 기하 평균보다 작지 않습니다", "않습니다", "양수", "작지", "크거나", "평균", "평균보다", "평균은"]
+  },
+  {
+    "category": "math",
+    "name": "젠슨 부등식",
+    "latex": "f\\left( \\frac{a_1 + a_2 + \\cdots + a_n}{n} \\right) \\leqslant \\frac{f(a_1) + f(a_2) + \\cdots + f(a_n)}{n}",
+    "keywords": ["fx", "jensen", "math", "mathematics", "널리", "볼록함수이면", "부등식", "사용되", "성립한다", "수리통계학에서", "젠슨", "젠슨 부등식", "확률론과"]
+  },
+  {
+    "category": "math",
+    "name": "양수의 가중 평균 불평등",
+    "latex": "\\frac{a_1 w_1 + a_2 w_2 + \\cdots + a_n w_n}{w_1 + w_2 + \\cdots + w_n} \\geqslant \\sqrt[n]{a_1^{w_1} a_2^{w_2} \\cdots a_n^{w_n}}",
+    "keywords": ["math", "mathematics", "가중", "같습니다", "기하", "불평등", "산술", "양수", "양수의", "양수의 가중 평균 불평등", "크거나", "평균", "평균보다"]
+  },
+  {
+    "category": "math",
+    "name": "로그 함수",
+    "latex": "y = \\log_a{x}",
+    "keywords": ["math", "mathematics", "로그", "로그 함수", "표준", "함수", "형식"]
+  },
+  {
+    "category": "math",
+    "name": "이차 함수",
+    "latex": "y = ax^2 + bx + c",
+    "keywords": ["math", "mathematics", "이차", "이차 함수", "표준", "함수", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "반비례 함수",
+    "latex": "y = \\frac{k}{x}",
+    "keywords": ["math", "mathematics", "반비례", "반비례 함수", "표준", "함수", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "지수함수",
+    "latex": "y = a^x",
+    "keywords": ["math", "mathematics", "지수", "지수함수", "표준", "함수", "형식"]
+  },
+  {
+    "category": "math",
+    "name": "파생상품의 정의",
+    "latex": "f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}",
+    "keywords": ["math", "mathematics", "상품", "정의", "파생", "파생상품", "파생상품의", "파생상품의 정의"]
+  },
+  {
+    "category": "math",
+    "name": "로그 함수의 미분",
+    "latex": "\\frac{\\rm d}{\\rm dx}(\\log_a{x}) = \\frac{1}{x \\ln a}",
+    "keywords": ["math", "mathematics", "로그", "로그 함수의 미분", "미분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "복합 함수의 미분",
+    "latex": "\\frac{\\rm d}{\\rm dx}(f(g(x))) = f'(g(x)) \\cdot g'(x)",
+    "keywords": ["math", "mathematics", "미분", "복합", "복합 함수의 미분", "체인", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "거듭제곱 함수의 미분",
+    "latex": "\\frac{\\rm d}{\\rm dx}(x^n) = nx^{n-1}",
+    "keywords": ["math", "mathematics", "거듭제곱", "거듭제곱 함수의 미분", "미분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "지수 함수의 미분",
+    "latex": "\\frac{\\rm d}{\\rm dx}(\\rm e^x) = \\rm e^x",
+    "keywords": ["math", "mathematics", "미분", "지수", "지수 함수의 미분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "복잡한 방정식",
+    "latex": "z = a + bi",
+    "keywords": ["math", "mathematics", "방정식", "복잡한", "복잡한 방정식", "표준", "형식"]
+  },
+  {
+    "category": "math",
+    "name": "고차 방정식",
+    "latex": "x^n + a_{n-1}x^{n-1} +\\cdots+ a_0 = 0",
+    "keywords": ["math", "mathematics", "고차", "고차 방정식", "방정식", "일반", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "선형 방정식 시스템",
+    "latex": "\\begin{cases} ax + by = c \\\\ dx + ey = f \\end{cases}",
+    "keywords": ["math", "mathematics", "방정식", "선형", "선형 방정식 시스템", "시스템", "표준", "형식"]
+  },
+  {
+    "category": "math",
+    "name": "대칭축",
+    "latex": "x = -\\frac{b}{2a}",
+    "keywords": ["math", "mathematics", "대칭축", "이차", "함수"]
+  },
+  {
+    "category": "math",
+    "name": "방정식의 해",
+    "latex": "x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}",
+    "keywords": ["math", "mathematics", "방정식", "방정식의", "방정식의 해", "변수에서", "이차", "하나"]
+  },
+  {
+    "category": "math",
+    "name": "선형 방정식",
+    "latex": "ax + by = c",
+    "keywords": ["math", "mathematics", "방정식", "선형", "선형 방정식", "표준", "형식"]
+  },
+  {
+    "category": "math",
+    "name": "직각삼각형에 대한 피타고라스의 정리",
+    "latex": "a^2 + b^2 = c^2",
+    "keywords": ["math", "mathematics", "대한", "정리", "직각삼각형", "직각삼각형에", "직각삼각형에 대한 피타고라스의 정리", "피타고라스", "피타고라스의"]
+  },
+  {
+    "category": "math",
+    "name": "벡터 사이의 각도",
+    "latex": "\\theta = \\cos^{-1} \\left( \\frac{\\vec{u} \\cdot \\vec{v}}{|\\vec{u}| |\\vec{v}|} \\right)",
+    "keywords": ["math", "mathematics", "각도", "계산할", "관계", "내적과", "벡터", "벡터 사이의 각도", "사용하여", "사이", "사이의", "있습니다", "크기"]
+  },
+  {
+    "category": "math",
+    "name": "벡터의 크기",
+    "latex": "|\\vec{v}| = \\sqrt{v_1^2 + v_2^2 + v_3^2 + \\cdots + v_n^2}",
+    "keywords": ["math", "mathematics", "거리", "구성", "길이", "끝점까지", "나타냅니다", "벡터", "벡터의", "벡터의 크기", "요소", "원점에서", "정의되며", "제곱근으로", "제곱합", "크기", "크기또", "해당"]
+  },
+  {
+    "category": "math",
+    "name": "벡터의 내적",
+    "latex": "\\vec{u} \\cdot \\vec{v} = |\\vec{u}| |\\vec{v}| \\cos(\\theta)",
+    "keywords": ["math", "mathematics", "각도", "값으로", "곱한", "내적", "벡터", "벡터의", "벡터의 내적", "사이", "정의됩니다", "코사인", "크기"]
+  },
+  {
+    "category": "math",
+    "name": "벡터의 정의",
+    "latex": "\\vec{a} = (x, y)",
+    "keywords": ["math", "mathematics", "벡터", "벡터의", "벡터의 정의", "정의"]
+  },
+  {
+    "category": "math",
+    "name": "내적 계산",
+    "latex": "\\vec{u} \\cdot \\vec{v} = u_1 v_1 + u_2 v_2 + u_3 v_3 + \\cdots + u_n v_n",
+    "keywords": ["math", "mathematics", "n차원", "같습니다", "경우", "계산", "구성요소", "내적", "내적 계산", "벡터", "합과", "해당"]
+  },
+  {
+    "category": "math",
+    "name": "벡터 추가",
+    "latex": "\\vec{a} + \\vec{b} = (x_1 + x_2, y_1 + y_2)",
+    "keywords": ["math", "mathematics", "덧셈", "벡터", "벡터 추가", "추가"]
+  },
+  {
+    "category": "math",
+    "name": "다항식 정리",
+    "latex": "(x+y)^n = \\sum\\limits_{k=0}^{n} C(n,k) x^{n-k} y^k",
+    "keywords": ["math", "mathematics", "다항식", "다항식 정리", "정리", "확장"]
+  },
+  {
+    "category": "math",
+    "name": "이항정리",
+    "latex": "(a+b)^n = \\sum\\limits_{k=0}^{n} C(n,k) a^{n-k} b^k",
+    "keywords": ["math", "mathematics", "대한", "이항", "이항정리", "확장"]
+  },
+  {
+    "category": "math",
+    "name": "유한 계승합 공식",
+    "latex": "n! = \\sum\\limits_{k=1}^{n} k \\cdot (k-1)!",
+    "keywords": ["math", "mathematics", "계승", "계승합", "공식", "관계", "유한", "유한 계승합 공식", "재귀"]
+  },
+  {
+    "category": "math",
+    "name": "코시 부등식",
+    "latex": "\\left( \\sum\\limits_{i=1}^{n} a_i b_i \\right)^2 \\leqslant \\left( \\sum\\limits_{i=1}^{n} a_i^2 \\right) \\left( \\sum\\limits_{i=1}^{n} b_i^2 \\right)",
+    "keywords": ["math", "mathematics", "부등식", "코시", "코시 부등식"]
+  },
+  {
+    "category": "math",
+    "name": "체비쇼프의 불평등",
+    "latex": "\\frac{1}{n^2} \\sum\\limits_{i=1}^{n} (x_i - \\bar{x})^2 \\geqslant 0",
+    "keywords": ["math", "mathematics", "불평등", "체비쇼프", "체비쇼프의", "체비쇼프의 불평등"]
+  },
+  {
+    "category": "math",
+    "name": "산술 평균이 제곱평균 제곱근보다 크지 않습니다.",
+    "latex": "\\frac{x_1 + x_2 + \\cdots + x_n}{n} \\leqslant \\sqrt{\\frac{x_1^2 + x_2^2 + \\cdots + x_n^2}{n}}",
+    "keywords": ["math", "mathematics", "불평등", "산술", "산술 평균이 제곱평균 제곱근보다 크지 않습니다", "산술평균과", "않습니다", "제곱근보다", "제곱평균", "제곱평균제곱근", "크지", "평균", "평균이"]
+  },
+  {
+    "category": "math",
+    "name": "젠슨의 부등식",
+    "latex": "f\\left( \\frac{x_1 + x_2 + \\cdots + x_n}{n} \\right) \\leqslant \\frac{f(x_1) + f(x_2) + \\cdots + f(x_n)}{n}",
+    "keywords": ["math", "mathematics", "부등식", "젠슨", "젠슨의", "젠슨의 부등식"]
+  },
+  {
+    "category": "math",
+    "name": "양수의 기하 평균이 산술 평균보다 크지 않습니다.",
+    "latex": "\\sqrt[n]{x_1 x_2 \\cdots x_n} \\leqslant \\frac{x_1 + x_2 + \\cdots + x_n}{n}",
+    "keywords": ["math", "mathematics", "기하", "기하평균과", "부등식", "산술", "산술평균", "않습니다", "양수", "양수의", "양수의 기하 평균이 산술 평균보다 크지 않습니다", "크지", "평균", "평균보다", "평균이"]
+  },
+  {
+    "category": "math",
+    "name": "부정적분의 기본 형태",
+    "latex": "\\int f(x) \\rm dx",
+    "keywords": ["math", "mathematics", "기본", "부정적분", "부정적분의", "부정적분의 기본 형태", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "전력 함수의 무기한 적분",
+    "latex": "\\int x^n \\rm dx = \\frac{x^{n+1}}{n+1} + C",
+    "keywords": ["math", "mathematics", "거듭제곱", "무기한", "적분", "전력", "전력 함수의 무기한 적분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "지수 함수의 무기한 적분",
+    "latex": "\\int \\rm e^x \\rm dx = \\rm e^x + C",
+    "keywords": ["math", "mathematics", "무기한", "적분", "지수", "지수 함수의 무기한 적분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "사인 함수의 부정적분",
+    "latex": "\\int \\sin x \\rm dx = -\\cos x + C",
+    "keywords": ["math", "mathematics", "부정적분", "사인", "사인 함수의 부정적분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "코사인 함수의 부정적분",
+    "latex": "\\int \\cos x \\rm dx = \\sin x + C",
+    "keywords": ["math", "mathematics", "부정적분", "코사인", "코사인 함수의 부정적분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "부정 적분의 선형 성질",
+    "latex": "\\int (f(x) + g(x)) \\rm dx = \\int f(x) \\rm dx + \\int g(x) \\rm dx",
+    "keywords": ["math", "mathematics", "부정", "부정 적분의 선형 성질", "부정적분", "선형", "성질", "적분", "적분의"]
+  },
+  {
+    "category": "math",
+    "name": "베르누이 방정식",
+    "latex": "\\frac{\\rm dy}{\\rm dx} + P(x)y = Q(x)y^n",
+    "keywords": ["math", "mathematics", "방정식", "베르누", "베르누이", "베르누이 방정식"]
+  },
+  {
+    "category": "math",
+    "name": "초기값 문제",
+    "latex": "y'(x) = f(x, y), \\, y(x_0) = y_0",
+    "keywords": ["math", "mathematics", "문제", "초기값", "초기값 문제"]
+  },
+  {
+    "category": "math",
+    "name": "2차 상미분 방정식",
+    "latex": "y'' + p(x)y' + q(x)y = g(x)",
+    "keywords": ["math", "mathematics", "2계", "2차", "2차 상미분 방정식", "방정식", "상미분", "상미분방정식", "일반적인", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "상수 계수를 갖는 2차 선형 비균질 미분 방정식",
+    "latex": "y'' + ay' + by = f(x)",
+    "keywords": ["math", "mathematics", "2차", "갖는", "계수", "계수를", "미분", "방정식", "비균질", "상수", "상수 계수를 갖는 2차 선형 비균질 미분 방정식", "선형"]
+  },
+  {
+    "category": "math",
+    "name": "상수 계수를 갖는 2차 선형 동차 미분 방정식",
+    "latex": "y'' + ay' + by = 0",
+    "keywords": ["math", "mathematics", "2차", "갖는", "계수", "계수를", "동차", "미분", "방정식", "상수", "상수 계수를 갖는 2차 선형 동차 미분 방정식", "선형"]
+  },
+  {
+    "category": "math",
+    "name": "변수 분리 방법",
+    "latex": "\\frac{\\rm dy}{\\rm dx} = g(y)h(x)",
+    "keywords": ["math", "mathematics", "기본", "방법", "변수", "변수 분리 방법", "분리", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "동차 미분 방정식",
+    "latex": "\\frac{\\rm dy}{\\rm dx} = \\frac{f(y)}{g(x)}",
+    "keywords": ["math", "mathematics", "동차", "동차 미분 방정식", "동차미분방정식", "미분", "방정식"]
+  },
+  {
+    "category": "math",
+    "name": "미분 형식의 분리 가능한 변수가 있는 미분 방정식",
+    "latex": "\\frac{\\rm dy}{\\rm dx} = f(x)g(y)",
+    "keywords": ["math", "mathematics", "가능한", "미분", "미분 형식의 분리 가능한 변수가 있는 미분 방정식", "방정식", "변수", "변수가", "분리", "있는", "형식", "형식의"]
+  },
+  {
+    "category": "math",
+    "name": "미분 형식의 1차 선형 미분 방정식, 일반 해",
+    "latex": "\\frac{\\rm dy}{\\rm dx} = f(x, y)",
+    "keywords": ["math", "mathematics", "1차", "미분", "미분 형식의 1차 선형 미분 방정식 일반 해", "방정식", "선형", "일반", "형식", "형식의"]
+  },
+  {
+    "category": "math",
+    "name": "명시적 방정식",
+    "latex": "F(x,y) = 0",
+    "keywords": ["math", "mathematics", "명시적", "명시적 방정식", "방정식"]
+  },
+  {
+    "category": "math",
+    "name": "선형 미분 방정식의 해법",
+    "latex": "y = y_h + y_p",
+    "keywords": ["math", "mathematics", "미분", "방정식", "방정식의", "선형", "선형 미분 방정식의 해법", "선형미분방정식", "일반해", "해법"]
+  },
+  {
+    "category": "math",
+    "name": "1차 선형 미분 방정식",
+    "latex": "\\frac{\\rm dy}{\\rm dx} + P(x)y = Q(x)",
+    "keywords": ["math", "mathematics", "1계", "1차", "1차 선형 미분 방정식", "미분", "방정식", "선형", "선형미분방정식", "표준형"]
+  },
+  {
+    "category": "math",
+    "name": "복소수의 곱셈",
+    "latex": "z_1 z_2 = r_1 r_2 \\left(\\cos(\\theta_1 + \\theta_2) + i \\sin(\\theta_1 + \\theta_2)\\right)",
+    "keywords": ["math", "mathematics", "곱셈", "복소수", "복소수의", "복소수의 곱셈"]
+  },
+  {
+    "category": "math",
+    "name": "복소수의 극형",
+    "latex": "z = r(\\cos \\theta + i \\sin \\theta)",
+    "keywords": ["math", "mathematics", "극형", "복소수", "복소수의", "복소수의 극형"]
+  },
+  {
+    "category": "math",
+    "name": "유한적분의 기본 형태",
+    "latex": "\\int_{a}^{b} f(x) \\rm dx",
+    "keywords": ["math", "mathematics", "기본", "유한적분", "유한적분의", "유한적분의 기본 형태", "정적분", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "상수의 정적분",
+    "latex": "\\int_{a}^{b} k \\rm dx = k(b-a)",
+    "keywords": ["math", "mathematics", "상수", "상수의", "상수의 정적분", "정적분"]
+  },
+  {
+    "category": "math",
+    "name": "선형 함수의 정적분",
+    "latex": "\\int_{a}^{b} x \\rm dx = \\frac{b^2 - a^2}{2}",
+    "keywords": ["math", "mathematics", "선형", "선형 함수의 정적분", "정적분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "지수 함수의 정적분",
+    "latex": "\\int_{0}^{\\infty} \\rm e^{-x} \\rm dx = 1",
+    "keywords": ["math", "mathematics", "정적분", "지수", "지수 함수의 정적분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "사인 함수의 정적분",
+    "latex": "\\int_{0}^{\\pi} \\sin x \\rm dx = 2",
+    "keywords": ["math", "mathematics", "사인", "사인 함수의 정적분", "정적분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "거듭제곱 함수의 정적분",
+    "latex": "\\int_{0}^{1} x^2 \\rm dx = \\frac{1}{3}",
+    "keywords": ["math", "mathematics", "거듭제곱", "거듭제곱 함수의 정적분", "정적분", "함수", "함수의"]
+  },
+  {
+    "category": "math",
+    "name": "유한 적분의 기본 정리",
+    "latex": "\\int_{a}^{b} f'(x) \\rm dx = f(b) - f(a)",
+    "keywords": ["math", "mathematics", "기본", "유한", "유한 적분의 기본 정리", "적분", "적분의", "정리", "정적분"]
+  },
+  {
+    "category": "math",
+    "name": "홀수 함수의 정적분",
+    "latex": "\\int_{-1}^{1} x^3 \\rm dx = 0",
+    "keywords": ["math", "mathematics", "정적분", "함수", "함수의", "홀수", "홀수 함수의 정적분"]
+  },
+  {
+    "category": "math",
+    "name": "무한 적분 발산",
+    "latex": "\\int_{0}^{1} \\frac{1}{x} \\rm dx = \\infty",
+    "keywords": ["math", "mathematics", "무한", "무한 적분 발산", "발산", "부정적분", "적분"]
+  },
+  {
+    "category": "math",
+    "name": "유한 적분의 선형 특성",
+    "latex": "\\int_{a}^{b} (f(x) + g(x)) \\rm dx = \\int_{a}^{b} f(x) \\rm dx + \\int_{a}^{b} g(x) \\rm dx",
+    "keywords": ["math", "mathematics", "선형", "성질", "유한", "유한 적분의 선형 특성", "적분", "적분의", "정적분", "특성"]
+  },
+  {
+    "category": "math",
+    "name": "베이즈 정리",
+    "latex": "P(B_i \\mid A) = \\frac{P(A \\mid B_i) P(B_i)}{\\sum\\limits_{j=1}^{n} P(A \\mid B_j) P(B_j)}",
+    "keywords": ["math", "mathematics", "베이즈", "베이즈 정리", "사용됩니다", "역확률", "정리", "조건부", "통해", "확률"]
+  },
+  {
+    "category": "math",
+    "name": "초기하 확률 분포",
+    "latex": "P(X = k) = \\frac{C(K, k)C(N-K, n-k)}{C(N, n)}",
+    "keywords": ["math", "mathematics", "분포", "초기하", "초기하 확률 분포", "확률"]
+  },
+  {
+    "category": "math",
+    "name": "독립 사건의 곱셈 공식",
+    "latex": "P(A \\cap B) = P(A) \\cdot P(B)",
+    "keywords": ["math", "mathematics", "곱셈", "공식", "독립", "독립 사건의 곱셈 공식", "사건", "사건의"]
+  },
+  {
+    "category": "math",
+    "name": "독립정리",
+    "latex": "P(A \\cap B) = P(A)P(B)",
+    "keywords": ["math", "mathematics", "독립", "독립정리", "사건", "조건"]
+  },
+  {
+    "category": "math",
+    "name": "보완적인 사건의 확률",
+    "latex": "P(A^c) = 1 - P(A)",
+    "keywords": ["ac", "math", "mathematics", "1에서", "같습니다", "것과", "보완적인", "보완적인 사건의 확률", "사건", "사건의", "상보적인", "확률"]
+  },
+  {
+    "category": "math",
+    "name": "여러 사건의 곱셈 공식",
+    "latex": "P(A_1 \\cap A_2 \\cap \\cdots \\cap A_n) = P(A_1) \\cdot P(A_2 \\mid A_1) \\cdots P(A_n \\mid A_1 \\cap A_2 \\cap \\cdots \\cap A_{n-1})",
+    "keywords": ["math", "mathematics", "곱셈", "공식", "사건", "사건의", "여러", "여러 사건의 곱셈 공식"]
+  },
+  {
+    "category": "math",
+    "name": "변화",
+    "latex": "Var(X) = E[X^2] - (E[X])^2",
+    "keywords": ["math", "mathematics", "변화", "분산", "확률변수"]
+  },
+  {
+    "category": "math",
+    "name": "확률의 곱셈 공식",
+    "latex": "P(A \\cap B) = P(A) \\cdot P(B \\mid A)",
+    "keywords": ["math", "mathematics", "곱셈", "공식", "확률", "확률의", "확률의 곱셈 공식"]
+  },
+  {
+    "category": "math",
+    "name": "확률의 비음성",
+    "latex": "P(A) \\geqslant 0",
+    "keywords": ["math", "mathematics", "pa", "0보다", "비음성", "사건", "아니어야", "않습니다", "어떤", "음수", "작지", "합니다", "확률", "확률의", "확률의 비음성"]
+  },
+  {
+    "category": "math",
+    "name": "확률의 정규화",
+    "latex": "P(\\Omega) = 1",
+    "keywords": ["math", "mathematics", "정규화", "확률", "확률의", "확률의 정규화"]
+  },
+  {
+    "category": "math",
+    "name": "확률의 한계",
+    "latex": "0 \\leqslant P(A) \\leqslant 1",
+    "keywords": ["math", "mathematics", "한계", "확률", "확률의", "확률의 한계"]
+  },
+  {
+    "category": "math",
+    "name": "확률의 정의",
+    "latex": "P(A) = \\frac{n(A)}{n(S)}",
+    "keywords": ["aaa", "math", "mathematics", "사건", "정의", "확률", "확률의", "확률의 정의"]
+  },
+  {
+    "category": "math",
+    "name": "확률과 빈도의 관계",
+    "latex": "P(A) \\approx \\frac{N(A)}{N}",
+    "keywords": ["math", "mathematics", "관계", "빈도", "빈도의", "상대빈도", "확률과", "확률과 빈도의 관계"]
+  },
+  {
+    "category": "math",
+    "name": "고전적 확률 모델",
+    "latex": "P(A) = \\frac{m(A)}{m(S)}",
+    "keywords": ["math", "mathematics", "고전적", "고전적 확률 모델", "모델", "확률"]
+  },
+  {
+    "category": "math",
+    "name": "덧셈 공식(상호 배타적)",
+    "latex": "P(A \\cup B) = P(A) + P(B), \\quad \\text{若 } A \\cap B = \\emptyset",
+    "keywords": ["math", "mathematics", "공식상호", "덧셈", "덧셈 공식상호 배타적", "덧셈식상호배타적", "배타적"]
+  },
+  {
+    "category": "math",
+    "name": "덧셈식(일반)",
+    "latex": "P(A \\cup B) = P(A) + P(B) - P(A \\cap B)",
+    "keywords": ["math", "mathematics", "덧셈식일반"]
+  },
+  {
+    "category": "math",
+    "name": "빈 세트의 확률",
+    "latex": "P(\\emptyset) = 0",
+    "keywords": ["math", "mathematics", "0입니다", "공집합원소", "발생할", "빈 세트의 확률", "사건", "세트", "세트의", "포함하지", "확률"]
+  },
+  {
+    "category": "math",
+    "name": "주파수의 정의",
+    "latex": "f = \\frac{n}{N}",
+    "keywords": ["math", "mathematics", "상대빈도", "정의", "주파수", "주파수의", "주파수의 정의"]
+  },
+  {
+    "category": "math",
+    "name": "총 확률의 법칙",
+    "latex": "P(A) = \\sum\\limits_{i=1}^{n} P(A \\mid B_i) P(B_i)",
+    "keywords": ["math", "mathematics", "법칙", "총 확률의 법칙", "확률", "확률의"]
+  },
+  {
+    "category": "math",
+    "name": "세 가지 사건의 상호독립성",
+    "latex": "P(A \\cap B \\cap C) = P(A)P(B)P(C)",
+    "keywords": ["math", "mathematics", "가지", "독립", "사건", "사건의", "상호독립성", "세 가지 사건의 상호독립성"]
+  },
+  {
+    "category": "math",
+    "name": "확률변수의 기대",
+    "latex": "E[X] = \\sum_{i} x_i P(X = x_i)",
+    "keywords": ["math", "mathematics", "기대", "이산확률변수", "확률변수", "확률변수의", "확률변수의 기대"]
+  },
+  {
+    "category": "math",
+    "name": "조건부 확률 공식",
+    "latex": "P(A \\mid B) = \\frac{P(A \\cap B)}{P(B)}, \\quad P(B) > 0",
+    "keywords": ["math", "mathematics", "공식", "나타냅니다", "발생할", "발생했", "사건", "조건부", "조건부 확률 공식", "확률"]
+  },
+  {
+    "category": "math",
+    "name": "한계",
+    "latex": "\\lim_{x \\to a} f(x) = L",
+    "keywords": ["math", "mathematics", "한계"]
+  },
+  {
+    "category": "math",
+    "name": "로피탈의 법칙 - 1",
+    "latex": "\\lim_{x \\to a} \\frac{f(x)}{g(x)} = \\lim_{x \\to a} \\frac{f'(x)}{g'(x)}",
+    "keywords": ["math", "mathematics", "로피탈", "로피탈의", "로피탈의 법칙 - 1", "법칙"]
+  },
+  {
+    "category": "math",
+    "name": "로피탈의 법칙 - 2",
+    "latex": "\\lim_{x \\to \\infty} f(x) = 0 \\text{ 和 } \\lim_{x \\to \\infty} g(x) = \\infty",
+    "keywords": ["math", "mathematics", "로피탈", "로피탈의", "로피탈의 법칙 - 2", "법칙", "조건"]
+  },
+  {
+    "category": "math",
+    "name": "m x n 매트릭스",
+    "latex": "A = \\begin{pmatrix} a_{11} & a_{12} & \\cdots & a_{1n} \\\\ a_{21} & a_{22} & \\cdots & a_{2n} \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ a_{m1} & a_{m2} & \\cdots & a_{mn} \\end{pmatrix}",
+    "keywords": ["math", "mathematics", "m x n 매트릭스", "매트릭스", "행렬"]
+  },
+  {
+    "category": "math",
+    "name": "n x n 정사각형 행렬",
+    "latex": "A = \\begin{pmatrix} a_{11} & a_{12} & \\cdots & a_{1n} \\\\ a_{21} & a_{22} & \\cdots & a_{2n} \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ a_{n1} & a_{n2} & \\cdots & a_{nn} \\end{pmatrix}",
+    "keywords": ["math", "mathematics", "n x n 정사각형 행렬", "정사각", "정사각형", "행렬"]
+  },
+  {
+    "category": "math",
+    "name": "대칭행렬, 편향대칭행렬",
+    "latex": "A = A^T \\text{ 对称 } , \\quad A = -A^T \\text{ 反对称}",
+    "keywords": ["math", "mathematics", "대칭행렬", "대칭행렬 편향대칭행렬", "매트릭스", "속성", "편향대칭행렬"]
+  },
+  {
+    "category": "math",
+    "name": "대각선 행렬",
+    "latex": "D = \\begin{pmatrix} d_1 & 0 & \\cdots & 0 \\\\ 0 & d_2 & \\cdots & 0 \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ 0 & 0 & \\cdots & d_n \\end{pmatrix}",
+    "keywords": ["math", "mathematics", "대각선", "대각선 행렬", "행렬"]
+  },
+  {
+    "category": "math",
+    "name": "행렬 곱셈",
+    "latex": "AB = C, \\text{ 其中 } C_{ij} = \\sum_{k=1}^{p} A_{ik} B_{kj}",
+    "keywords": ["math", "mathematics", "곱셈", "행렬", "행렬 곱셈"]
+  },
+  {
+    "category": "math",
+    "name": "매트릭스 추가",
+    "latex": "A + B = C, \\text{ 其中 } C_{ij} = A_{ij} + B_{ij}",
+    "keywords": ["math", "mathematics", "덧셈", "매트릭스", "매트릭스 추가", "추가", "행렬"]
+  },
+  {
+    "category": "math",
+    "name": "행렬 전치",
+    "latex": "A^{\\rm T} = \\begin{pmatrix} a_{11} & a_{21} & \\cdots & a_{m1} \\\\ a_{12} & a_{22} & \\cdots & a_{m2} \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ a_{1n} & a_{2n} & \\cdots & a_{mn} \\end{pmatrix}",
+    "keywords": ["math", "mathematics", "전치", "행렬", "행렬 전치"]
+  },
+  {
+    "category": "math",
+    "name": "제로 매트릭스",
+    "latex": "O = \\begin{pmatrix} 0 & 0 & \\cdots & 0 \\\\ 0 & 0 & \\cdots & 0 \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ 0 & 0 & \\cdots & 0 \\end{pmatrix}",
+    "keywords": ["math", "mathematics", "매트릭스", "제로", "제로 매트릭스"]
+  },
+  {
+    "category": "math",
+    "name": "스칼라 곱셈",
+    "latex": "kA = \\begin{pmatrix} ka_{11} & ka_{12} & \\cdots & ka_{1n} \\\\ ka_{21} & ka_{22} & \\cdots & ka_{2n} \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ ka_{m1} & ka_{m2} & \\cdots & ka_{mn} \\end{pmatrix}",
+    "keywords": ["math", "mathematics", "곱셈", "스칼라", "스칼라 곱셈", "행렬"]
+  },
+  {
+    "category": "math",
+    "name": "선형변환",
+    "latex": "T: \\mathbb{R}^n \\to \\mathbb{R}^m",
+    "keywords": ["math", "mathematics", "선형", "선형변환"]
+  },
+  {
+    "category": "math",
+    "name": "유리함수",
+    "latex": "f(x) = \\frac{P(x)}{Q(x)}",
+    "keywords": ["math", "mathematics", "유리함수"]
+  },
+  {
+    "category": "math",
+    "name": "유리 적분 함수(다항식)",
+    "latex": "P(x) = a_n x^n + a_{n-1} x^{n-1} + \\cdots + a_1 x + a_0",
+    "keywords": ["math", "mathematics", "유리", "유리 적분 함수다항식", "적분", "함수다항식"]
+  },
+  {
+    "category": "math",
+    "name": "호 길이에 대한 선 적분",
+    "latex": "\\int_{C} f(x,y) \\rm ds",
+    "keywords": ["math", "mathematics", "길이", "길이에", "대한", "적분", "호 길이에 대한 선 적분"]
+  },
+  {
+    "category": "math",
+    "name": "이중 적분의 정의 및 계산",
+    "latex": "\\iint_{D} f(x,y) \\rm dA",
+    "keywords": ["math", "mathematics", "계산", "이중", "이중 적분의 정의 및 계산", "적분", "적분의", "정의"]
+  },
+  {
+    "category": "math",
+    "name": "이중 적분의 평균값 정리",
+    "latex": "\\iint_R f(x,y) \\rm dx \\rm dy = f(\\xi, \\eta) \\cdot \\text{Area}(R)",
+    "keywords": ["math", "mathematics", "이중", "이중 적분의 평균값 정리", "적분", "적분의", "정리", "평균값"]
+  },
+  {
+    "category": "math",
+    "name": "적분과 1차 확장의 평균값 정리",
+    "latex": "\\int_a^b f(x) \\rm dx = f(c)(b-a)",
+    "keywords": ["math", "mathematics", "1차", "대한", "적분", "적분과", "적분과 1차 확장의 평균값 정리", "정리", "평균값", "확장", "확장의"]
+  },
+  {
+    "category": "math",
+    "name": "적분에 대한 평균값 정리의 두 번째 확장",
+    "latex": "\\int_a^b f(x) \\rm dx = \\int_{a}^{b} g(x) \\rm dx",
+    "keywords": ["math", "mathematics", "대한", "번째", "적분", "적분에", "적분에 대한 평균값 정리의 두 번째 확장", "정리", "정리의", "평균값", "확장"]
+  },
+  {
+    "category": "math",
+    "name": "삼중 적분의 정의 및 계산",
+    "latex": "\\iiint_{V} f(x,y,z) \\rm dV",
+    "keywords": ["math", "mathematics", "계산", "삼중", "삼중 적분의 정의 및 계산", "적분", "적분의", "정의"]
+  },
+  {
+    "category": "math",
+    "name": "한도의 정의",
+    "latex": "\\lim_{x \\to c} f(x) = L",
+    "keywords": ["math", "mathematics", "정의", "한계", "한도", "한도의", "한도의 정의"]
+  },
+  {
+    "category": "math",
+    "name": "미분을 위한 평균값 정리",
+    "latex": "f'(c) = \\frac{f(b) - f(a)}{b - a}",
+    "keywords": ["math", "mathematics", "라그랑주", "미분", "미분을", "미분을 위한 평균값 정리", "위한", "정리", "평균값"]
+  },
+  {
+    "category": "math",
+    "name": "공통 전력 시리즈 확장",
+    "latex": "f(x) = \\sum\\limits_{n=0}^{\\infty} a_n x^n",
+    "keywords": ["math", "mathematics", "공통", "공통 전력 시리즈 확장", "시리즈", "전력", "파워", "확장"]
+  },
+  {
+    "category": "math",
+    "name": "이항 확장",
+    "latex": "(x+y)^n = \\sum\\limits_{k=0}^{n} C(n,k) x^k y^{n-k}",
+    "keywords": ["math", "mathematics", "이항", "이항 확장", "확장"]
+  },
+  {
+    "category": "math",
+    "name": "푸리에 시리즈",
+    "latex": "f(x) = \\sum\\limits_{n=0}^{\\infty} (a_n \\cos nx + b_n \\sin nx)",
+    "keywords": ["math", "mathematics", "급수", "시리즈", "전개", "푸리", "푸리에", "푸리에 시리즈"]
+  },
+  {
+    "category": "math",
+    "name": "기하학적 시리즈",
+    "latex": "S_n = a + ar + ar^2 + ar^3 + \\cdots + ar^{n-1}",
+    "keywords": ["math", "mathematics", "n항", "기하급수", "기하학적", "기하학적 시리즈", "시리즈", "처음"]
+  },
+  {
+    "category": "math",
+    "name": "파워 시리즈",
+    "latex": "f(x) = \\sum\\limits_{n=0}^{\\infty} a_n (x - c)^n",
+    "keywords": ["math", "mathematics", "거듭제곱", "계열", "시리즈", "파워", "파워 시리즈", "표준", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "전력 시리즈 - 정의",
+    "latex": "\\sum\\limits_{n=0}^{\\infty} a_n x^n",
+    "keywords": ["math", "mathematics", "멱급수", "시리즈", "전력", "전력 시리즈 - 정의", "정의"]
+  },
+  {
+    "category": "math",
+    "name": "오일러의 공식",
+    "latex": "\\rm e^{ix} = \\cos x + i \\sin x",
+    "keywords": ["math", "mathematics", "공식", "오일러", "오일러의", "오일러의 공식"]
+  },
+  {
+    "category": "math",
+    "name": "삼각함수 계열 - 단순 조화 운동",
+    "latex": "y(t) = A \\cos(\\omega t + \\phi)",
+    "keywords": ["math", "mathematics", "계열", "단순", "방정식", "삼각함수", "삼각함수 계열 - 단순 조화 운동", "운동", "조화"]
+  },
+  {
+    "category": "math",
+    "name": "삼각함수, 삼각함수의 직교성",
+    "latex": "\\int_{0}^{2\\pi} \\sin(nx) \\sin(mx) \\rm dx = 0 \\, (n \\neq m)",
+    "keywords": ["math", "mathematics", "삼각", "삼각함수", "삼각함수 삼각함수의 직교성", "삼각함수의", "직교성", "함수"]
+  },
+  {
+    "category": "math",
+    "name": "수렴기준",
+    "latex": "\\text{如果} \\lim_{n \\to \\infty} a_n = 0, \\text{则收敛}",
+    "keywords": ["math", "mathematics", "수렴기준"]
+  },
+  {
+    "category": "math",
+    "name": "테일러 시리즈",
+    "latex": "f(x) = f(a) + f'(a)(x-a) + \\frac{f''(a)}{2!}(x-a)^2 + \\cdots",
+    "keywords": ["math", "mathematics", "급수", "시리즈", "전개식", "테일러", "테일러 시리즈"]
+  },
+  {
+    "category": "math",
+    "name": "테일러 시리즈, 매클로린 시리즈",
+    "latex": "f(x) = \\sum\\limits_{n=0}^{\\infty} \\frac{f^{(n)}(0)}{n!} x^n",
+    "keywords": ["math", "mathematics", "매클로린", "시리즈", "시리즈와", "테일러", "테일러 시리즈 매클로린 시리즈"]
+  },
+  {
+    "category": "math",
+    "name": "무한 시리즈의 정의",
+    "latex": "S = \\sum\\limits_{n=1}^{\\infty} a_n",
+    "keywords": ["math", "mathematics", "계열", "무한", "무한 시리즈의 정의", "시리즈", "시리즈의", "정의"]
+  },
+  {
+    "category": "math",
+    "name": "사인 계열, 코사인 계열, 푸리에 계열의 복소수 형태",
+    "latex": "f(t) = \\sum\\limits_{n=-\\infty}^{\\infty} c_n \\rm e^{i n \\omega t}",
+    "keywords": ["math", "mathematics", "계열", "계열의", "급수", "복소수", "사인", "사인 계열 코사인 계열 푸리에 계열의 복소수 형태", "코사인", "푸리", "푸리에", "형태"]
+  },
+  {
+    "category": "math",
+    "name": "고유값과 고유벡터",
+    "latex": "A\\vec{v} = \\lambda \\vec{v}",
+    "keywords": ["math", "mathematics", "고유값과", "고유값과 고유벡터", "고유벡터"]
+  },
+  {
+    "category": "math",
+    "name": "결정자",
+    "latex": "\\det(A) = \\sum_{\\sigma \\in S_n} \\text{sgn}(\\sigma) a_{1,\\sigma(1)} a_{2,\\sigma(2)} \\cdots a_{n,\\sigma(n)}",
+    "keywords": ["math", "mathematics", "결정자", "계산식", "행렬식"]
+  },
+  {
+    "category": "math",
+    "name": "유리함수의 한계",
+    "latex": "\\lim_{x \\to c} f(x) = \\frac{P(c)}{Q(c)}",
+    "keywords": ["math", "mathematics", "c에서", "극한", "유리함수", "유리함수의", "유리함수의 한계", "한계"]
+  },
+  {
+    "category": "chem",
+    "name": "염화암모늄과 수산화칼슘의 반응",
+    "latex": "2\\text{NH}_4\\text{Cl} + \\text{Ca(OH)}_2 \\rightarrow \\text{CaCl}_2 + 2\\text{NH}_3\\uparrow + 2\\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "반응", "반응하여", "생성하", "설명합니다", "수산화칼슘", "수산화칼슘의", "암모니아와", "염화암모늄과", "염화암모늄과 수산화칼슘의 반응"]
+  },
+  {
+    "category": "chem",
+    "name": "이산화탄소와 물의 반응",
+    "latex": "\\text{CO}_2 + \\text{H}_2\\text{O} \\rightarrow \\text{H}_2\\text{CO}_3",
+    "keywords": ["chem", "chemistry", "과정", "물과", "물의", "반응", "반응하여", "설명합니다", "이산화탄소", "이산화탄소와", "이산화탄소와 물의 반응", "탄산", "형성하"]
+  },
+  {
+    "category": "chem",
+    "name": "깨끗한 석회수와 이산화탄소의 반응",
+    "latex": "\\text{CO}_2 + \\text{Ca(OH)}_2 \\rightarrow \\text{CaCO}_3\\downarrow + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "깨끗한", "깨끗한 석회수와 이산화탄소의 반응", "반응", "생성하", "석회수와", "설명합니다", "이산화탄소", "이산화탄소의", "침전물과"]
+  },
+  {
+    "category": "chem",
+    "name": "철과 황산구리 용액의 반응",
+    "latex": "\\text{Fe} + \\text{CuSO}_4 \\rightarrow \\text{FeSO}_4 + \\text{Cu}",
+    "keywords": ["chem", "chemistry", "과정", "구리", "반응", "반응하여", "설명합니다", "용액", "용액의", "철과", "철과 황산구리 용액의 반응", "형성하", "황산구리", "황산제1철과"]
+  },
+  {
+    "category": "chem",
+    "name": "알루미늄과 산소의 반응",
+    "latex": "4\\text{Al} + 3\\text{O}_2 \\rightarrow 2\\text{Al}_2\\text{O}_3",
+    "keywords": ["chem", "chemistry", "과정", "반응", "반응하여", "산소", "산소의", "산화알루미늄", "설명합니다", "알루미늄과", "알루미늄과 산소의 반응", "형성하"]
+  },
+  {
+    "category": "chem",
+    "name": "아연은 묽은 황산과 반응합니다.",
+    "latex": "\\text{Zn} + \\text{H}_2\\text{SO}_4 \\rightarrow \\text{ZnSO}_4 + \\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "묽은", "반응으로", "반응합니다", "생성하", "설명합니다", "수소", "아연", "아연과", "아연은", "아연은 묽은 황산과 반응합니다", "황산", "황산과", "황산아연과"]
+  },
+  {
+    "category": "chem",
+    "name": "철은 묽은 황산과 반응한다",
+    "latex": "\\text{Fe} + \\text{H}_2\\text{SO}_4 \\rightarrow \\text{FeSO}_4 + \\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "묽은", "반응하여", "반응한다", "생성하", "설명합니다", "수소", "철과", "철은", "철은 묽은 황산과 반응한다", "황산", "황산과", "황산제1철과"]
+  },
+  {
+    "category": "chem",
+    "name": "마그네슘은 묽은 황산과 반응합니다.",
+    "latex": "\\text{Mg} + \\text{H}_2\\text{SO}_4 \\rightarrow \\text{MgSO}_4 + \\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "마그네슘", "마그네슘과", "마그네슘은", "마그네슘은 묽은 황산과 반응합니다", "묽은", "반응으로", "반응합니다", "생성하", "설명합니다", "수소", "황산", "황산과", "황산마그네슘과"]
+  },
+  {
+    "category": "chem",
+    "name": "알루미늄은 묽은 황산과 반응합니다.",
+    "latex": "2\\text{Al} + 3\\text{H}_2\\text{SO}_4 \\rightarrow \\text{Al}_2(\\text{SO}_4)_3 + 3\\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "묽은", "반응하여", "반응합니다", "생성하", "설명합니다", "수소", "알루미늄", "알루미늄과", "알루미늄은", "알루미늄은 묽은 황산과 반응합니다", "황산", "황산과", "황산알루미늄과"]
+  },
+  {
+    "category": "chem",
+    "name": "아연은 묽은 염산과 반응합니다.",
+    "latex": "\\text{Zn} + 2\\text{HCl} \\rightarrow \\text{ZnCl}_2 + \\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "묽은", "반응하여", "반응합니다", "생성하", "설명합니다", "수소", "아연", "아연과", "아연은", "아연은 묽은 염산과 반응합니다", "염산", "염산과", "염화아연과"]
+  },
+  {
+    "category": "chem",
+    "name": "철은 묽은 염산과 반응한다",
+    "latex": "\\text{Fe} + 2\\text{HCl} \\rightarrow \\text{FeCl}_2 + \\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "묽은", "반응하여", "반응한다", "생성하", "설명합니다", "수소", "염산", "염산과", "염화제1철과", "철과", "철은", "철은 묽은 염산과 반응한다"]
+  },
+  {
+    "category": "chem",
+    "name": "마그네슘은 묽은 염산과 반응합니다.",
+    "latex": "\\text{Mg} + 2\\text{HCl} \\rightarrow \\text{MgCl}_2 + \\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "마그네슘", "마그네슘과", "마그네슘은", "마그네슘은 묽은 염산과 반응합니다", "묽은", "반응하여", "반응합니다", "생성하", "설명합니다", "수소", "염산", "염산과", "염화마그네슘과"]
+  },
+  {
+    "category": "chem",
+    "name": "알루미늄은 묽은 염산과 반응합니다.",
+    "latex": "2\\text{Al} + 6\\text{HCl} \\rightarrow 2\\text{AlCl}_3 + 3\\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "묽은", "반응하여", "반응합니다", "생성하", "설명합니다", "수소", "알루미늄", "알루미늄과", "알루미늄은", "알루미늄은 묽은 염산과 반응합니다", "염산", "염산과", "염화알루미늄과"]
+  },
+  {
+    "category": "chem",
+    "name": "구리는 질산은 용액과 반응합니다.",
+    "latex": "\\text{Cu} + 2\\text{AgNO}_3 \\rightarrow \\text{Cu(NO}_3)_2 + 2\\text{Ag}",
+    "keywords": ["chem", "chemistry", "과정", "구리", "구리는", "구리는 질산은 용액과 반응합니다", "구리와", "반응하여", "반응합니다", "생성하", "설명합니다", "용액", "용액과", "질산", "질산구리와", "질산은"]
+  },
+  {
+    "category": "chem",
+    "name": "수소는 산소 속에서 연소된다",
+    "latex": "2\\text{H}_2 + \\text{O}_2 \\rightarrow 2\\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "산소", "생성하기", "설명합니다", "속에서", "수소", "수소는", "수소는 산소 속에서 연소된다", "연소된다", "연소시키", "위해"]
+  },
+  {
+    "category": "chem",
+    "name": "수소는 산화구리를 환원시킨다",
+    "latex": "\\text{CuO} + \\text{H}_2 \\rightarrow \\text{Cu} + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "구리", "구리와", "산화구리", "산화구리를", "산화물", "설명합니다", "수소", "수소는", "수소는 산화구리를 환원시킨다", "형성하", "환원", "환원시킨다"]
+  },
+  {
+    "category": "chem",
+    "name": "메탄 연소",
+    "latex": "\\text{CH}_4 + 2\\text{O}_2 \\rightarrow \\text{CO}_2 + 2\\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "메탄", "메탄 연소", "생성하", "설명합니다", "연소", "연소시켜", "이산화탄소와"]
+  },
+  {
+    "category": "chem",
+    "name": "염산은 수산화나트륨과 반응한다",
+    "latex": "\\text{HCl} + \\text{NaOH} \\rightarrow \\text{NaCl} + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "반응하여", "반응한다", "생성되", "설명합니다", "수산화나트륨", "수산화나트륨과", "염산", "염산과", "염산은", "염산은 수산화나트륨과 반응한다", "염화나트륨과"]
+  },
+  {
+    "category": "chem",
+    "name": "황산은 수산화나트륨과 반응한다",
+    "latex": "\\text{H}_2\\text{SO}_4 + 2\\text{NaOH} \\rightarrow \\text{Na}_2\\text{SO}_4 + 2\\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "반응하여", "반응한다", "생성되", "설명합니다", "수산화나트륨", "수산화나트륨과", "황산", "황산과", "황산나트륨과", "황산은", "황산은 수산화나트륨과 반응한다"]
+  },
+  {
+    "category": "chem",
+    "name": "탄산칼슘은 염산과 반응한다",
+    "latex": "\\text{CaCO}_3 + 2\\text{HCl} \\rightarrow \\text{CaCl}_2 + \\text{CO}_2\\uparrow + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "반응하여", "반응한다", "생성하", "설명합니다", "염산", "염산과", "염화칼슘", "이산화탄소", "탄산칼슘", "탄산칼슘과", "탄산칼슘은", "탄산칼슘은 염산과 반응한다"]
+  },
+  {
+    "category": "chem",
+    "name": "탄산나트륨은 염산과 반응합니다.",
+    "latex": "\\text{Na}_2\\text{CO}_3 + 2\\text{HCl} \\rightarrow 2\\text{NaCl} + \\text{CO}_2\\uparrow + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "반응하여", "반응합니다", "생성되", "설명합니다", "염산", "염산과", "염화나트륨", "이산화탄소", "탄산나트륨", "탄산나트륨과", "탄산나트륨은", "탄산나트륨은 염산과 반응합니다"]
+  },
+  {
+    "category": "chem",
+    "name": "황산구리는 수산화나트륨과 반응합니다.",
+    "latex": "\\text{CuSO}_4 + 2\\text{NaOH} \\rightarrow \\text{Cu(OH)}_2\\downarrow + \\text{Na}_2\\text{SO}_4",
+    "keywords": ["chem", "chemistry", "과정", "반응하여", "반응합니다", "생성되", "설명합니다", "수산화구리", "수산화나트륨", "수산화나트륨과", "침전물과", "황산구리", "황산구리는", "황산구리는 수산화나트륨과 반응합니다", "황산구리와", "황산나트륨"]
+  },
+  {
+    "category": "chem",
+    "name": "수산화나트륨은 염산과 반응합니다.",
+    "latex": "\\text{NaOH} + \\text{HCl} \\rightarrow \\text{NaCl} + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "반응하여", "반응합니다", "생성되", "설명합니다", "수산화나트륨", "수산화나트륨과", "수산화나트륨은", "수산화나트륨은 염산과 반응합니다", "염산", "염산과", "염화나트륨과"]
+  },
+  {
+    "category": "chem",
+    "name": "수산화칼슘은 황산과 반응한다",
+    "latex": "\\text{Ca(OH)}_2 + \\text{H}_2\\text{SO}_4 \\rightarrow \\text{CaSO}_4 + 2\\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "반응하여", "반응한다", "생성하", "설명합니다", "수산화칼슘", "수산화칼슘과", "수산화칼슘은", "수산화칼슘은 황산과 반응한다", "황산", "황산과", "황산칼슘과"]
+  },
+  {
+    "category": "chem",
+    "name": "탄소는 산화구리를 감소시킨다",
+    "latex": "\\text{CuO} + \\text{C} \\rightarrow \\text{Cu} + \\text{CO}",
+    "keywords": ["chem", "chemistry", "감소시킨다", "구리", "구리와", "대해", "산화구리", "산화구리를", "산화물", "생성하", "설명합니다", "일산화탄소", "탄소", "탄소는", "탄소는 산화구리를 감소시킨다", "환원"]
+  },
+  {
+    "category": "chem",
+    "name": "탄소는 산화철을 감소시킨다",
+    "latex": "\\text{Fe}_2\\text{O}_3 + 3\\text{C} \\rightarrow 2\\text{Fe} + 3\\text{CO}",
+    "keywords": ["chem", "chemistry", "감소시킨다", "산화철", "산화철을", "생성하", "설명합니다", "일산화탄소", "철과", "탄소", "탄소는", "탄소는 산화철을 감소시킨다", "환원"]
+  },
+  {
+    "category": "chem",
+    "name": "탄소는 산소 속에서 완전히 연소됩니다.",
+    "latex": "\\text{C} + \\text{O}_2 \\rightarrow \\text{CO}_2",
+    "keywords": ["chem", "chemistry", "산소", "생성하", "설명합니다", "속에서", "연소되어", "연소됩니다", "완전히", "이산화탄소", "탄소", "탄소는", "탄소는 산소 속에서 완전히 연소됩니다"]
+  },
+  {
+    "category": "chem",
+    "name": "탄소는 산소 속에서 불완전 연소된다",
+    "latex": "2\\text{C} + \\text{O}_2 \\rightarrow 2\\text{CO}",
+    "keywords": ["chem", "chemistry", "불완전", "산소", "산소에서", "생성하기", "설명합니다", "속에서", "연소", "연소된다", "위해", "일산화탄소", "탄소", "탄소는", "탄소는 산소 속에서 불완전 연소된다"]
+  },
+  {
+    "category": "chem",
+    "name": "불안정한 탄산이 분해됩니다.",
+    "latex": "\\text{H}_2\\text{CO}_3 \\rightarrow \\text{CO}_2 + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "가열하여", "과정", "분해되", "분해됩니다", "불안정한", "불안정한 탄산이 분해됩니다", "설명합니다", "이산화탄소와", "탄산", "탄산이", "형성함으로써"]
+  },
+  {
+    "category": "chem",
+    "name": "일산화탄소 화상",
+    "latex": "2\\text{CO} + \\text{O}_2 \\rightarrow 2\\text{CO}_2",
+    "keywords": ["chem", "chemistry", "과정", "생성하", "설명합니다", "연소시켜", "이산화탄소", "일산화탄소", "일산화탄소 화상", "화상"]
+  },
+  {
+    "category": "chem",
+    "name": "일산화탄소는 산화구리를 감소시킵니다.",
+    "latex": "\\text{CuO} + \\text{CO} \\rightarrow \\text{Cu} + \\text{CO}_2",
+    "keywords": ["chem", "chemistry", "감소시켜", "감소시킵니다", "구리", "구리와", "방법", "산화구리", "산화구리를", "산화물", "설명합니다", "이산화탄소", "일산화탄소", "일산화탄소는", "일산화탄소는 산화구리를 감소시킵니다", "형성하"]
+  },
+  {
+    "category": "chem",
+    "name": "탄산칼슘은 고온에서 분해됩니다.",
+    "latex": "\\text{CaCO}_3 \\rightarrow \\text{CaO} + \\text{CO}_2",
+    "keywords": ["chem", "chemistry", "가열하면", "고온에서", "대해", "분해되어", "분해됩니다", "산화칼슘과", "생성하", "설명합니다", "이산화탄소", "탄산칼슘", "탄산칼슘은", "탄산칼슘은 고온에서 분해됩니다"]
+  },
+  {
+    "category": "chem",
+    "name": "마그네슘은 공기 중에서 연소됩니다.",
+    "latex": "2\\text{Mg} + \\text{O}_2 \\rightarrow 2\\text{MgO}",
+    "keywords": ["chem", "chemistry", "공기", "마그네슘", "마그네슘은", "마그네슘은 공기 중에서 연소됩니다", "산화마그네슘", "설명합니다", "연소되어", "연소됩니다", "중에서", "형성하"]
+  },
+  {
+    "category": "chem",
+    "name": "철은 산소 속에서 연소된다",
+    "latex": "3\\text{Fe} + 2\\text{O}_2 \\rightarrow \\text{Fe}_3\\text{O}_4",
+    "keywords": ["chem", "chemistry", "산소", "산화철", "설명합니다", "속에서", "연소되어", "연소된다", "철은", "철은 산소 속에서 연소된다", "형성하"]
+  },
+  {
+    "category": "chem",
+    "name": "구리는 공기 중에서 가열됩니다.",
+    "latex": "2\\text{Cu} + \\text{O}_2 \\rightarrow 2\\text{CuO}",
+    "keywords": ["chem", "chemistry", "가열되어", "가열됩니다", "공기", "구리", "구리는", "구리는 공기 중에서 가열됩니다", "산화구리", "설명합니다", "중에서", "형성하"]
+  },
+  {
+    "category": "chem",
+    "name": "적린은 공기 중에서 연소됩니다.",
+    "latex": "4\\text{P} + 5\\text{O}_2 \\rightarrow 2\\text{P}_2\\text{O}_5",
+    "keywords": ["chem", "chemistry", "공기", "생성하", "설명합니다", "연소되어", "연소됩니다", "오산화이인", "적린", "적린은", "적린은 공기 중에서 연소됩니다", "중에서"]
+  },
+  {
+    "category": "chem",
+    "name": "유황 가루는 공기 중에서 연소됩니다.",
+    "latex": "S + \\text{O}_2 \\rightarrow \\text{SO}_2",
+    "keywords": ["chem", "chemistry", "가루", "가루는", "공기", "방법", "분말", "생성하", "설명합니다", "연소됩니다", "연소시켜", "유황", "유황 가루는 공기 중에서 연소됩니다", "이산화황", "중에서"]
+  },
+  {
+    "category": "chem",
+    "name": "일산화탄소는 산화철을 감소시킵니다.",
+    "latex": "\\text{Fe}_2\\text{O}_3 + 3\\text{CO} \\rightarrow 2\\text{Fe} + 3\\text{CO}_2",
+    "keywords": ["chem", "chemistry", "감소시킵니다", "산화철", "산화철을", "설명합니다", "이산화탄소", "일산화탄소", "일산화탄소는", "일산화탄소는 산화철을 감소시킵니다", "철과", "형성하", "환원시켜"]
+  },
+  {
+    "category": "chem",
+    "name": "과망간산칼륨 가열",
+    "latex": "2\\text{KMnO}_4 \\rightarrow \\text{K}_2\\text{MnO}_4 + \\text{MnO}_2 + \\text{O}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "가열", "과망간산칼륨", "과망간산칼륨 가열", "대해", "분해되어", "산소", "생성하", "설명합니다"]
+  },
+  {
+    "category": "chem",
+    "name": "염소산칼륨과 이산화망간의 혼합물 가열",
+    "latex": "2\\text{KClO}_3 + 2\\text{MnO}_2 \\rightarrow 2\\text{KCl} + 3\\text{O}_2 + 2\\text{MnO}_2",
+    "keywords": ["chem", "chemistry", "가열", "가열하면", "분해되어", "산소", "생성하", "설명합니다", "염소산칼륨과", "염소산칼륨과 이산화망간의 혼합물 가열", "이산화망간", "이산화망간의", "혼합물"]
+  },
+  {
+    "category": "chem",
+    "name": "과산화수소는 이산화망간 촉매작용으로 분해됩니다.",
+    "latex": "2\\text{H}_2\\text{O}_2 \\xrightarrow{\\text{MnO}_2} 2\\text{H}_2\\text{O} + \\text{O}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과산화수소", "과산화수소는", "과산화수소는 이산화망간 촉매작용으로 분해됩니다", "대해", "물과", "분해되어", "분해됩니다", "산소", "생성하", "설명합니다", "이산화망간", "촉매작용", "촉매작용으로", "하에서"]
+  },
+  {
+    "category": "chem",
+    "name": "산화구리는 묽은 황산과 반응합니다.",
+    "latex": "\\text{CuO} + \\text{H}_2\\text{SO}_4 \\rightarrow \\text{CuSO}_4 + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과정", "금속", "묽은", "반응하여", "반응합니다", "산묽", "산화구리", "산화구리는", "산화구리는 묽은 황산과 반응합니다", "산화물산화구리과", "설명합니다", "용액", "청색", "형성하", "황산", "황산과", "황산구리"]
+  },
+  {
+    "category": "chem",
+    "name": "물의 전기분해",
+    "latex": "2\\text{H}_2\\text{O} \\xrightarrow{\\text{电解}} 2\\text{H}_2\\uparrow + \\text{O}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "과정", "물의", "물의 전기분해", "분해되어", "산소", "생성하", "설명합니다", "수소와", "전기분해", "통해"]
+  },
+  {
+    "category": "chem",
+    "name": "알루미늄은 수산화나트륨과 반응합니다.",
+    "latex": "2\\text{Al} + 2\\text{NaOH} + 6\\text{H}_2\\text{O} \\rightarrow 2\\text{NaAl(OH)}_4 + 3\\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "가스", "가시적인", "반응하여", "반응합니다", "발생으로", "방법", "생성하", "설명합니다", "수산화나트륨", "수산화나트륨과", "수소", "알루미늄", "알루미늄은", "알루미늄은 수산화나트륨과 반응합니다", "용액과"]
+  },
+  {
+    "category": "chem",
+    "name": "이산화탄소는 수산화나트륨과 반응한다",
+    "latex": "\\text{CO}_2 + 2\\text{NaOH} \\rightarrow \\text{Na}_2\\text{CO}_3 + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "반응하여", "반응한다", "방법", "생성하", "설명합니다", "수산화나트륨과", "이산화탄소", "이산화탄소는", "이산화탄소는 수산화나트륨과 반응한다", "탄산나트륨과"]
+  },
+  {
+    "category": "chem",
+    "name": "염화바륨은 황산나트륨과 반응합니다.",
+    "latex": "\\text{BaCl}_2 + \\text{Na}_2\\text{SO}_4 \\rightarrow \\text{BaSO}_4\\downarrow + 2\\text{NaCl}",
+    "keywords": ["chem", "chemistry", "반응하여", "반응합니다", "방법", "설명합니다", "염화나트륨", "염화바륨", "염화바륨은", "염화바륨은 황산나트륨과 반응합니다", "용액", "침전물과", "형성하", "황산나트륨과", "황산바륨"]
+  },
+  {
+    "category": "chem",
+    "name": "염소는 수산화나트륨과 반응한다",
+    "latex": "\\text{Cl}_2 + 2\\text{NaOH} \\rightarrow \\text{NaCl} + \\text{NaClO} + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "반응하여", "반응한다", "방법", "생성하", "설명합니다", "수산화나트륨과", "염소", "염소는", "염소는 수산화나트륨과 반응한다", "염화나트륨과", "차아염소산나트륨"]
+  },
+  {
+    "category": "chem",
+    "name": "이산화황은 염소수와 반응합니다.",
+    "latex": "\\text{SO}_2 + \\text{Cl}_2 + 2\\text{H}_2\\text{O} \\rightarrow \\text{H}_2\\text{SO}_4 + 2\\text{HCl}",
+    "keywords": ["chem", "chemistry", "반응하여", "반응합니다", "방법", "생성하", "설명합니다", "염산", "염소수와", "이산화황", "이산화황은", "이산화황은 염소수와 반응합니다", "황산과"]
+  },
+  {
+    "category": "chem",
+    "name": "베이킹 소다는 가열하면 분해됩니다.",
+    "latex": "2\\text{NaHCO}_3 \\rightarrow \\text{Na}_2\\text{CO}_3 + \\text{CO}_2\\uparrow + \\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "가스와", "가열", "가열하면", "고체", "대해", "베이킹", "베이킹 소다는 가열하면 분해됩니다", "분해되어", "분해됩니다", "생성하", "설명합니다", "소다", "소다는", "제품"]
+  },
+  {
+    "category": "chem",
+    "name": "구리는 진한 황산과 반응합니다.",
+    "latex": "\\text{Cu} + 2\\text{H}_2\\text{SO}_4 (\\text{浓}) \\rightarrow \\text{CuSO}_4 + 2\\text{H}_2\\text{O} + \\text{SO}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "구리", "구리는", "구리는 진한 황산과 반응합니다", "반응하", "반응합니다", "생성하기", "설명합니다", "위해", "이산화황", "진한", "황산과", "황산구리와"]
+  },
+  {
+    "category": "chem",
+    "name": "구리는 진한 질산과 반응합니다.",
+    "latex": "\\text{3Cu} + 8\\text{HNO}_3 (\\text{浓}) \\rightarrow 3\\text{Cu(NO}_3)_2 + 2\\text{NO}_2\\uparrow + 4\\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "구리", "구리는", "구리는 진한 질산과 반응합니다", "반응하여", "반응합니다", "방법", "생성하", "설명합니다", "이산화질소", "진한", "질산과", "질산구리와"]
+  },
+  {
+    "category": "chem",
+    "name": "수산화철이 산화된다",
+    "latex": "4\\text{Fe(OH)}_2 + \\text{O}_2 + 2\\text{H}_2\\text{O} \\rightarrow 4\\text{Fe(OH)}_3",
+    "keywords": ["chem", "chemistry", "공기", "산화되어", "산화된다", "설명합니다", "수산화철", "수산화철이", "수산화철이 산화된다", "중에서", "침전물", "형성하"]
+  },
+  {
+    "category": "chem",
+    "name": "실리콘은 수산화나트륨과 반응합니다.",
+    "latex": "\\text{Si} + 2\\text{NaOH} + 2\\text{H}_2\\text{O} \\rightarrow \\text{Na}_2\\text{SiO}_3 + 2\\text{H}_2\\uparrow",
+    "keywords": ["chem", "chemistry", "규산나트륨과", "규소", "반응하여", "반응합니다", "방법", "생성하", "설명합니다", "수산화나트륨과", "수소", "실리콘", "실리콘은", "실리콘은 수산화나트륨과 반응합니다"]
+  },
+  {
+    "category": "chem",
+    "name": "황산제1철이 산화됨",
+    "latex": "2\\text{FeSO}_4 + \\text{O}_2 + 2\\text{H}_2\\text{O} \\rightarrow 2\\text{Fe}_2\\text{O}_3 + 2\\text{H}_2\\text{SO}_4",
+    "keywords": ["chem", "chemistry", "공기", "대해", "산화되어", "산화됨", "산화제2철과", "설명합니다", "중에서", "형성하", "황산", "황산제1철", "황산제1철이", "황산제1철이 산화됨"]
+  },
+  {
+    "category": "chem",
+    "name": "중탄산칼슘은 소량의 수산화나트륨과 반응합니다.",
+    "latex": "\\text{Ca(HCO}_3)_2 + 2\\text{NaOH} \\rightarrow \\text{CaCO}_3\\downarrow + \\text{Na}_2\\text{CO}_3 + 2\\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "반응하여", "반응합니다", "방법", "생성하", "설명합니다", "소량", "소량의", "수산화나트륨과", "수산화칼슘", "중탄산칼슘", "중탄산칼슘은", "중탄산칼슘은 소량의 수산화나트륨과 반응합니다", "침전물과", "탄산나트륨"]
+  },
+  {
+    "category": "chem",
+    "name": "중탄산칼슘은 과량의 수산화나트륨과 반응합니다.",
+    "latex": "\\text{Ca(HCO}_3)_2 + 2\\text{NaOH} \\rightarrow \\text{Ca(OH)}_2\\downarrow + \\text{Na}_2\\text{CO}_3 + 2\\text{H}_2\\text{O}",
+    "keywords": ["chem", "chemistry", "과량", "과량의", "반응하여", "반응합니다", "방법", "생성하", "설명합니다", "수산화나트륨과", "수산화칼슘", "중탄산칼슘", "중탄산칼슘은", "중탄산칼슘은 과량의 수산화나트륨과 반응합니다", "침전물과", "탄산나트륨"]
+  },
+  {
+    "category": "physics",
+    "name": "자기장에서 하전 입자에 가해지는 힘을 계산합니다.",
+    "latex": "F = qvB \\sinθ",
+    "keywords": ["physical", "physics", "가해지", "가해지는", "계산합니다", "로렌츠", "속도", "입자", "입자에", "자기장", "자기장에서", "자기장에서 하전 입자에 가해지는 힘을 계산합니다", "전류", "전하", "하전", "함수입니다", "힘을"]
+  },
+  {
+    "category": "physics",
+    "name": "코일을 통한 자속 계산",
+    "latex": "\\varPhi = B \\times A",
+    "keywords": ["physical", "physics", "강도와", "계산", "곱입니다", "면적", "자기장", "자속", "코일", "코일을", "코일을 통한 자속 계산", "통한"]
+  },
+  {
+    "category": "physics",
+    "name": "전자기파의 전파 속도 계산",
+    "latex": "c = \\lambda \\times f",
+    "keywords": ["physical", "physics", "계산", "곱입니다", "속도", "전자기파", "전자기파의", "전자기파의 전파 속도 계산", "전파", "주파수", "파장과"]
+  },
+  {
+    "category": "physics",
+    "name": "광자의 에너지 계산",
+    "latex": "E = h \\times f",
+    "keywords": ["physical", "physics", "계산", "곱입니다", "광자", "광자의", "광자의 에너지 계산", "상수와", "에너지", "주파수", "플랑크"]
+  },
+  {
+    "category": "physics",
+    "name": "전자기 유도의 기전력 계산",
+    "latex": "\\mathcal{E} = -\\frac{\\rm d\\varPhi}{\\rm dt}",
+    "keywords": ["physical", "physics", "값입니다", "계산", "기전력", "변화율", "유도", "유도의", "음수", "자속", "전자기", "전자기 유도의 기전력 계산"]
+  },
+  {
+    "category": "physics",
+    "name": "인덕터의 자체 인덕턴스 계수 계산",
+    "latex": "L = \\frac{\\varPhi}{I}",
+    "keywords": ["physical", "physics", "계산", "계수", "대한", "비율입니다", "인덕터", "인덕터의", "인덕터의 자체 인덕턴스 계수 계산", "인덕턴스", "자기", "자속", "자체", "전류"]
+  },
+  {
+    "category": "physics",
+    "name": "전기 제품의 전력 계산",
+    "latex": "P = U \\times I",
+    "keywords": ["physical", "physics", "계산", "곱이다", "전기", "전기 제품의 전력 계산", "전력", "전류", "전압과", "제품", "제품의"]
+  },
+  {
+    "category": "physics",
+    "name": "회로를 통과하는 전하 계산",
+    "latex": "Q = I \\times t",
+    "keywords": ["physical", "physics", "계산", "곱이다", "시간", "전류와", "전하", "통과하", "통과하는", "회로", "회로를", "회로를 통과하는 전하 계산"]
+  },
+  {
+    "category": "physics",
+    "name": "회로의 전압, 전류 또는 저항을 계산합니다.",
+    "latex": "U = I \\times R",
+    "keywords": ["physical", "physics", "계산합니다", "곱입니다", "또는", "저항", "저항을", "전류", "전류와", "전압", "회로", "회로의", "회로의 전압 전류 또는 저항을 계산합니다"]
+  },
+  {
+    "category": "physics",
+    "name": "액체에 있는 물체의 부력 계산",
+    "latex": "F = \\rho \\times g \\times V",
+    "keywords": ["physical", "physics", "가속도", "계산", "곱입니다", "물체", "물체의", "밀도", "변위된", "부력", "부피", "액체", "액체에", "액체에 있는 물체의 부력 계산", "있는", "중력"]
+  },
+  {
+    "category": "physics",
+    "name": "물질의 밀도 계산",
+    "latex": "\\rho = \\frac{m}{V}",
+    "keywords": ["physical", "physics", "계산", "물질", "물질의", "물질의 밀도 계산", "밀도", "부피", "비율입니다", "질량과"]
+  },
+  {
+    "category": "physics",
+    "name": "렌즈의 초점 거리 계산",
+    "latex": "\\frac{1}{f} = \\frac{1}{d_o} + \\frac{1}{d_i}",
+    "keywords": ["physical", "physics", "거리", "거리와", "계산", "관련", "렌즈", "렌즈의", "렌즈의 초점 거리 계산", "물체", "이미지", "있습니다", "초점"]
+  },
+  {
+    "category": "physics",
+    "name": "빛의 굴절률 계산",
+    "latex": "n = \\frac{c}{v}",
+    "keywords": ["physical", "physics", "계산", "굴절률", "매질에서", "비율입니다", "빛의", "빛의 굴절률 계산", "속도", "속도와", "진공에서"]
+  },
+  {
+    "category": "physics",
+    "name": "스프링이나 기타 탄성 물체의 복원력을 계산합니다.",
+    "latex": "F = -k \\times x",
+    "keywords": ["physical", "physics", "계산합니다", "곱입니다", "기타", "물체", "물체의", "변위", "복원력", "복원력을", "상수와", "스프링", "스프링이나", "스프링이나 기타 탄성 물체의 복원력을 계산합니다", "탄성"]
+  },
+  {
+    "category": "physics",
+    "name": "단조파 운동의 주기 계산",
+    "latex": "T = 2 \\pi \\sqrt{\\frac{m}{k}}",
+    "keywords": ["physical", "physics", "2π", "것입니다", "계산", "곱한", "단조파", "단조파 운동의 주기 계산", "대한", "비율", "상수", "스프링", "운동", "운동의", "제곱근", "주기", "질량"]
+  },
+  {
+    "category": "physics",
+    "name": "스프링의 탄성 위치 에너지를 계산합니다.",
+    "latex": "E = \\frac{1}{2} k x^2",
+    "keywords": ["physical", "physics", "계산합니다", "변위", "상수와", "스프링", "스프링의", "스프링의 탄성 위치 에너지를 계산합니다", "에너지", "에너지를", "위치", "절반입니다", "제곱", "탄성"]
+  },
+  {
+    "category": "physics",
+    "name": "물체에 작용하는 힘 계산",
+    "latex": "F = m \\times a",
+    "keywords": ["physical", "physics", "가속도", "계산", "물체", "물체에", "물체에 작용하는 힘 계산", "산물이다", "작용하", "작용하는", "질량과"]
+  },
+  {
+    "category": "physics",
+    "name": "물체의 중력 계산",
+    "latex": "F_g = m \\times g",
+    "keywords": ["physical", "physics", "계산", "곱이다", "물체", "물체의", "물체의 중력 계산", "중력", "중력가속도", "질량과"]
+  },
+  {
+    "category": "physics",
+    "name": "기계력 계산",
+    "latex": "P = \\frac{W}{t}",
+    "keywords": ["physical", "physics", "계산", "기계력", "기계력 계산", "단위", "수행된", "시간당", "일입니다", "전력"]
+  },
+  {
+    "category": "physics",
+    "name": "물체가 한 일을 계산한다",
+    "latex": "W = F \\times d",
+    "keywords": ["physical", "physics", "계산한다", "물체", "물체가", "물체가 한 일을 계산한다", "변위", "산물이다", "일을", "힘과"]
+  },
+  {
+    "category": "physics",
+    "name": "물체 사이의 마찰력 계산",
+    "latex": "F_f = \\mu \\times N",
+    "keywords": ["physical", "physics", "계산", "곱입니다", "마찰계수와", "마찰력", "물체", "물체 사이의 마찰력 계산", "사이", "사이의", "수직항력"]
+  },
+  {
+    "category": "physics",
+    "name": "물체 표면의 마찰 계수 계산",
+    "latex": "\\mu = \\frac{F_f}{N}",
+    "keywords": ["physical", "physics", "계산", "계수", "마찰", "마찰계수", "마찰력과", "물체", "물체 표면의 마찰 계수 계산", "비율입니다", "수직력", "표면", "표면의"]
+  },
+  {
+    "category": "physics",
+    "name": "물체의 운동에너지 계산",
+    "latex": "E_k = \\frac{1}{2} m v^2",
+    "keywords": ["physical", "physics", "계산", "물체", "물체의", "물체의 운동에너지 계산", "속도", "에너지", "운동", "운동에너지", "절반입니다", "제곱", "질량과"]
+  },
+  {
+    "category": "physics",
+    "name": "물체의 중력 위치 에너지 계산",
+    "latex": "E_p = m \\times g \\times h",
+    "keywords": ["physical", "physics", "가속도", "계산", "곱입니다", "높이", "물체", "물체의", "물체의 중력 위치 에너지 계산", "에너지", "위치", "중력", "질량"]
+  },
+  {
+    "category": "physics",
+    "name": "온도 변화로 인한 물체의 팽창 계산",
+    "latex": "\\Delta L = \\alpha \\times L_0 \\times \\Delta T",
+    "keywords": ["physical", "physics", "계산", "계수", "곱입니다", "물체", "물체의", "변화", "변화로", "선형", "온도", "온도 변화로 인한 물체의 팽창 계산", "인한", "초기", "팽창"]
+  },
+  {
+    "category": "physics",
+    "name": "온도 변화로 인한 물체의 부피 팽창 계산",
+    "latex": "\\Delta V = \\beta \\times V_0 \\times \\Delta T",
+    "keywords": ["physical", "physics", "계산", "계수", "곱입니다", "물체", "물체의", "변화", "변화로", "부피", "온도", "온도 변화로 인한 물체의 부피 팽창 계산", "인한", "초기", "팽창"]
+  },
+  {
+    "category": "physics",
+    "name": "물체가 흡수하거나 방출하는 열을 계산합니다.",
+    "latex": "Q = m \\times c \\times \\Delta T",
+    "keywords": ["physical", "physics", "계산합니다", "곱입니다", "물체", "물체가", "물체가 흡수하거나 방출하는 열을 계산합니다", "방출하", "방출하는", "변화", "비열", "열을", "온도", "용량", "질량", "흡수하거나"]
+  },
+  {
+    "category": "physics",
+    "name": "시스템의 에너지 변화 계산",
+    "latex": "\\Delta E = Q - W",
+    "keywords": ["physical", "physics", "계산", "관계", "법칙열과", "변화", "보존", "시스템", "시스템의", "시스템의 에너지 변화 계산", "에너지"]
+  },
+  {
+    "category": "physics",
+    "name": "음파의 전파 속도 계산",
+    "latex": "v = \\lambda \\times f",
+    "keywords": ["physical", "physics", "계산", "곱입니다", "소리", "속도", "음파", "음파의", "음파의 전파 속도 계산", "전파", "주파수", "파장과"]
+  },
+  {
+    "category": "physics",
+    "name": "소리의 크기를 계산",
+    "latex": "L = 10 \\lg \\frac{I}{I_0}",
+    "keywords": ["physical", "physics", "강도", "계산", "기준", "대한", "로그입니다", "볼륨", "비율", "사운드", "소리", "소리의", "소리의 크기를 계산", "크기", "크기를"]
+  },
+  {
+    "category": "physics",
+    "name": "물체의 가속도 계산",
+    "latex": "a = \\frac{\\Delta v}{t}",
+    "keywords": ["physical", "physics", "가속도", "계산", "대한", "물체", "물체의", "물체의 가속도 계산", "변화", "비율입니다", "속도", "시간"]
+  },
+  {
+    "category": "physics",
+    "name": "가속 운동에서 물체의 변위를 계산합니다.",
+    "latex": "s = ut + \\frac{1}{2} a t^2",
+    "keywords": ["physical", "physics", "가속", "가속 운동에서 물체의 변위를 계산합니다", "가속도", "계산합니다", "공식초기", "대한", "물체", "물체의", "변위", "변위를", "속도", "운동", "운동에서"]
+  },
+  {
+    "category": "physics",
+    "name": "가속 운동 중인 물체의 최종 속도를 계산합니다.",
+    "latex": "v^2 = u^2 + 2as",
+    "keywords": ["physical", "physics", "가속", "가속 운동 중인 물체의 최종 속도를 계산합니다", "가속도", "계산합니다", "공식초기", "물체", "물체의", "속도", "속도를", "운동", "제곱", "중인", "최종"]
+  },
+  {
+    "category": "physics",
+    "name": "액체 또는 기체의 압력 계산",
+    "latex": "P = \\frac{F}{A}",
+    "keywords": ["physical", "physics", "계산", "기체", "기체의", "또는", "면적", "비율입니다", "압력", "액체", "액체 또는 기체의 압력 계산", "힘과"]
+  },
+  {
+    "category": "physics",
+    "name": "용기 벽에 액체가 가하는 압력을 계산합니다.",
+    "latex": "F = P \\times A",
+    "keywords": ["physical", "physics", "가하", "가하는", "계산합니다", "면적", "물체", "벽에", "압력", "압력과", "압력을", "액체", "액체가", "용기", "용기 벽에 액체가 가하는 압력을 계산합니다", "작용하", "힘이다"]
+  },
+  {
+    "category": "physics",
+    "name": "액체 속 깊이의 압력을 계산합니다.",
+    "latex": "P = \\rho \\times g \\times h",
+    "keywords": ["physical", "physics", "가속도", "계산합니다", "곱입니다", "깊이", "깊이의", "밀도", "압력", "압력을", "액체", "액체 속 깊이의 압력을 계산합니다", "정수압", "중력"]
+  },
+  {
+    "category": "physics",
+    "name": "원운동을 하는 물체의 가속도 계산",
+    "latex": "a_c = \\frac{v^2}{r}",
+    "keywords": ["physical", "physics", "가속도", "계산", "구심", "물체", "물체의", "반지름", "비율입니다", "속도", "원운동", "원운동을", "원운동을 하는 물체의 가속도 계산", "제곱과", "하는"]
+  },
+  {
+    "category": "physics",
+    "name": "원운동하는 물체의 구심력 계산",
+    "latex": "F_c = \\frac{m v^2}{r}",
+    "keywords": ["physical", "physics", "계산", "구심력", "물체", "물체의", "반지름", "비율입니다", "속도", "원운동하", "원운동하는", "원운동하는 물체의 구심력 계산", "제곱과", "질량"]
+  },
+  {
+    "category": "physics",
+    "name": "파동의 전파 속도 계산",
+    "latex": "v = \\lambda f",
+    "keywords": ["physical", "physics", "계산", "곱입니다", "속도", "전파", "주파수", "파동", "파동의", "파동의 전파 속도 계산", "파장과"]
+  },
+  {
+    "category": "physics",
+    "name": "광파의 파장을 계산",
+    "latex": "\\lambda = \\frac{c}{f}",
+    "keywords": ["physical", "physics", "계산", "광파", "광파의", "광파의 파장을 계산", "비율입니다", "속도와", "주파수", "파장", "파장을"]
+  },
+  {
+    "category": "physics",
+    "name": "원형 전류 루프의 자기장 계산",
+    "latex": "B = \\frac{\\mu_0 I}{2R}",
+    "keywords": ["physical", "physics", "강도", "계산", "루프", "루프의", "생성된", "원형", "원형 전류 루프의 자기장 계산", "의해", "자기장", "전류"]
+  },
+  {
+    "category": "physics",
+    "name": "진공에서 전자기파의 전파 속도를 계산합니다.",
+    "latex": "v = c",
+    "keywords": ["physical", "physics", "계산합니다", "관련", "상수와", "속도", "속도를", "있습니다", "전자기", "전자기파", "전자기파의", "전파", "진공에서", "진공에서 전자기파의 전파 속도를 계산합니다"]
+  },
+  {
+    "category": "physics",
+    "name": "전기장의 에너지 밀도 계산",
+    "latex": "u_E = \\frac{1}{2} \\varepsilon_0 E^2",
+    "keywords": ["physical", "physics", "강도", "계산", "밀도", "에너지", "전기장", "전기장의", "전기장의 에너지 밀도 계산", "절반입니다", "제곱"]
+  },
+  {
+    "category": "physics",
+    "name": "자속을 계산",
+    "latex": "\\varPhi = B A \\cos \\theta",
+    "keywords": ["physical", "physics", "각도", "강도", "계산", "곱입니다", "면적", "방향", "자기장", "자속", "자속을", "자속을 계산"]
+  },
+  {
+    "category": "physics",
+    "name": "회로 구성 요소의 전력 계산",
+    "latex": "P = I^2 R",
+    "keywords": ["physical", "physics", "계산", "곱입니다", "구성", "요소", "요소의", "저항", "전력", "전류", "제곱과", "회로", "회로 구성 요소의 전력 계산"]
+  },
+  {
+    "category": "physics",
+    "name": "직렬 회로의 총 전압 계산",
+    "latex": "V_{\\rm total} = V_1 + V_2 + \\cdots + V_n",
+    "keywords": ["physical", "physics", "걸리", "계산", "저항", "전압", "직렬", "직렬 회로의 총 전압 계산", "합입니다", "회로", "회로의"]
+  },
+  {
+    "category": "physics",
+    "name": "병렬 회로의 총 저항 계산",
+    "latex": "\\frac{1}{R_{\\rm total}} = \\frac{1}{R_1} + \\frac{1}{R_2} + \\cdots + \\frac{1}{R_n}",
+    "keywords": ["physical", "physics", "계산", "병렬", "병렬 회로의 총 저항 계산", "역수", "역수입니다", "저항", "합계", "회로", "회로의"]
+  },
+  {
+    "category": "physics",
+    "name": "물체의 운동량 계산",
+    "latex": "p = mv",
+    "keywords": ["physical", "physics", "계산", "곱이다", "물체", "물체의", "물체의 운동량 계산", "속도", "운동량", "질량과"]
+  },
+  {
+    "category": "physics",
+    "name": "물체에 가해지는 힘의 충격량을 계산합니다.",
+    "latex": "J = F \\times t",
+    "keywords": ["physical", "physics", "가해지", "가해지는", "계산합니다", "곱이다", "물체", "물체에", "물체에 가해지는 힘의 충격량을 계산합니다", "작용시간", "충격량", "충격량을", "힘과", "힘의"]
+  },
+  {
+    "category": "physics",
+    "name": "물체의 운동 에너지에 대한 외력의 영향을 계산합니다.",
+    "latex": "\\Delta E_k = W_{\\text{w}}",
+    "keywords": ["physical", "physics", "같다", "계산합니다", "대한", "물체", "물체의", "물체의 운동 에너지에 대한 외력의 영향을 계산합니다", "변화", "에너지", "에너지에", "영향", "영향을", "외력", "외력의", "외부", "운동", "운동에너지", "일과"]
+  },
+  {
+    "category": "physics",
+    "name": "물체의 총 에너지 계산",
+    "latex": "E_{\\text{A}} = E_k + E_p",
+    "keywords": ["physical", "physics", "계산", "물체", "물체의", "물체의 총 에너지 계산", "에너지", "운동에너지와", "위치에너지", "총에너지", "합이다"]
+  },
+  {
+    "category": "physics",
+    "name": "빛의 내부 전반사에 대한 임계각 계산",
+    "latex": "\\theta_c = \\arcsin \\frac{n_2}{n_1}",
+    "keywords": ["physical", "physics", "계산", "굴절률", "내부", "대한", "비율", "빛의", "빛의 내부 전반사에 대한 임계각 계산", "아크사인", "임계각", "전반사", "전반사에", "함수입니다"]
+  },
+  {
+    "category": "physics",
+    "name": "핵반응에서 에너지 방출을 계산합니다.",
+    "latex": "E = \\Delta m c^2",
+    "keywords": ["physical", "physics", "계산합니다", "곱이다", "방출", "방출을", "빛속도", "에너지", "제곱", "질량차와", "핵반응", "핵반응에서", "핵반응에서 에너지 방출을 계산합니다"]
+  },
+  {
+    "category": "physics",
+    "name": "붕괴 후 방사성 물질의 양을 계산합니다.",
+    "latex": "N(t) = N_0 e^{-\\lambda t}",
+    "keywords": ["physical", "physics", "계산합니다", "물질", "물질의", "방사성", "붕괴", "붕괴 후 방사성 물질의 양을 계산합니다", "시간", "양을", "지수함수이다"]
+  },
+  {
+    "category": "physics",
+    "name": "스프링의 복원력 계산",
+    "latex": "F = -kx",
+    "keywords": ["physical", "physics", "계산", "곱입니다", "변위", "복원력", "상수와", "스프링", "스프링의", "스프링의 복원력 계산"]
+  },
+  {
+    "category": "physics",
+    "name": "이상기체의 상태 계산",
+    "latex": "PV = nRT",
+    "keywords": ["physical", "physics", "계산", "관계", "기체", "부피", "상수", "상태", "압력", "온도", "이상기체", "이상기체의", "이상기체의 상태 계산"]
+  },
+  {
+    "category": "physics",
+    "name": "주어진 부피에서 가스 압력을 계산합니다.",
+    "latex": "P = \\frac{nRT}{V}",
+    "keywords": ["physical", "physics", "가스", "계산식", "계산합니다", "법칙에서", "부피에서", "압력", "압력을", "이상기체", "주어진", "주어진 부피에서 가스 압력을 계산합니다", "파생된"]
+  },
+  {
+    "category": "physics",
+    "name": "가스의 내부 에너지 변화를 계산합니다.",
+    "latex": "\\Delta U = Q - W",
+    "keywords": ["physical", "physics", "가스", "가스의", "가스의 내부 에너지 변화를 계산합니다", "같습니다", "것과", "계산합니다", "내부", "변화", "변화를", "에너지", "열에서", "외부에서", "흡수된"]
+  },
+  {
+    "category": "physics",
+    "name": "내부 에너지에 대한 가스 부피 변화의 영향 계산",
+    "latex": "\\frac{\\partial U}{\\partial V} = -P",
+    "keywords": ["physical", "physics", "가스", "같습니다", "계산", "내부", "내부 에너지에 대한 가스 부피 변화의 영향 계산", "대한", "미분", "변화", "변화의", "부압과", "부피", "에너지", "에너지에", "영향"]
+  },
+  {
+    "category": "physics",
+    "name": "물체가 녹거나 증발하는 동안의 열 계산",
+    "latex": "Q = mL",
+    "keywords": ["physical", "physics", "계산", "곱입니다", "녹거나", "동안", "동안의", "물체", "물체가", "물체가 녹거나 증발하는 동안의 열 계산", "잠열", "잠열량", "증발하", "증발하는", "질량과"]
+  },
+  {
+    "category": "physics",
+    "name": "전자 전이 에너지 계산",
+    "latex": "\\Delta E = h f",
+    "keywords": ["physical", "physics", "계산", "광자", "에너지", "에너지입니다", "전이", "전자", "전자 전이 에너지 계산", "준위", "차이"]
+  },
+  {
+    "category": "physics",
+    "name": "물체의 속도 계산",
+    "latex": "v = u + at",
+    "keywords": ["physical", "physics", "계산", "관계", "물체", "물체의", "물체의 속도 계산", "속도", "속도와", "시간"]
+  },
+  {
+    "category": "physics",
+    "name": "진동 변위 계산",
+    "latex": "x(t) = A \\cos(\\omega t + \\varphi)",
+    "keywords": ["physical", "physics", "계산", "단순", "변위", "운동", "조화", "진동", "진동 변위 계산"]
+  },
+  {
+    "category": "physics",
+    "name": "단순 조화 운동의 각주파수 계산",
+    "latex": "\\omega = 2\\pi f",
+    "keywords": ["physical", "physics", "2π배입니다", "각주파수", "계산", "단순", "단순 조화 운동의 각주파수 계산", "운동", "운동의", "조화", "주파수"]
+  },
+  {
+    "category": "physics",
+    "name": "단순 조화 운동의 주파수 계산",
+    "latex": "f = \\frac{1}{T}",
+    "keywords": ["physical", "physics", "계산", "기간", "단순", "단순 조화 운동의 주파수 계산", "빈도", "역수입니다", "운동", "운동의", "조화", "주파수"]
+  }
+]

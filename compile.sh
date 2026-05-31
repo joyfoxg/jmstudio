@@ -33,18 +33,18 @@ if [ $? -ne 0 ]; then
 fi
 
 # app_config.py에서 버전 정보 추출
-APP_VER=$($PY_CMD -c "import app_config; print(app_config.VERSION)")
+APP_VER=$($PY_CMD -c "from jmstudio import app_config; print(app_config.VERSION)")
 if [ -z "$APP_VER" ]; then
     APP_VER="unknown"
 fi
 echo "Detected version: v$APP_VER"
 
-# Step 4: Compiling jmstudio.py
+# Step 4: Compiling jmstudio
 echo ""
-echo "[Step 4] Compiling jmstudio.py into a macOS App Bundle..."
+echo "[Step 4] Compiling into a macOS App Bundle..."
 # macOS에서는 --windowed 옵션 사용 시 .app 폴더 패키지가 생성됩니다.
 # 아이콘으로 app_icon.png를 지정하면 PyInstaller가 내부적으로 .icns 변환을 시도합니다.
-$PY_CMD -m PyInstaller --clean --noconfirm --onefile --windowed --icon=app_icon.png --name="JoyMarkdownStudio-v$APP_VER" jmstudio.py
+$PY_CMD -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "jmstudio/frontend:jmstudio/frontend" --add-data "client_secrets.json:." --icon=app_icon.png --name="JoyMarkdownStudio-v$APP_VER" jmstudio/__main__.py
 if [ $? -ne 0 ]; then
     echo "[ERROR] PyInstaller compilation failed!"
     exit 1

@@ -1,1 +1,1 @@
-recursive-include frontend *
+recursive-include jmstudio/frontend *

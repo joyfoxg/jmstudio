@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Joy Markdown Studio v3.9.7</title>
+    <!-- 외부 라이브러리 CDN 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
+    <!-- force-graph: 그래프 뷰 버튼 클릭 시 동적 로드 -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css?v=3.9.7_template_helper_v1">
+</head>
+<body>
+
+    <!-- 스플래시 화면 -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <i data-lucide="book-open" style="width: 60px; height: 60px;"></i>
+            </div>
+            <div class="splash-title">JM Studio</div>
+        </div>
+    </div>
+    
+
+    <!-- 헤더 영역 -->
+    <header>
+        <div class="brand-section">
+            <div class="brand-logo"><i data-lucide="book-open" style="width: 18px; height: 18px;"></i></div>
+            <div class="brand-title">JM Studio</div>
+            <button class="add-doc-btn" onclick="addDocumentToLibrary()" title="서재에 마크다운 문서(.md) 추가" data-i18n-title="tooltip_add_doc">
+                <i data-lucide="file-plus" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="btn_add_doc">문서 추가</span>
+            </button>
+            <button class="add-doc-btn" onclick="openTagsManager()" title="해시태그 관리자" data-i18n-title="sidebar_title_tags">
+                <i data-lucide="tag" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="sidebar_title_tags">해시태그 관리자</span>
+            </button>
+        </div>
+
+        <!-- 뷰 모드 토글 -->
+        <div class="view-mode-toggles">
+            <button class="mode-btn" id="mode-edit" onclick="setViewMode('edit')">
+                <i data-lucide="edit" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="mode_edit">편집기</span>
+            </button>
+            <button class="mode-btn active" id="mode-split" onclick="setViewMode('split')">
+                <i data-lucide="columns" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="mode_split">스플릿</span>
+            </button>
+            <button class="mode-btn" id="mode-preview" onclick="setViewMode('preview')">
+                <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="mode_preview">미리보기</span>
+            </button>
+            <button class="mode-btn" id="mode-graph" onclick="toggleGraphView()" style="color: #a855f7;">
+                <i data-lucide="share-2" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="mode_graph">Graph</span>
+            </button>
+        </div>
+
+        <!-- 액션 그룹 -->
+        <div class="action-group">
+            <button class="btn" onclick="toggleDocumentFullscreen()" title="문서 전체화면 (더블클릭 단축 지원)" data-i18n-title="tooltip_fullscreen">
+                <i id="fs-doc-icon" data-lucide="expand" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="btn_fullscreen">문서 전체화면</span>
+            </button>
+            <button class="btn btn-accent" onclick="saveActiveFile()">
+                <i data-lucide="save" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="btn_save">저장</span>
+            </button>
+            <button class="btn" onclick="exportToHtml()">
+                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="btn_export_html">HTML 내보내기</span>
+            </button>
+            <button class="btn" onclick="printDocument()">
+                <i data-lucide="printer" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="btn_print_pdf">PDF 인쇄</span>
+            </button>
+            <div class="lang-toggle-container" onclick="toggleLanguage()" title="언어 변경 / Switch Language" style="margin-left: 8px;">
+                <div class="lang-toggle-track">
+                    <span class="lang-text ko">KR</span>
+                    <span class="lang-text en">EN</span>
+                    <div class="lang-toggle-thumb"></div>
+                </div>
+            </div>
+            <button class="icon-btn" onclick="toggleTheme()" title="테마 전환" data-i18n-title="tooltip_theme" style="margin-left: 8px;">
+                <i id="theme-icon" data-lucide="sun" style="width: 18px; height: 18px;"></i>
+            </button>
+            <button class="icon-btn" onclick="toggleBlueLight()" title="블루라이트 차단 켜기" data-i18n-title="tooltip_blue_light_on" style="margin-left: 4px;">
+                <i id="blue-light-icon" data-lucide="eye" style="width: 18px; height: 18px;"></i>
+            </button>
+            <button class="icon-btn" onclick="openSettingsModal()" title="네트워크 및 보안 설정" data-i18n-title="tooltip_settings" style="margin-left: 4px;">
+                <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 메인 워크스페이스 -->
+    <main id="main-dropzone">
+        <!-- 드래그 드롭 오버레이 -->
+        <div class="drag-overlay" id="drag-overlay">
+            <i data-lucide="upload-cloud" style="width: 48px; height: 48px;"></i>
+            <div style="font-size: 1.2em; font-weight: 600;" data-i18n="msg_drag_drop_desc">여기에 마크다운 파일을 드롭하여 즉시 열기</div>
+        </div>
+
+        <!-- 사이드바 (내 서재 + 수식 입력기 + 화학식 검색 + 다이어그램) -->
+        <div class="sidebar" id="sidebar-panel" style="display: flex; flex-direction: column;">
+            <div class="sidebar-tabs" style="display: flex; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.15);">
+                <button class="sidebar-tab-btn active" id="tab-explorer" onclick="setSidebarTab('explorer')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid var(--accent); color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                    <i data-lucide="folder" style="width: 13px; height: 13px;"></i>
+                    <span data-i18n="tab_explorer">내 서재</span>
+                </button>
+                <button class="sidebar-tab-btn" id="tab-math" onclick="setSidebarTab('math')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                    <i data-lucide="calculator" style="width: 13px; height: 13px;"></i>
+                    <span data-i18n="tab_math">수식 입력기</span>
+                </button>
+                <button class="sidebar-tab-btn" id="tab-chemistry" onclick="setSidebarTab('chemistry')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                    <i data-lucide="beaker" style="width: 13px; height: 13px;"></i>
+                    <span data-i18n="tab_chemistry">화학식 검색</span>
+                </button>
+                <button class="sidebar-tab-btn" id="tab-diagram" onclick="setSidebarTab('diagram')" style="flex: 1; padding: 12px 6px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s;">
+                    <i data-lucide="network" style="width: 13px; height: 13px;"></i>
+                    <span data-i18n="tab_diagram">다이어그램</span>
+                </button>
+
+            </div>
+            
+            <!-- 내 서재 패널 -->
+            <div class="sidebar-content-pane" id="sidebar-content-explorer" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+                <div class="sidebar-header">
+                    <span class="sidebar-title" data-i18n="sidebar_title_explorer">내 서재</span>
+                    <div class="sidebar-actions">
+                        <button class="icon-btn" onclick="openCreateModal('file')" title="새 파일 생성" data-i18n-title="tooltip_create_file">
+                            <i data-lucide="file-plus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <button class="icon-btn" onclick="toggleTemplateSelector()" title="템플릿으로 새 파일 생성" data-i18n-title="tooltip_template_create" id="template-create-btn">
+                            <i data-lucide="layout-template" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <button class="icon-btn" onclick="openCreateModal('folder')" title="새 폴더 생성" data-i18n-title="tooltip_create_folder">
+                            <i data-lucide="folder-plus" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <button class="icon-btn" onclick="refreshWorkspace()" title="목록 새로고침" data-i18n-title="tooltip_refresh">
+                            <i data-lucide="rotate-cw" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 템플릿 셀렉터 패널 (기본 숨김) -->
+                <div id="sidebar-template-selector" style="display: none; flex: 1; flex-direction: column; overflow-y: auto; padding: 12px; gap: 8px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--border);">
+                        <span style="font-size: 0.82em; font-weight: 600; color: var(--accent);" data-i18n="templates_select_title">템플릿 문서 만들기</span>
+                        <button class="icon-btn" onclick="toggleTemplateSelector(false)" title="템플릿 선택 닫기" style="padding: 2px;">
+                            <i data-lucide="x" style="width: 12px; height: 12px;"></i>
+                        </button>
+                    </div>
+                    <div id="sidebar-templates-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- templates.js에서 콤팩트 카드형태로 주입됨 -->
+                    </div>
+                </div>
+
+                <!-- 트리 뷰 목록 -->
+                <div class="file-tree" id="file-tree-container"></div>
+
+                <!-- 구글 드라이브 동기화 아코디언 메뉴 -->
+                <details class="math-section-accordion" id="gdrive-sidebar-accordion" style="margin: 10px; border-color: var(--border);">
+                    <summary class="math-section-title" style="font-size: 0.8em; padding: 10px 12px;">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <i data-lucide="cloud" style="width: 14px; height: 14px; color: var(--accent);"></i>
+                            <span data-i18n="tab_cloud_sync">클라우드 싱크</span>
+                        </span>
+                    </summary>
+                    <div style="padding: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px;">
+                        <!-- 연결 상태 영역 -->
+                        <div class="settings-group" style="display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+                            <div id="gdrive-status-disconnected" style="display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; padding: 5px 0;">
+                                <i data-lucide="cloud-off" style="width: 32px; height: 32px; color: var(--text-muted);"></i>
+                                <div style="font-size: 0.8em; color: var(--text-muted);" data-i18n="cloud_sync_disconnected">구글 드라이브와 연결되어 있지 않습니다.</div>
+                                <button class="btn btn-accent" onclick="connectGoogleDrive()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px; font-size: 0.82em;">
+                                    <i data-lucide="link" style="width: 12px; height: 12px;"></i>
+                                    <span data-i18n="btn_cloud_sync_connect">구글 드라이브 연동하기</span>
+                                </button>
+                            </div>
+                            <div id="gdrive-status-connected" style="display: none; flex-direction: column; gap: 8px; padding: 5px 0; text-align: left;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <i data-lucide="cloud" style="width: 16px; height: 16px; color: var(--accent);"></i>
+                                    <span style="font-size: 0.82em; font-weight: 500;" data-i18n="cloud_sync_connected_as">연동 계정: </span>
+                                </div>
+                                <div id="gdrive-account-email" style="font-size: 0.76em; opacity: 0.85; word-break: break-all; padding-left: 22px; font-family: monospace;">-</div>
+                                <button class="btn" onclick="disconnectGoogleDrive()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); padding: 6px 10px; font-size: 0.82em; margin-top: 4px;">
+                                    <i data-lucide="link-2" style="width: 12px; height: 12px;"></i>
+                                    <span data-i18n="btn_cloud_sync_disconnect">연동 해제</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 현재 파일 동기화 설정 -->
+                        <div id="gdrive-file-sync-section" style="display: none; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: left;">
+                            <div style="font-size: 0.78em; font-weight: 600; color: var(--text-muted); text-transform: uppercase;" data-i18n="cloud_sync_file_status">현재 파일 상태</div>
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div id="active-file-sync-path" style="font-size: 0.78em; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace;">-</div>
+                                <div id="active-file-sync-badge" class="badge" style="font-size: 0.68em; padding: 1px 6px; border-radius: 3px; font-weight: 600; text-transform: uppercase;">-</div>
+                            </div>
+                            
+                            <button class="btn btn-accent" id="btn-sync-file-now" onclick="syncActiveFileNow()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px; font-size: 0.82em;">
+                                <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i>
+                                <span data-i18n="btn_sync_now">지금 동기화</span>
+                            </button>
+                            
+                            <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px;">
+                                <span style="font-size: 0.78em; color: var(--text-main);" data-i18n="lbl_auto_sync">저장 시 자동 동기화</span>
+                                <input type="checkbox" id="gdrive-auto-sync-toggle" onchange="toggleFileAutoSync(this.checked)" style="cursor: pointer; width: 14px; height: 14px;">
+                            </div>
+                        </div>
+
+                        <!-- 클라우드 보관 파일 목록 -->
+                        <div id="gdrive-remote-files-section" style="display: none; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: left;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 6px;">
+                                <span style="font-size: 0.78em; font-weight: 600; color: var(--text-muted); text-transform: uppercase;" data-i18n="cloud_files_title">클라우드 저장 문서</span>
+                                <button class="icon-btn-sm" onclick="refreshRemoteFiles()" title="클라우드 목록 새로고침" style="padding: 2px; width: 20px; height: 20px;">
+                                    <i data-lucide="rotate-cw" style="width: 10px; height: 10px;"></i>
+                                </button>
+                            </div>
+                            <div id="gdrive-remote-files-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; padding-right: 2px;">
+                                <!-- 원격 파일 리스트 항목이 동적으로 생성됨 -->
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+            
+            <!-- 다이어그램 입력기 패널 -->
+            <div class="sidebar-content-pane" id="sidebar-content-diagram" style="display: none; flex-direction: column; flex: 1; overflow-y: auto; padding: 16px; gap: 12px;">
+                <div class="sidebar-header" style="padding: 0 0 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                    <span class="sidebar-title" data-i18n="sidebar_title_diagram">다이어그램 & 마인드맵 도우미</span>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="math-section">
+                        <div class="math-section-title" data-i18n="diagram_title_mindmap">마인드맵 & 조직도</div>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertDiagramTemplate('mindmap')" style="text-align: center;">
+                                <i data-lucide="brain" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);" data-i18n="diagram_label_mindmap">마인드맵</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);" data-i18n="diagram_desc_mindmap">생각 구조화 / 브레인스토밍</span>
+                            </button>
+                            <button class="math-item" onclick="insertDiagramTemplate('orgchart')" style="text-align: center;">
+                                <i data-lucide="git-pull-request" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);" data-i18n="diagram_label_orgchart">조직도 (UML)</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);" data-i18n="diagram_desc_orgchart">계층형 트리 / 조직 구조</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="math-section">
+                        <div class="math-section-title" data-i18n="diagram_title_flow">흐름도 & 상태도</div>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertDiagramTemplate('flowchart')" style="text-align: center;">
+                                <i data-lucide="git-commit" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);" data-i18n="diagram_label_flowchart">플로우차트</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);" data-i18n="diagram_desc_flowchart">알고리즘 및 작업 순서도</span>
+                            </button>
+                            <button class="math-item" onclick="insertDiagramTemplate('state')" style="text-align: center;">
+                                <i data-lucide="refresh-cw" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);" data-i18n="diagram_label_state">상태도</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);" data-i18n="diagram_desc_state">시스템 상태 전이 모델링</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="math-section">
+                        <div class="math-section-title" data-i18n="diagram_title_structure">프로젝트 & 클래스 설계</div>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertDiagramTemplate('sequence')" style="text-align: center;">
+                                <i data-lucide="arrow-left-right" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);" data-i18n="diagram_label_sequence">시퀀스도</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);" data-i18n="diagram_desc_sequence">객체/서비스간 통신 흐름</span>
+                            </button>
+                            <button class="math-item" onclick="insertDiagramTemplate('class')" style="text-align: center;">
+                                <i data-lucide="layout" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);" data-i18n="diagram_label_class">클래스도</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);" data-i18n="diagram_desc_class">UML 클래스 및 설계도</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="math-section">
+                        <div class="math-section-title" data-i18n="diagram_title_pm">일정 및 데이터 분석</div>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertDiagramTemplate('gantt')" style="text-align: center;">
+                                <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);" data-i18n="diagram_label_gantt">간트 차트</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);" data-i18n="diagram_desc_gantt">일정 로드맵 및 기한 관리</span>
+                            </button>
+                            <button class="math-item" onclick="insertDiagramTemplate('pie')" style="text-align: center;">
+                                <i data-lucide="pie-chart" style="width: 18px; height: 18px; color: var(--accent); margin-bottom: 2px;"></i>
+                                <span style="font-weight: 600; font-size: 0.8em; color: var(--text-main);" data-i18n="diagram_label_pie">파이 차트</span>
+                                <span style="font-size: 0.64em; color: var(--text-muted);" data-i18n="diagram_desc_pie">데이터 비율 시각화</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 수식 입력기 패널 -->
+            <div class="sidebar-content-pane" id="sidebar-content-math" style="display: none; flex-direction: column; flex: 1; overflow-y: auto; padding: 16px; gap: 12px;">
+                <!-- 서브탭 네비게이션 -->
+                <div class="math-subtabs">
+                    <button class="math-subtab-btn active" id="subtab-math-math" onclick="setMathSubTab('math')" style="padding: 6px 2px; border: none; background: var(--accent-glow); color: var(--accent); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_math">📐 수학</button>
+                    <button class="math-subtab-btn" id="subtab-math-physics" onclick="setMathSubTab('physics')" style="padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_physics">⚛️ 물리</button>
+                    <button class="math-subtab-btn" id="subtab-math-bio" onclick="setMathSubTab('bio')" style="padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_bio">🧪 화학/생명</button>
+                    <button class="math-subtab-btn" id="subtab-math-cs" onclick="setMathSubTab('cs')" style="padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_cs">💻 컴공/AI</button>
+                    <button class="math-subtab-btn" id="subtab-math-ee" onclick="setMathSubTab('ee')" style="padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_ee">⚡ 전기/전자</button>
+                    <button class="math-subtab-btn" id="subtab-math-katex" onclick="pywebview.api.open_katex_support()" style="padding: 6px 2px; border: none; background: transparent; color: var(--text-muted); font-family: 'Outfit', sans-serif; font-size: 0.72em; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.2s; white-space: nowrap;" data-i18n="math_subtab_katex">📖 KATEX</button>
+                </div>
+
+
+                <!-- 검색 및 카테고리 필터 컨트롤 -->
+                <div class="math-filter-controls" style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <input type="text" id="math-search-input" placeholder="수식 키워드 검색..." data-i18n-placeholder="placeholder_math_search" oninput="filterMathSymbols()" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 6px 10px; font-size: 0.82em; outline: none; transition: border-color 0.2s;">
+                    <select id="math-category-select" onchange="filterMathSymbols()" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 6px 8px; font-size: 0.82em; outline: none; cursor: pointer; max-width: 120px;">
+                        <option value="all" data-i18n="lbl_all">전체</option>
+                    </select>
+                </div>
+
+                <!-- 1. 수학 서브탭 콘텐츠 -->
+                <div class="math-subtab-content" id="math-subtab-content-math" style="display: flex; flex-direction: column; gap: 8px;">
+                    <details class="math-section-accordion" data-section-id="basic" open>
+                        <summary class="math-section-title" data-i18n="math_title_basic">자주 쓰이는 기본 수식</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{?}{?}$')" data-raw-math="\frac{a}{b}"><span data-i18n="math_label_fraction">분수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\sqrt{?}$')" data-raw-math="\sqrt{x}"><span data-i18n="math_label_sqrt">루트</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$?^{?}$')" data-raw-math="a^b"><span data-i18n="math_label_power">거듭제곱</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$?_{?}$')" data-raw-math="a_n"><span data-i18n="math_label_subscript">아래첨자</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\sum_{i=1}^{n} ?_{i}$')" data-raw-math="\sum x_i"><span data-i18n="math_label_sum">합(Sum)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\prod_{i=1}^{n} ?_{i}$')" data-raw-math="\prod x_i"><span data-i18n="math_label_prod">곱(Prod)</span></button>
+                        </div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="calculus" open>
+                        <summary class="math-section-title" data-i18n="math_title_calculus">미적분 및 극한</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{d?}{d?}$')" data-raw-math="\frac{dy}{dx}"><span data-i18n="math_label_diff">미분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{\\partial ?}{\\partial ?}$')" data-raw-math="\frac{\partial y}{\partial x}"><span data-i18n="math_label_partial">편미분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\int f(x)\\,dx$')" data-raw-math="\int f(x)\,dx"><span data-i18n="math_label_indef_int">부정적분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\int_{?}^{?} ?\\,d?$')" data-raw-math="\int_a^b f(x)\,dx"><span data-i18n="math_label_def_int">정적분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lim_{? \\to ?} ?$')" data-raw-math="\lim_{x \to \infty} f(x)"><span data-i18n="math_label_limit">극한</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="greek" open>
+                        <summary class="math-section-title" data-i18n="math_title_greek">그리스 문자 (Greek)</summary>
+                        <div class="math-grid-small">
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\alpha$')" data-raw-math="\alpha">&alpha;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\beta$')" data-raw-math="\beta">&beta;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\gamma$')" data-raw-math="\gamma">&gamma;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\delta$')" data-raw-math="\delta">&delta;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\epsilon$')" data-raw-math="\epsilon">&epsilon;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\theta$')" data-raw-math="\theta">&theta;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\lambda$')" data-raw-math="\lambda">&lambda;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\pi$')" data-raw-math="\pi">&pi;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\sigma$')" data-raw-math="\sigma">&sigma;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\omega$')" data-raw-math="\omega">&omega;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\Delta$')" data-raw-math="\Delta">&Delta;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\Sigma$')" data-raw-math="\Sigma">&Sigma;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\Omega$')" data-raw-math="\Omega">&Omega;</button>
+                            <button class="math-item-small" onclick="insertMathSymbol('$\\Phi$')" data-raw-math="\Phi">&Phi;</button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="symbols" open>
+                        <summary class="math-section-title" data-i18n="math_title_symbols">기본 수학 기호</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$+$')" data-raw-math="+"><span data-i18n="math_label_plus">더하기</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$-$')" data-raw-math="-"><span data-i18n="math_label_minus">빼기</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\times$')" data-raw-math="\times"><span data-i18n="math_label_mul">곱셈</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\div$')" data-raw-math="\div"><span data-i18n="math_label_div">나눗셈</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\approx$')" data-raw-math="\approx"><span data-i18n="math_label_approx">근사치</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\ne$')" data-raw-math="\ne"><span data-i18n="math_label_ne">다름</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\infty$')" data-raw-math="\infty"><span data-i18n="math_label_infinity">무한대</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\vec{?}$')" data-raw-math="\vec{v}"><span data-i18n="math_label_vector">벡터</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\to$')" data-raw-math="\to"><span data-i18n="math_label_arrow">화살표</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="spec_operators" open>
+                        <summary class="math-section-title" data-i18n="math_title_spec_operators">전문 수학 연산자</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\pm$')" data-raw-math="\pm"><span data-i18n="math_label_pm">플러스마이너스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\mp$')" data-raw-math="\mp"><span data-i18n="math_label_mp">마이너스플러스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\cdot$')" data-raw-math="\cdot"><span data-i18n="math_label_cdot">점곱(내적)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\otimes$')" data-raw-math="\otimes"><span data-i18n="math_label_tensor">텐서곱</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\oplus$')" data-raw-math="\oplus"><span data-i18n="math_label_direct_sum">직합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\equiv$')" data-raw-math="\equiv"><span data-i18n="math_label_equiv">합동/정의</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\propto$')" data-raw-math="\propto"><span data-i18n="math_label_propto">비례</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\partial$')" data-raw-math="\partial"><span data-i18n="math_label_partial_sym">편미분기호</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla$')" data-raw-math="\nabla"><span data-i18n="math_label_nabla">나블라(역삼각형)</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="set_logic" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\cup$')" data-raw-math="\cup"><span data-i18n="math_label_union">합집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\cap$')" data-raw-math="\cap"><span data-i18n="math_label_intersection">교집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\subset$')" data-raw-math="\subset"><span data-i18n="math_label_subset">부분집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\subseteq$')" data-raw-math="\subseteq"><span data-i18n="math_label_superset">포함관계</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\in$')" data-raw-math="\in"><span data-i18n="math_label_in">속함</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\notin$')" data-raw-math="\notin"><span data-i18n="math_label_notin">속하지않음</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\emptyset$')" data-raw-math="\emptyset"><span data-i18n="math_label_varnothing">공집합</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\forall$')" data-raw-math="\forall"><span data-i18n="math_label_forall">모든 (for all)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\exists$')" data-raw-math="\exists"><span data-i18n="math_label_exists">존재 (exists)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\neg$')" data-raw-math="\neg"><span data-i18n="math_label_neg">부정 (not)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lor$')" data-raw-math="\lor"><span data-i18n="math_label_lor">논리합 (or)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\land$')" data-raw-math="\land"><span data-i18n="math_label_land">논리곱 (and)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\implies$')" data-raw-math="\implies"><span data-i18n="math_label_implies">함의 (implies)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\iff$')" data-raw-math="\iff"><span data-i18n="math_label_iff">동치 (iff)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\mathbb{U}$')" data-raw-math="\mathbb{U}"><span data-i18n="math_label_univ_set">전체집합</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="lin_alg" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\begin{pmatrix} ? & ? \\\\ ? & ? \\end{pmatrix}$')" data-raw-math="\begin{pmatrix} a & b \\ c & d \end{pmatrix}"><span data-i18n="math_label_matrix_2x2">2x2 행렬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\begin{pmatrix} ? & ? & ? \\\\ ? & ? & ? \\\\ ? & ? & ? \\end{pmatrix}$')" data-raw-math="\begin{pmatrix} a & b & c \\ d & e & f \\ g & h & i \end{pmatrix}"><span data-i18n="math_label_matrix_3x3">3x3 행렬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\det(?)$')" data-raw-math="\det(A)"><span data-i18n="math_label_det">행렬식 (det)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$?^T$')" data-raw-math="A^T"><span data-i18n="math_label_transpose">전치행렬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$?^{-1}$')" data-raw-math="A^{-1}"><span data-i18n="math_label_inverse">역행렬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\langle ?, ? \\rangle$')" data-raw-math="\langle \vec{u}, \vec{v} \rangle"><span data-i18n="math_label_inner_prod">내적</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\|?\\|$')" data-raw-math="\|\vec{v}\|"><span data-i18n="math_label_norm">노름 (Norm)</span></button>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- 2. 물리학 서브탭 콘텐츠 -->
+                <div class="math-subtab-content" id="math-subtab-content-physics" style="display: none; flex-direction: column; gap: 8px;">
+                    <details class="math-section-accordion" data-section-id="phys_ops" open>
+                        <summary class="math-section-title" data-i18n="math_title_physics_ops">기본 연산자</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla$')" data-raw-math="\nabla"><span data-i18n="math_label_nabla">델/나블라</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla ?$')" data-raw-math="\nabla f"><span data-i18n="math_label_grad">그라디언트</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla \\cdot \\vec{?}$')" data-raw-math="\nabla \cdot \vec{F}"><span data-i18n="math_label_div_op">다이버전스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla \\times \\vec{?}$')" data-raw-math="\nabla \times \vec{F}"><span data-i18n="math_label_curl">컬(회전)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla^2 ?$')" data-raw-math="\nabla^2 f"><span data-i18n="math_label_laplacian">라플라시안</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\oint \\vec{?} \\cdot d\\vec{r}$')" data-raw-math="\oint \vec{F} \cdot d\vec{r}"><span data-i18n="math_label_line_int">선적분</span></button>
+                        </div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="em_gravity" open>
+                        <summary class="math-section-title" data-i18n="math_title_em_gravity">전자기학 및 중력</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$F = k_e \\frac{q_1 q_2}{r^2}$')" data-raw-math="F = k_e \frac{q_1 q_2}{r^2}"><span data-i18n="math_label_coulomb">쿨롱 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\vec{F} = q(\\vec{E} + \\vec{v} \\times \\vec{B})$')" data-raw-math="\vec{F} = q(\vec{E} + \vec{v} × \vec{B})"><span data-i18n="math_label_lorentz">로런츠 힘</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\oint \\vec{E} \\cdot d\\vec{A} = \\frac{Q}{\\varepsilon_0}$')" data-raw-math="\oint \vec{E} \cdot d\vec{A} = \frac{Q}{\varepsilon_0}"><span data-i18n="math_label_gauss">가우스 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$F = G \\frac{m_1 m_2}{r^2}$')" data-raw-math="F = G \frac{m_1 m_2}{r^2}"><span data-i18n="math_label_gravity">만유인력</span></button>
+                        </div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="quantum" open>
+                        <summary class="math-section-title" data-i18n="math_title_quantum">양자 및 상대성</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$E = mc^2$')" data-raw-math="E = mc^2"><span data-i18n="math_label_mass_energy">질량-에너지</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$E = h\\nu$')" data-raw-math="E = h\nu"><span data-i18n="math_label_planck">플랑크-양자</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$i\\hbar\\frac{\\partial}{\\partial t}\\Psi = \\hat{H}\\Psi$')" data-raw-math="i\hbar\frac{\partial}{\partial t}\Psi = \hat{H}\Psi"><span data-i18n="math_label_schrodinger">슈뢰딩거</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\Delta x \\Delta p \\ge \\frac{\\hbar}{2}$')" data-raw-math="\Delta x \Delta p \ge \frac{\hbar}{2}"><span data-i18n="math_label_uncertainty">불확정성</span></button>
+                        </div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="fluid" open>
+                        <summary class="math-section-title" data-i18n="math_title_fluid">유체역학</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{\\partial \\rho}{\\partial t} + \\nabla \\cdot (\\rho \\vec{v}) = 0$')" data-raw-math="\frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \vec{v}) = 0"><span data-i18n="math_label_fluid_cont">연속 방정식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{\\partial \\vec{v}}{\\partial t} + (\\vec{v} \\cdot \\nabla)\\vec{v} = -\\frac{1}{\\rho}\\nabla p + \\vec{g}$')" data-raw-math="\frac{\partial \vec{v}}{\partial t} + (\vec{v} \cdot \nabla)\vec{v} = -\frac{1}{\rho}\nabla p + \vec{g}"><span data-i18n="math_label_euler">오일러 방정식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\rho \\left( \\frac{\\partial \\vec{v}}{\\partial t} + (\\vec{v} \\cdot \\nabla)\\vec{v} \\right) = -\\nabla p + \\mu \\nabla^2 \\vec{v} + \\vec{f}$')" data-raw-math="\rho \left( \frac{\partial \vec{v}}{\partial t} + (\vec{v} \cdot \nabla)\vec{v} \right) = -\nabla p + \mu \nabla^2 \vec{v} + \vec{f}"><span data-i18n="math_label_navier">나비에-스토크스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$p + \\frac{1}{2}\\rho v^2 + \\rho gh = \\text{const}$')" data-raw-math="p + \frac{1}{2}\rho v^2 + \rho gh = \text{const}"><span data-i18n="math_label_bernoulli">베르누이 방정식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$E = T + V = \\text{const}$')" data-raw-math="E = T + V = \text{const}"><span data-i18n="math_label_mech_energy">역학적보존법칙</span></button>
+                        </div>
+                    </details>
+                    
+                    <details class="math-section-accordion" data-section-id="thermo" open>
+                        <summary class="math-section-title" data-i18n="math_title_thermo">열역학</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$dU = \\delta Q - \\delta W$')" data-raw-math="dU = \delta Q - \delta W"><span data-i18n="math_label_thermo_1st_close">열역학 1법칙(폐계)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\dot{Q} - \\dot{W}_s = \\dot{m}\\left( \\Delta h + \\Delta \\frac{v^2}{2} + g\\Delta z \\right)$')" data-raw-math="\dot{Q} - \dot{W}_s = \dot{m}\left( \Delta h + \Delta \frac{v^2}{2} + g\Delta z \right)"><span data-i18n="math_label_thermo_1st_open">열역학 1법칙(개방)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\oint \\frac{\\delta Q}{T} \\le 0$')" data-raw-math="\oint \frac{\delta Q}{T} \le 0"><span data-i18n="math_label_clausius">클라우지우스 정리</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$dS = \\frac{\\delta Q_{\\text{rev}}}{T}$')" data-raw-math="dS = \frac{\delta Q_{\text{rev}}}{T}"><span data-i18n="math_label_entropy_change">엔트로피 변화</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$dS = \\frac{\\delta Q}{T}$')" data-raw-math="dS = \frac{\delta Q}{T}"><span data-i18n="math_label_rev_proc">가역 과정</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$dS > \\frac{\\delta Q}{T}$')" data-raw-math="dS > \frac{\delta Q}{T}"><span data-i18n="math_label_irrev_proc">비가역 과정</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$PV = nRT$')" data-raw-math="PV = nRT"><span data-i18n="math_label_ideal_gas_eq">이상기체상태방정식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$dU = C_v dT,\\, dH = C_p dT$')" data-raw-math="dU = C_v dT,\, dH = C_p dT"><span data-i18n="math_label_internal_enthalpy">내부에너지/엔탈피</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$C_p - C_v = R$')" data-raw-math="C_p - C_v = R"><span data-i18n="math_label_mayer">마이어 관계식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\eta_c = 1 - \\frac{T_C}{T_H}$')" data-raw-math="\eta_c = 1 - \frac{T_C}{T_H}" style="grid-column: span 2;"><span data-i18n="math_label_carnot_eff">카르노 효율</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\eta_{\\text{Otto}} = 1 - \\frac{1}{r^{\\gamma-1}}$')" data-raw-math="\eta_{\text{Otto}} = 1 - \frac{1}{r^{\gamma-1}}" style="grid-column: span 2;"><span data-i18n="math_label_otto_eff">오토 효율</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\eta_{\\text{Diesel}} = 1 - \\frac{1}{r^{\\gamma-1}} \\left[ \\frac{r_c^\\gamma - 1}{\\gamma(r_c - 1)} \\right]$')" data-raw-math="\eta_{\text{Diesel}} = 1 - \frac{1}{r^{\gamma-1}} \left[ \frac{r_c^\gamma - 1}{\gamma(r_c - 1)} \right]" style="grid-column: span 2;"><span data-i18n="math_label_diesel_eff">디젤 효율</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{COP}_{\\text{ref}} = \\frac{T_C}{T_H - T_C}$')" data-raw-math="\text{COP}_{\text{ref}} = \frac{T_C}{T_H - T_C}" style="grid-column: span 2;"><span data-i18n="math_label_ref_cop">냉동 COP</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$q = -k \\nabla T$')" data-raw-math="q = -k \nabla T"><span data-i18n="math_label_fourier_cond">Fourier 전도</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$q = h(T_s - T_{\\infty})$')" data-raw-math="q = h(T_s - T_{\infty})"><span data-i18n="math_label_newton_conv">Newton 대류</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$E = \\epsilon \\sigma T^4$')" data-raw-math="E = \epsilon \sigma T^4"><span data-i18n="math_label_stefan_rad">Stefan 복사</span></button>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- 3. 화학/생명 서브탭 콘텐츠 -->
+                <div class="math-subtab-content" id="math-subtab-content-bio" style="display: none; flex-direction: column; gap: 8px;">
+                    <details class="math-section-accordion" data-section-id="rxn" open>
+                        <summary class="math-section-title" data-i18n="math_title_rxn">화학 반응 및 평형</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$k = A e^{-\\frac{E_a}{RT}}$')" data-raw-math="k = A e^{-\frac{E_a}{RT}}"><span data-i18n="math_label_arrhenius">아레니우스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$PV = nRT$')" data-raw-math="PV = nRT"><span data-i18n="math_label_ideal_gas">이상기체</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$E = E^0 - \\frac{RT}{zF}\\ln Q$')" data-raw-math="E = E^0 - \frac{RT}{zF}\ln Q"><span data-i18n="math_label_nernst">네른스트 식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$A = \\varepsilon c l$')" data-raw-math="A = \varepsilon c l"><span data-i18n="math_label_beer_lambert">비어-람베르트</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\Delta G^0 = -RT\\ln K$')" data-raw-math="\Delta G^0 = -RT\ln K"><span data-i18n="math_label_gibbs_k">자유에너지 평형상수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\rightarrow$')" data-raw-math="\rightarrow"><span data-i18n="math_label_forward">정반응</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\rightleftharpoons$')" data-raw-math="\rightleftharpoons"><span data-i18n="math_label_reversible">가역반응</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\uparrow$')" data-raw-math="\uparrow"><span data-i18n="math_label_gas_gen">기체발생</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\downarrow$')" data-raw-math="\downarrow"><span data-i18n="math_label_precip">침전발생</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="genetics" open>
+                        <summary class="math-section-title" data-i18n="math_title_genetics">유전학 및 집단유전학</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$3\\,\\text{A\\_} : 1\\,\\text{aa}$') " data-raw-math="3\,\text{A\_} : 1\,\text{aa}"><span data-i18n="math_label_segregation">분리의 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{Aa} \\times \\text{Aa} \\rightarrow 1\\,\\text{AA} : 2\\,\\text{Aa} : 1\\,\\text{aa}$') " data-raw-math="\text{Aa} \times \text{Aa} \rightarrow 1\,\text{AA} : 2\,\text{Aa} : 1\,\text{aa}"><span data-i18n="math_label_monohybrid">단일형질교배</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$P(\\text{Aa}) = \\frac{1}{2},\\, P(\\text{aa}) = \\frac{1}{4}$') " data-raw-math="P(\text{Aa}) = \frac{1}{2},\, P(\text{aa}) = \frac{1}{4}"><span data-i18n="math_label_hetero_prob">이형접합 교배확률</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$9\\,\\text{A\\_B\\_} : 3\\,\\text{A\\_bb} : 3\\,\\text{aaB\\_} : 1\\,\\text{aabb}$') " data-raw-math="9\,\text{A\_B\_} : 3\,\text{A\_bb} : 3\,\text{aaB\_} : 1\,\text{aabb}"><span data-i18n="math_label_independent">독립의 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$p^2 + 2pq + q^2 = 1$')" data-raw-math="p^2 + 2pq + q^2 = 1"><span data-i18n="math_label_hardy">하디-바인베르크</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$p + q = 1$')" data-raw-math="p + q = 1"><span data-i18n="math_label_allele_freq">대립유전자 빈도</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="molbio" open>
+                        <summary class="math-section-title" data-i18n="math_title_molbio">분자생물학 및 유전자 분석</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$N_t = N_0 \\times 2^n$')" data-raw-math="N_t = N_0 \times 2^n"><span data-i18n="math_label_pcr_amp">PCR 증폭 공식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$T_m = 64.9 + \\frac{41 \\times (G+C - 16.4)}{A+T+G+C}$') " data-raw-math="T_m = 64.9 + \frac{41 \times (G+C - 16.4)}{A+T+G+C}"><span data-i18n="math_label_tm_calc">DNA 용융온도 (Tm)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\Delta\\Delta C_t = (C_{t,\\text{Target}} - C_{t,\\text{Ref}})_{\\text{Exp}} - (C_{t,\\text{Target}} - C_{t,\\text{Ref}})_{\\text{Ctrl}}$')" data-raw-math="\Delta\Delta C_t = (C_{t,\text{Target}} - C_{t,\text{Ref}})_{\text{Exp}} - (C_{t,\text{Target}} - C_{t,\text{Ref}})_{\text{Ctrl}}"><span data-i18n="math_label_ddct">qPCR Delta-Delta Ct</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$2^{-\\Delta\\Delta C_t}$') " data-raw-math="2^{-\Delta\Delta C_t}"><span data-i18n="math_label_relative_expression">유전자 상대발현량</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{Conc.} = A_{260} \\times \\text{Dilution} \\times 50\\,\\mu\\text{g/mL}$')" data-raw-math="\text{Conc.} = A_{260} \times \text{Dilution} \times 50\,\mu\text{g/mL}"><span data-i18n="math_label_dna_conc">DNA 농도 계산</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{A} = \\text{T}$') " data-raw-math="\text{A} = \text{T}"><span data-i18n="math_label_at_pair">A-T 염기쌍</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{G} \\equiv \\text{C}$') " data-raw-math="\text{G} \equiv \text{C}"><span data-i18n="math_label_gc_pair">G-C 염기쌍</span></button>
+                        </div>
+                    </details>
+
+                    <details class="math-section-accordion" data-section-id="protein" open>
+                        <summary class="math-section-title" data-i18n="math_title_biochem">생화학 및 효소 반응</summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$v = \\frac{V_{\\max}[S]}{K_m + [S]}$')" data-raw-math="v = \frac{V_{\max}[S]}{K_m + [S]}"><span data-i18n="math_label_menten">미하엘리스-멘텐 식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{1}{v} = \\frac{K_m}{V_{\\max}}\\frac{1}{[S]} + \\frac{1}{V_{\\max}}$')" data-raw-math="\frac{1}{v} = \frac{K_m}{V_{\max}}\frac{1}{[S]} + \frac{1}{V_{\max}}"><span data-i18n="math_label_lineweaver">이중역수 플롯</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$v = \\frac{V_{\\max}[S]}{K_m\\left(1+\\frac{[I]}{K_i}\\right)+[S]}$')" data-raw-math="v = \frac{V_{\max}[S]}{K_m\left(1+\frac{[I]}{K_i}\right)+[S]}"><span data-i18n="math_label_comp_inhibition">경쟁적 저해</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\theta = \\frac{[L]^n}{K_d + [L]^n}$') " data-raw-math="\theta = \frac{[L]^n}{K_d + [L]^n}"><span data-i18n="math_label_hill_eq">힐 방정식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\Delta G = \\Delta H - T\\Delta S$')" data-raw-math="\Delta G = \Delta H - T\Delta S"><span data-i18n="math_label_gibbs">깁스 자유에너지</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{pH} = \\text{p}K_a + \\log\\left(\\frac{[\\text{A}^-]}{[\\text{HA}]}\\right)$')" data-raw-math="\text{pH} = \text{p}K_a + \log\left(\frac{[\text{A}^-]}{[\text{HA}]}\right)"><span data-i18n="math_label_henderson">핸더슨-하셀바흐</span></button>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="math-subtab-content" id="math-subtab-content-cs" style="display: none; flex-direction: column; gap: 8px;">
+                    <!-- 0. 자주 쓰이는 연산자 -->
+                    <details class="math-section-accordion" data-section-id="cs_ops" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid" style="grid-template-columns: repeat(3, 1fr) !important;">
+                            <button class="math-item" onclick="insertMathSymbol('$? \\odot ?$')" data-raw-math="\odot"><span data-i18n="math_label_hadamard">하다마르 곱</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$? \\cdot ?$')" data-raw-math="\cdot"><span data-i18n="math_label_dot_prod">내적 (점곱)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\oplus$')" data-raw-math="\oplus"><span data-i18n="math_label_bitwise_xor">비트 XOR</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$? \\otimes ?$')" data-raw-math="\otimes"><span data-i18n="math_label_tensor_prod">텐서곱</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$? \\bmod ?$')" data-raw-math="\bmod"><span data-i18n="math_label_modulo">모듈로</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lfloor ? \\rfloor$')" data-raw-math="\lfloor \rfloor"><span data-i18n="math_label_floor">바닥 함수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\lceil ? \\rceil$')" data-raw-math="\lceil \rceil"><span data-i18n="math_label_ceil">천장 함수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\ll$')" data-raw-math="\ll"><span data-i18n="math_label_lshift">L Shift (비트)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\gg$')" data-raw-math="\gg"><span data-i18n="math_label_rshift">R Shift (비트)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\operatorname{argmax}_{?} ?$')" data-raw-math="\operatorname{argmax}"><span>Argmax</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\operatorname{argmin}_{?} ?$')" data-raw-math="\operatorname{argmin}"><span>Argmin</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\sum_{?}^{?} ?$')" data-raw-math="\sum"><span data-i18n="math_label_sum_cs">합 (Sum)</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 1. 알고리즘 & 컴퓨터 과학 -->
+                    <details class="math-section-accordion" data-section-id="algo_cs" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$O(1)$')" data-raw-math="O(1)"><span>O(1)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(\\log n)$')" data-raw-math="O(\log n)"><span>O(log n)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(n)$')" data-raw-math="O(n)"><span>O(n)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(n \\log n)$')" data-raw-math="O(n \log n)"><span>O(n log n)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(n^2)$')" data-raw-math="O(n^2)"><span>O(n²)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(2^n)$')" data-raw-math="O(2^n)"><span>O(2ⁿ)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(n!)$')" data-raw-math="O(n!)"><span>O(n!)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$O(\\log n)$')" data-raw-math="O(\log n)"><span data-i18n="math_label_binary_search">이진 탐색</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$p \\approx 1 - e^{-\\frac{k^2}{2N}}$')" data-raw-math="p \approx 1 - e^{-k^2/(2N)}"><span data-i18n="math_label_hash_collision">해시 충돌</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 2. 머신러닝 & AI -->
+                    <details class="math-section-accordion" data-section-id="ml_ai" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$y = \\beta_0 + \\beta_1 x + \\epsilon$')" data-raw-math="y = \beta_0 + \beta_1 x + \epsilon"><span data-i18n="math_label_linear_regression">선형 회귀</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$P(y = 1|x) = \\frac{1}{1 + e^{-(\\beta_0 + \\beta_1 x)}}$')" data-raw-math="P(y=1|x) = 1/(1 + e^{-(\beta_0 + \beta_1 x)})"><span data-i18n="math_label_logistic_regression">로지스틱 회귀</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$L = \\frac{1}{n} \\sum_{i=1}^n (y_i - \\hat{y}_i)^2$')" data-raw-math="L = 1/n * \sum (y_i - \hat{y}_i)^2"><span data-i18n="math_label_mse">손실 함수 (MSE)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$L = - \\sum_{i=1}^n y_i \\log(\\hat{y}_i)$')" data-raw-math="L = - \sum y_i \log(\hat{y}_i)"><span data-i18n="math_label_cross_entropy">크로스 엔트로피</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$P(y_i) = \\frac{e^{z_i}}{\\sum_{j} e^{z_j}}$')" data-raw-math="P(y_i) = e^{z_i} / \sum e^{z_j}"><span data-i18n="math_label_softmax_fn">Softmax 함수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\theta := \\theta - \\alpha \\nabla_\\theta J(\\theta)$')" data-raw-math="\theta := \theta - \alpha \nabla_\theta J(\theta)"><span data-i18n="math_label_grad_descent_fn">경사하강법</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 3. 딥러닝 -->
+                    <details class="math-section-accordion" data-section-id="deep_learning" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$y = f\\left(\\sum w_i x_i + b\\right)$')" data-raw-math="y = f(\sum w_i x_i + b)"><span data-i18n="math_label_perceptron">퍼셉트론 출력</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$f(x) = \\max(0, x)$')" data-raw-math="f(x) = \max(0, x)"><span data-i18n="math_label_relu_activation">ReLU 활성화</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$P(\\text{뉴런 유지}) = 1 - p$')" data-raw-math="P(neuron active) = 1 - p"><span data-i18n="math_label_dropout">Dropout 확률</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{\\partial L}{\\partial w} = \\frac{\\partial L}{\\partial y} \\cdot \\frac{\\partial y}{\\partial w}$')" data-raw-math="\frac{\partial L}{\partial w} = \frac{\partial L}{\partial y} * \frac{\partial y}{\partial w}"><span data-i18n="math_label_backpropagation">역전파 (BP)</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 4. 정보이론 -->
+                    <details class="math-section-accordion" data-section-id="info_theory" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$H(X) = - \\sum_i p(x_i) \\log_2 p(x_i)$')" data-raw-math="H(X) = - \sum p(x_i) \log_2 p(x_i)"><span data-i18n="math_label_entropy">샤논 엔트로피</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$C = B \\log_2\\left(1 + \\frac{S}{N}\\right)$')" data-raw-math="C = B \log_2(1 + S/N)"><span data-i18n="math_label_channel_capacity">채널 용량</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 5. 컴퓨터 구조 -->
+                    <details class="math-section-accordion" data-section-id="comp_arch" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{CPU Time} = \\frac{\\text{Instruction Count} \\times \\text{CPI}}{\\text{Clock Rate}}$')" data-raw-math="CPU Time = IC * CPI / Clock Rate"><span data-i18n="math_label_cpu_perf">CPU 성능 공식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$S = \\frac{1}{(1 - P) + \\frac{P}{N}}$')" data-raw-math="S = 1 / ((1-P) + P/N)"><span data-i18n="math_label_amdahl">Amdahl의 법칙</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 6. 암호학 -->
+                    <details class="math-section-accordion" data-section-id="crypto" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$C = M^e \\bmod n, \\quad M = C^d \\bmod n$')" data-raw-math="C = M^e \bmod n, M = C^d \bmod n"><span data-i18n="math_label_rsa">RSA 암복호화</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$K = g^{ab} \\bmod p$')" data-raw-math="K = g^{ab} \bmod p"><span>Diffie-Hellman</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$y^2 = x^3 + ax + b \\pmod p$')" data-raw-math="y^2 = x^3 + ax + b \pmod p"><span data-i18n="math_label_ecc">ECC 암호</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 7. 해시 함수 & 무결성 -->
+                    <details class="math-section-accordion" data-section-id="hash_integrity" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$H = \\text{SHA256}(M)$')" data-raw-math="H = SHA256(M)"><span>SHA-256</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{MAC}_K(M) = H(K \\parallel M)$')" data-raw-math="MAC_K(M) = H(K \parallel M)"><span>MAC</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 8. 네트워크 보안 -->
+                    <details class="math-section-accordion" data-section-id="net_security" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$S = \\sum_{i=1}^n d_i \\bmod 2^k$')" data-raw-math="S = \sum d_i \bmod 2^k"><span data-i18n="math_label_checksum">체크섬</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$d(x, y) = \\sum_{i=1}^n |x_i - y_i|$')" data-raw-math="d(x,y) = \sum |x_i - y_i|"><span>Hamming Dist</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 9. 정보이론 기반 -->
+                    <details class="math-section-accordion" data-section-id="info_security" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$H(X) = - \\sum_i p(x_i) \\log_2 p(x_i)$')" data-raw-math="H(X) = - \sum p(x_i) \log_2 p(x_i)"><span data-i18n="math_label_secret_key_entropy">비밀키 엔트로피</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$N = s^l$')" data-raw-math="N = s^l"><span data-i18n="math_label_password_space">비밀번호 공간</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$p = \\frac{t}{N}$')" data-raw-math="p = t/N"><span data-i18n="math_label_attack_prob">공격 성공 확률</span></button>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- 5. 전기/전자 서브탭 콘텐츠 -->
+                <div class="math-subtab-content" id="math-subtab-content-ee" style="display: none; flex-direction: column; gap: 8px;">
+                    <!-- 0. 자주 쓰이는 연산자 -->
+                    <details class="math-section-accordion" data-section-id="ee_ops" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$j$')" data-raw-math="j"><span data-i18n="math_label_imag_unit">허수 단위 (j)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\omega$')" data-raw-math="\omega"><span data-i18n="math_label_ang_freq">각주파수 (w)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\theta$')" data-raw-math="\theta"><span data-i18n="math_label_phase_angle">위상각</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla$')" data-raw-math="\nabla"><span data-i18n="math_label_nabla_ee">나블라</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$*$')" data-raw-math="*"><span data-i18n="math_label_convolution_ee">컨볼루션</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\delta(t)$')" data-raw-math="\delta(t)"><span data-i18n="math_label_impulse">임펄스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$u(t)$')" data-raw-math="u(t)"><span data-i18n="math_label_unit_step">단위 계단</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\int$')" data-raw-math="\int"><span data-i18n="math_label_integral_sym">적분 기호</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\mathcal{L}\\{?\\}$')" data-raw-math="\mathcal{L}\{?\}"><span data-i18n="math_label_laplace_op">라플라스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\mathcal{F}\\{?\\}$')" data-raw-math="\mathcal{F}\{?\}"><span data-i18n="math_label_fourier_op">푸리에</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\partial$')" data-raw-math="\partial"><span data-i18n="math_label_partial_op">편미분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\infty$')" data-raw-math="\infty"><span data-i18n="math_label_infinity_op">무한대</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 1. 회로 이론 -->
+                    <details class="math-section-accordion" data-section-id="ee_circuits" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$V = I \\cdot R$')" data-raw-math="V = I \cdot R"><span data-i18n="math_label_ohm">옴의 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$P = V \\cdot I = I^2 R = \\frac{V^2}{R}$')" data-raw-math="P = V \cdot I = I^2 R = \frac{V^2}{R}"><span data-i18n="math_label_power_eq">전력 공식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$V(t) = V_0 \\cdot e^{-\\frac{t}{RC}}$')" data-raw-math="V(t) = V_0 \cdot e^{-\frac{t}{RC}}"><span data-i18n="math_label_capacitor">커패시터 충방전</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$I(t) = I_0 \\cdot e^{-\\frac{R}{L} t}$')" data-raw-math="I(t) = I_0 \cdot e^{-\frac{R}{L} t}"><span data-i18n="math_label_inductor">인덕터 전류</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$Z = R + jX$')" data-raw-math="Z = R + jX"><span data-i18n="math_label_impedance">임피던스</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$f_0 = \\frac{1}{2\\pi\\sqrt{LC}}$')" data-raw-math="f_0 = \frac{1}{2\pi\sqrt{LC}}"><span data-i18n="math_label_resonance">공진 주파수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\sum V_k = 0$')" data-raw-math="\sum V_k = 0"><span data-i18n="math_label_kvl_ee">KVL (전압)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\sum I_k = 0$')" data-raw-math="\sum I_k = 0"><span data-i18n="math_label_kcl_ee">KCL (전류)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\tau = RC$')" data-raw-math="\tau = RC"><span data-i18n="math_label_rc_time">RC 시상수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\tau = \\frac{L}{R}$')" data-raw-math="\tau = \frac{L}{R}"><span data-i18n="math_label_rl_time">RL 시상수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$S = P + jQ$')" data-raw-math="S = P + jQ"><span data-i18n="math_label_ac_power">교류 전력</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$V_{out} = V_{in} \\frac{R_2}{R_1 + R_2}$')" data-raw-math="V_{out} = V_{in} \frac{R_2}{R_1 + R_2}"><span data-i18n="math_label_voltage_divider">분압 법칙</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 2. 전자기학 -->
+                    <details class="math-section-accordion" data-section-id="ee_em" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$F = k_e \\frac{q_1 q_2}{r^2}$')" data-raw-math="F = k_e \frac{q_1 q_2}{r^2}"><span data-i18n="math_label_coulomb_ee">쿨롱의 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$E = -\\frac{d\\Phi_B}{dt}$')" data-raw-math="E = -\frac{d\Phi_B}{dt}"><span data-i18n="math_label_faraday_ee">패러데이 법칙</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla \\cdot E = \\frac{\\rho}{\\epsilon_0}$')" data-raw-math="\nabla \cdot E = \frac{\rho}{\epsilon_0}"><span data-i18n="math_label_maxwell1">맥스웰 1 (전기)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla \\cdot B = 0$')" data-raw-math="\nabla \cdot B = 0"><span data-i18n="math_label_maxwell2">맥스웰 2 (자기)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla \\times E = -\\frac{\\partial B}{\\partial t}$')" data-raw-math="\nabla \times E = -\frac{\partial B}{\partial t}"><span data-i18n="math_label_maxwell3">맥스웰 3 (회전)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\nabla \\times B = \\mu_0 J + \\mu_0 \\epsilon_0 \\frac{\\partial E}{\\partial t}$')" data-raw-math="\nabla \times B = \mu_0 J + \mu_0 \epsilon_0 \frac{\partial E}{\partial t}"><span data-i18n="math_label_maxwell4">맥스웰 4 (전류)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\vec{F} = q(\\vec{E} + \\vec{v} \\times \\vec{B})$')" data-raw-math="\vec{F} = q(\vec{E} + \vec{v} \times \vec{B})"><span data-i18n="math_label_lorentz">로런츠 힘</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$d\\vec{B} = \\frac{\\mu_0 I}{4\\pi} \\frac{d\\vec{l} \\times \\hat{r}}{r^2}$')" data-raw-math="d\vec{B} = \frac{\mu_0 I}{4\pi} \frac{d\vec{l} \times \hat{r}}{r^2}"><span data-i18n="math_label_biot_savart">비오-사바르</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\vec{S} = \\vec{E} \\times \\vec{H}$')" data-raw-math="\vec{S} = \vec{E} \times \vec{H}"><span data-i18n="math_label_poynting">포인팅 벡터</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 3. 신호 및 시스템 -->
+                    <details class="math-section-accordion" data-section-id="ee_signals" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$X(\\omega) = \\int_{-\\infty}^{\\infty} x(t) e^{-j\\omega t} dt$')" data-raw-math="X(\omega) = \int_{-\infty}^{\infty} x(t) e^{-j\omega t} dt"><span data-i18n="math_label_fourier_trans">푸리에 변환</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$X(s) = \\int_{0}^{\\infty} x(t) e^{-st} dt$')" data-raw-math="X(s) = \int_{0}^{\infty} x(t) e^{-st} dt"><span data-i18n="math_label_laplace_trans">라플라스 변환</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$X(z) = \\sum_{n=-\\infty}^{\\infty} x[n] z^{-n}$')" data-raw-math="X(z) = \sum_{n=-\infty}^{\infty} x[n] z^{-n}"><span data-i18n="math_label_z_trans">Z-변환</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$e^{j\\theta} = \\cos\\theta + j\\sin\\theta$')" data-raw-math="e^{j\theta} = \cos\theta + j\sin\theta"><span data-i18n="math_label_euler_eq">오일러 공식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$f_s \\ge 2f_{\\max}$')" data-raw-math="f_s \ge 2f_{\max}"><span data-i18n="math_label_sampling">표본화 정리</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$y(t) = \\int_{-\\infty}^{\\infty} x(\\tau)h(t-\\tau)d\\tau$')" data-raw-math="y(t) = \int_{-\infty}^{\infty} x(\tau)h(t-\tau)d\tau"><span data-i18n="math_label_conv_integral">컨볼루션 적분</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$X[k] = \\sum_{n=0}^{N-1} x[n] e^{-j\\frac{2\\pi}{N}kn}$')" data-raw-math="X[k] = \sum_{n=0}^{N-1} x[n] e^{-j\frac{2\pi}{N}kn}"><span data-i18n="math_label_dft">이산 푸리에(DFT)</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\text{SNR} = 10 \\log_{10} \\left( \\frac{P_{\\text{signal}}}{P_{\\text{noise}}} \\right)$')" data-raw-math="\text{SNR} = 10 \log_{10} \left( \frac{P_{\text{signal}}}{P_{\text{noise}}} \right)"><span data-i18n="math_label_snr">신호 대 잡음비</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$e^{j\\pi} + 1 = 0$')" data-raw-math="e^{j\pi} + 1 = 0"><span data-i18n="math_label_euler_identity">오일러 항등식</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 4. 반도체 물리 -->
+                    <details class="math-section-accordion" data-section-id="ee_semicon" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$J = q n \\mu_n E + q p \\mu_p E$')" data-raw-math="J = q n \mu_n E + q p \mu_p E"><span data-i18n="math_label_drift_current">드리프트 전류</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$I = I_s \\left( e^{\\frac{qV}{kT}} - 1 \\right)$')" data-raw-math="I = I_s \left( e^{\frac{qV}{kT}} - 1 \right)"><span data-i18n="math_label_diode_eq">다이오드 식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$I_D = \\frac{1}{2} \\mu_n C_{ox} \\frac{W}{L} (V_{GS} - V_{th})^2$')" data-raw-math="I_D = \frac{1}{2} \mu_n C_{ox} \frac{W}{L} (V_{GS} - V_{th})^2"><span data-i18n="math_label_mosfet_sat">MOSFET 포화</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\frac{D}{\\mu} = \\frac{kT}{q}$')" data-raw-math="\frac{D}{\mu} = \frac{kT}{q}"><span data-i18n="math_label_einstein_rel">아인슈타인 관계</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$n_i^2 = n \\cdot p$')" data-raw-math="n_i^2 = n \cdot p"><span data-i18n="math_label_carrier_eq">캐리어 평형</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$I_D = \\mu_n C_{ox} \\frac{W}{L} \\left( (V_{GS} - V_{th})V_{DS} - \\frac{1}{2}V_{DS}^2 \\right)$')" data-raw-math="I_D = \mu_n C_{ox} \frac{W}{L} \left( (V_{GS} - V_{th})V_{DS} - \frac{1}{2}V_{DS}^2 \right)"><span data-i18n="math_label_mosfet_lin">MOSFET 선형</span></button>
+                        </div>
+                    </details>
+
+                    <!-- 5. 제어공학 -->
+                    <details class="math-section-accordion" data-section-id="ee_control" open>
+                        <summary class="math-section-title"></summary>
+                        <div class="math-grid">
+                            <button class="math-item" onclick="insertMathSymbol('$G(s) = \\frac{Y(s)}{U(s)}$')" data-raw-math="G(s) = \frac{Y(s)}{U(s)}"><span data-i18n="math_label_transfer_fn">전달 함수</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$u(t) = K_p e(t) + K_i \\int_{0}^{t} e(\\tau)d\\tau + K_d \\frac{de(t)}{dt}$')" data-raw-math="u(t) = K_p e(t) + K_i \int_{0}^{t} e(\tau)d\tau + K_d \frac{de(t)}{dt}"><span data-i18n="math_label_pid_ctrl">PID 제어기</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$\\dot{x}(t) = Ax(t) + Bu(t)$')" data-raw-math="\dot{x}(t) = Ax(t) + Bu(t)"><span data-i18n="math_label_state_eq">상태 방정식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$y(t) = Cx(t) + Du(t)$')" data-raw-math="y(t) = Cx(t) + Du(t)"><span data-i18n="math_label_output_eq">출력 방정식</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$T(s) = \\frac{G(s)}{1 + G(s)H(s)}$')" data-raw-math="T(s) = \frac{G(s)}{1 + G(s)H(s)}"><span data-i18n="math_label_feedback_ctrl">피드백 제어</span></button>
+                            <button class="math-item" onclick="insertMathSymbol('$e_{ss} = \\lim_{s \\to 0} \\frac{s R(s)}{1 + G(s)}$')" data-raw-math="e_{ss} = \lim_{s \to 0} \frac{s R(s)}{1 + G(s)}"><span data-i18n="math_label_steady_state_error">정상상태 오차</span></button>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <!-- 화학식 검색 패널 -->
+            <div class="sidebar-content-pane" id="sidebar-content-chemistry" style="display: none; flex-direction: column; flex: 1; overflow: hidden; padding: 20px; gap: 16px;">
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.1em; font-weight: 600; color: var(--text-main); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="beaker" style="width: 18px; height: 18px; color: var(--accent);"></i>
+                    <span data-i18n="chem_title">PubChem 화학식 연동 검색</span>
+                </div>
+                <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4;" data-i18n="chem_desc">
+                    미국 국립의학도서관(NLM) PubChem 데이터베이스에서 화합물을 검색하여 분자 구조와 SMILES 코드를 실시간으로 가져옵니다. (한글/영어 모두 지원)
+                </div>
+                
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <input type="text" id="chemistry-search-input" placeholder="예: aspirin, caffeine, 캡사이신" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 8px 12px; font-size: 0.9em; outline: none; transition: border-color 0.2s;" onkeydown="if(event.key==='Enter') searchChemistryPubChem()" data-i18n-placeholder="placeholder_chem_search">
+                    <button class="btn btn-accent" style="padding: 8px 14px;" onclick="searchChemistryPubChem()" title="검색 실행" data-i18n-title="tooltip_chem_search_btn">
+                        <i data-lucide="search" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
+                
+                <!-- 검색 로딩 스피너 -->
+                <div id="chemistry-search-loading" style="display: none; align-items: center; justify-content: center; padding: 24px 0; gap: 10px; color: var(--text-muted); font-size: 0.9em;">
+                    <div style="width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <span data-i18n="chem_searching">PubChem 검색 중...</span>
+                </div>
+                
+                <!-- 검색 결과 영역 -->
+                <div id="chemistry-search-result" style="display: none; flex-direction: column; gap: 16px; overflow-y: auto; flex: 1; margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 16px;">
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                            <div id="chem-result-name" style="font-size: 1.05em; font-weight: 600; color: var(--accent); text-transform: capitalize;">Aspirin</div>
+                            <div id="chem-result-cid" style="font-size: 0.75em; color: var(--text-muted); margin-top: 2px;">PubChem CID: 2244</div>
+                        </div>
+                        
+                        <!-- 분자 구조 실시간 벡터 프리뷰 -->
+                        <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; padding: 8px; display: flex; justify-content: center; align-items: center; min-height: 160px; position: relative;">
+                            <svg id="chem-preview-svg" style="width: 150px; height: 150px; display: block;"></svg>
+                        </div>
+                        
+                        <div>
+                            <div style="font-size: 0.75em; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;" data-i18n="chem_smiles_title">SMILES 코드</div>
+                            <div style="position: relative; display: flex;">
+                                <input type="text" id="chem-result-smiles" readonly style="flex: 1; font-family: monospace; font-size: 0.8em; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; color: var(--text-main); outline: none;">
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-accent" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="insertChemistryToEditor()">
+                            <i data-lucide="edit" style="width: 14px; height: 14px;"></i>
+                            <span data-i18n="chem_btn_insert">에디터에 분자식 삽입</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 태그 관리자 패널 -->
+            <div class="sidebar-content-pane" id="sidebar-content-tags" style="display: none; flex-direction: column; flex: 1; overflow: hidden; padding: 20px; gap: 16px;">
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.1em; font-weight: 600; color: var(--text-main); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="tag" style="width: 18px; height: 18px; color: var(--accent);"></i>
+                    <span data-i18n="sidebar_title_tags">해시태그 관리자</span>
+                </div>
+                <div style="font-size: 0.85em; color: var(--text-muted); line-height: 1.4;" data-i18n="sidebar_desc_tags">
+                    서재 파일들의 해시태그를 모아보고 탐색합니다.
+                </div>
+                
+                <!-- 태그 검색 입력창 -->
+                <div style="display: flex; position: relative; width: 100%; margin-bottom: 10px;">
+                    <input type="text" id="tags-search-input" placeholder="태그 이름 검색..." oninput="onTagSearchInput()" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 8px 32px 8px 32px; font-size: 0.85em; outline: none; transition: border-color 0.2s;" data-i18n-placeholder="placeholder_tags_search">
+                    <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-muted); pointer-events: none;"></i>
+                    <button id="tags-search-clear-btn" onclick="clearTagSearch()" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 0; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; transition: color 0.2s;">
+                        <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
+                
+                <!-- 태그 클라우드/목록 영역 -->
+                <div id="tags-list-container" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: rgba(0,0,0,0.15); scrollbar-width: thin;">
+                    <!-- 자바스크립트로 태그들이 추가될 영역 -->
+                </div>
+                
+                <!-- 필터링된 파일 리스트 영역 -->
+                <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden; margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px;">
+                    <div style="font-size: 0.85em; font-weight: 600; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;">
+                        <span id="filtered-tags-title" data-i18n="tags_filtered_files">태그별 파일 목록</span>
+                        <button class="icon-btn-sm" id="clear-tag-filter-btn" onclick="clearTagFilter()" style="display: none; padding: 4px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 4px; color: var(--accent); cursor: pointer; align-items: center; justify-content: center; transition: all 0.2s;" data-i18n-title="tags_clear_filter" title="필터 초기화">
+                            <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                        </button>
+                    </div>
+                    <div id="filtered-files-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px; scrollbar-width: thin;">
+                        <!-- 필터링된 파일 목록이 추가될 영역 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 슬라이딩 숨기기/나오기 핸들 (사이드바 바로 뒤 인접 형제로 배치) -->
+        <button class="sidebar-slide-toggle" onclick="toggleSidebar()" id="sidebar-slide-btn" title="사이드바 열기/접기" data-i18n-title="tooltip_toggle_sidebar">
+            <i id="sidebar-slide-icon" data-lucide="chevron-left" style="width: 12px; height: 12px;"></i>
+        </button>
+
+        <!-- 편집기 및 렌더러 영역 -->
+        <div class="workspace-panes">
+            <!-- 편집기 패널 -->
+            <div class="pane" id="pane-editor">
+                <div class="pane-header">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button class="nav-glass-btn" id="btn-nav-back" onclick="navigateHistory(-1)" title="뒤로가기" disabled>
+                            <i data-lucide="arrow-left"></i>
+                        </button>
+                        <button class="nav-glass-btn" id="btn-nav-forward" onclick="navigateHistory(1)" title="앞으로가기" disabled>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                        <span id="active-file-title" style="margin-left: 4px;">선택된 파일 없음</span>
+                        <span id="active-file-cloud-indicator" style="display: none; align-items: center; justify-content: center; margin-left: 6px; color: var(--text-muted);" title="구글 드라이브 동기화 상태">
+                            <i id="cloud-indicator-icon" data-lucide="cloud-off" style="width: 14px; height: 14px;"></i>
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button class="icon-btn-sm" onclick="undoEditor()" title="되돌리기 (Ctrl+Z)">
+                            <i data-lucide="undo" style="width: 12px; height: 12px;"></i>
+                        </button>
+                        <button class="icon-btn-sm" onclick="redoEditor()" title="다시 실행 (Ctrl+Y)">
+                            <i data-lucide="redo" style="width: 12px; height: 12px;"></i>
+                        </button>
+                        <span style="font-size: 0.85em; opacity: 0.6; margin-left: 8px;">Editor</span>
+                    </div>
+                </div>
+                <!-- 에디터 마크다운 툴바 -->
+                <div class="editor-toolbar">
+                    <!-- 드롭다운: 단락 / 머리글 -->
+                    <div class="toolbar-dropdown" id="toolbar-heading-dropdown">
+                        <button class="toolbar-dropdown-btn" id="toolbar-heading-btn">
+                            <span id="heading-btn-text">단락</span>
+                            <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+                        </button>
+                        <div class="toolbar-dropdown-menu" id="toolbar-heading-menu">
+                            <div class="dropdown-item" onclick="setHeading(1)">머리글 1</div>
+                            <div class="dropdown-item" onclick="setHeading(2)">머리글 2</div>
+                            <div class="dropdown-item" onclick="setHeading(3)">머리글 3</div>
+                            <div class="dropdown-item" onclick="setHeading(4)">머리글 4</div>
+                            <div class="dropdown-item active" onclick="setHeading(0)">
+                                <span>단락</span>
+                                <i data-lucide="check" style="width: 14px; height: 14px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="toolbar-divider"></div>
+                    
+                    <!-- 굵게 / 기울이기 버튼 -->
+                    <button class="toolbar-btn" onclick="insertFormatting('bold')" title="굵게 (Ctrl+B)">
+                        <i data-lucide="bold" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button class="toolbar-btn" onclick="insertFormatting('italic')" title="기울이기 (Ctrl+I)">
+                        <i data-lucide="italic" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    
+                    <!-- 드롭다운: 목록 스타일 -->
+                    <div class="toolbar-dropdown" id="toolbar-list-dropdown">
+                        <button class="toolbar-dropdown-btn" id="toolbar-list-btn" title="목록 스타일">
+                            <i data-lucide="list" style="width: 14px; height: 14px;"></i>
+                            <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+                        </button>
+                        <div class="toolbar-dropdown-menu" id="toolbar-list-menu">
+                            <div class="dropdown-item" onclick="insertListStyle('unordered')">
+                                <i data-lucide="list" style="width: 14px; height: 14px; margin-right: 6px;"></i>
+                                <span>글머리 기호 목록</span>
+                            </div>
+                            <div class="dropdown-item" onclick="insertListStyle('ordered')">
+                                <i data-lucide="list-ordered" style="width: 14px; height: 14px; margin-right: 6px;"></i>
+                                <span>순서가 지정된 목록</span>
+                            </div>
+                            <div class="dropdown-item" onclick="insertListStyle('checklist')">
+                                <i data-lucide="check-square" style="width: 14px; height: 14px; margin-right: 6px;"></i>
+                                <span>체크리스트</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 코드 블록 버튼 -->
+                    <button class="toolbar-btn" onclick="insertFormatting('code')" title="코드 블록">
+                        <i data-lucide="code" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    
+                    <!-- 이모지 버튼 -->
+                    <div class="toolbar-dropdown" id="toolbar-emoji-dropdown">
+                        <button class="toolbar-btn" id="toolbar-emoji-btn" title="이모지 삽입">
+                            <i data-lucide="smile" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <div class="toolbar-dropdown-menu emoji-picker-menu" id="toolbar-emoji-menu" style="padding: 0; border: none; overflow: hidden; width: 398px; max-height: none;">
+                            <!-- Emoji Mart 컴포넌트 마운트 (emoji.js에서 동적 생성) -->
+                        </div>
+                    </div>
+                    
+                    <div class="toolbar-divider"></div>
+                    
+                    <!-- 해시태그 편집 버튼 -->
+                    <button class="toolbar-btn" onclick="openHashtagModal()" title="해시태그 편집" data-i18n-title="tooltip_edit_tags" style="color: var(--accent);">
+                        <i data-lucide="tag" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
+                <div class="editor-container" id="editor-parent">
+                    <!-- CodeMirror 6 will be mounted here dynamically -->
+                </div>
+                <!-- 플로팅 해시태그 컨테이너 -->
+                <div id="floating-hashtag-container" class="floating-hashtag-container" style="display: none;"></div>
+            </div>
+
+            <!-- 드래그 가능한 분할 크기 조절선 -->
+            <div class="resizer-gutter" id="pane-resizer"></div>
+
+            <!-- 프리뷰 패널 -->
+            <div class="pane" id="pane-preview">
+                <div class="pane-header">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <button class="nav-glass-btn" id="btn-preview-nav-back" onclick="navigateHistory(-1)" title="뒤로가기" disabled>
+                            <i data-lucide="arrow-left"></i>
+                        </button>
+                        <button class="nav-glass-btn" id="btn-preview-nav-forward" onclick="navigateHistory(1)" title="앞으로가기" disabled>
+                            <i data-lucide="arrow-right"></i>
+                        </button>
+                        <span data-i18n="preview_live" style="margin-left: 4px;">실시간 미리보기</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.8em; opacity: 0.6; margin-right: 4px;">Live Render</span>
+                        <div style="display: flex; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 2px 4px; gap: 4px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
+                            <button class="icon-btn-sm" onclick="zoomPreview(-0.1)" title="축소 (Zoom Out)" style="width: 22px; height: 22px; border: none; background: transparent;">
+                                <i data-lucide="zoom-out" style="width: 11px; height: 11px;"></i>
+                            </button>
+                            <span id="preview-zoom-level" onclick="resetPreviewZoom()" title="배율 초기화 (100%)" style="font-family: 'Outfit', sans-serif; font-size: 0.76em; font-weight: 600; cursor: pointer; color: var(--accent); min-width: 32px; text-align: center; user-select: none;">100%</span>
+                            <button class="icon-btn-sm" onclick="zoomPreview(0.1)" title="확대 (Zoom In)" style="width: 22px; height: 22px; border: none; background: transparent;">
+                                <i data-lucide="zoom-in" style="width: 11px; height: 11px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-pane" id="preview-pane">
+                    <div class="markdown-body" id="preview-content">
+                        <div class="empty-state">
+                            <div class="empty-state-icon"><i data-lucide="markdown" style="width: 64px; height: 64px;"></i></div>
+                            <div style="font-size: 1.1em; font-weight: 500;" data-i18n="empty_no_file">파일이 열리지 않았습니다.</div>
+                            <div style="font-size: 0.85em; opacity: 0.8;" data-i18n="empty_no_file_desc">좌측 탐색기에서 파일을 열거나 새로운 마크다운 문서를 작성해 보세요.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 지식 그래프 뷰 컨테이너 -->
+            <div id="graph-view-container" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:var(--bg-app); z-index:9999;">
+                <!-- 실제 그래프 캔버스가 그려질 엘리먼트 (이것을 ForceGraph에 넘겨줌) -->
+                <div id="graph-canvas" style="width: 100%; height: 100%;"></div>
+                
+                <!-- 슬라이더 스위치 CSS 스타일 -->
+                <link rel="stylesheet" href="/static/css/style.css">
+
+                <!-- 좌측 설정 패널 -->
+                <div id="graph-settings-panel" style="position: absolute; top: 20px; left: 20px; z-index: 10000; width: 260px; background: rgba(15, 17, 26, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 18px; color: #fff; font-family: sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.5); user-select: none;">
+                    <h3 style="margin-top:0; margin-bottom: 15px; font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-weight: 600;">
+                        <span>그래프 설정</span>
+                        <i data-lucide="sliders" style="width: 15px; height: 15px; opacity: 0.7;"></i>
+                    </h3>
+                    
+                    <!-- 보기 섹션 -->
+                    <div>
+                        <!-- 화살표 표시 -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 12px; opacity: 0.9;">화살표 표시</span>
+                            <label class="graph-switch">
+                                <input type="checkbox" id="graph-arrow-toggle" checked onchange="updateGraphDesign()">
+                                <span class="graph-slider-switch"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- 파티클 애니메이션 -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-size: 12px; opacity: 0.9;">파티클 애니메이션</span>
+                            <label class="graph-switch">
+                                <input type="checkbox" id="graph-particle-toggle" checked onchange="updateGraphDesign()">
+                                <span class="graph-slider-switch"></span>
+                            </label>
+                        </div>
+                        
+                        <!-- 선 길이 -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.8;">
+                                <span>선 길이</span>
+                                <span id="val-link-distance">120px</span>
+                            </div>
+                            <input type="range" id="graph-link-distance" min="60" max="240" value="120" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign(true)">
+                        </div>
+                        
+                        <!-- 선 두께 -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.8;">
+                                <span>선 두께</span>
+                                <span id="val-link-width">2.0px</span>
+                            </div>
+                            <input type="range" id="graph-link-width" min="0.5" max="5.0" step="0.5" value="2.0" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign()">
+                        </div>
+
+                        <!-- 선 색상 -->
+                        <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; opacity: 0.9;">선 색상</span>
+                            <input type="color" id="graph-link-color" value="#a855f7" style="border: none; border-radius: 4px; width: 44px; height: 24px; padding: 0; background: none; cursor: pointer;" onchange="updateGraphDesign()">
+                        </div>
+                        
+                        <!-- 노드 크기 배율 -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.8;">
+                                <span>노드 크기 배율</span>
+                                <span id="val-node-size">1.0x</span>
+                            </div>
+                            <input type="range" id="graph-node-size" min="0.5" max="2.5" step="0.1" value="1.0" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign()">
+                        </div>
+                        
+                        <!-- 글꼴 크기 -->
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; opacity: 0.8;">
+                                <span>글꼴 크기</span>
+                                <span id="val-font-size">12px</span>
+                            </div>
+                            <input type="range" id="graph-font-size" min="8" max="22" value="12" style="width: 100%; accent-color: #a855f7;" oninput="updateGraphDesign()">
+                        </div>
+
+                        <!-- 글꼴 색상 -->
+                        <div style="margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; opacity: 0.9;">글꼴 색상</span>
+                            <input type="color" id="graph-font-color" value="#ffffff" style="border: none; border-radius: 4px; width: 44px; height: 24px; padding: 0; background: none; cursor: pointer;" onchange="updateGraphDesign()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 하단 줌 컨트롤바 -->
+                <div id="graph-zoom-bar" style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; align-items: center; background: rgba(15, 17, 26, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 5px 14px; gap: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); user-select: none;">
+                    <button onclick="resetGraphZoom()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="화면에 맞춤">
+                        <i data-lucide="maximize" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    
+                    <button onclick="zoomGraph('out')" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="축소">
+                        <i data-lucide="minus" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    
+                    <input type="range" id="graph-zoom-slider" min="0.1" max="4.0" step="0.05" value="1.0" style="width: 100px; accent-color: #a855f7; cursor: pointer;" oninput="onZoomSliderChange(this.value)">
+                    
+                    <button onclick="zoomGraph('in')" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="확대">
+                        <i data-lucide="plus" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    
+                    <!-- 구분선 -->
+                    <div style="width: 1px; height: 16px; background: rgba(255,255,255,0.2); margin: 0 4px;"></div>
+                    
+                    <button onclick="exportGraphImage()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="이미지 저장">
+                        <i data-lucide="image" style="width: 16px; height: 16px;"></i>
+                    </button>
+                    
+                    <button onclick="printGraph()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="PDF 인쇄">
+                        <i data-lucide="printer" style="width: 16px; height: 16px;"></i>
+                    </button>
+                </div>
+
+                <!-- 우측 상단 닫기 버튼 -->
+                <button onclick="toggleGraphView()" style="position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(168, 85, 247, 0.2); border: 1px solid #a855f7; color: white; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 10px rgba(168,85,247,0.4); transition: all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.4)'; this.style.boxShadow='0 0 15px rgba(168,85,247,0.6)'" onmouseout="this.style.background='rgba(168, 85, 247, 0.2)'; this.style.boxShadow='0 0 10px rgba(168,85,247,0.4)'">×</button>
+            </div>
+        </div>
+
+        <!-- 우측 TOC 플로팅 패널 -->
+        <div class="toc-pane" id="sidebar-toc">
+            <div class="toc-title" data-i18n="toc_title">문서 개요 (TOC)</div>
+            <div id="toc-container">
+                <ul class="toc-list" id="toc-list"></ul>
+            </div>
+        </div>
+
+        <!-- 슬라이딩 숨기기/나오기 핸들 (우측 TOC) -->
+        <button class="toc-slide-toggle" onclick="toggleToc()" id="toc-slide-btn" title="문서 개요 열기/접기" data-i18n-title="tooltip_toggle_toc">
+            <i id="toc-slide-icon" data-lucide="chevron-right" style="width: 12px; height: 12px;"></i>
+        </button>
+    </main>
+
+    <!-- 새 아이템 생성 모달 -->
+    <div class="modal" id="create-modal">
+        <div class="modal-card">
+            <div class="modal-title" id="modal-card-title" data-i18n="create_modal_title">새 항목 추가</div>
+            <input type="text" class="modal-input" id="modal-card-input" placeholder="이름을 입력해 주세요..." data-i18n-placeholder="placeholder_name">
+            <div class="modal-actions">
+                <button class="btn" onclick="closeCreateModal()" data-i18n="btn_cancel">취소</button>
+                <button class="btn btn-accent" onclick="submitCreateItem()" data-i18n="btn_create">생성</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 네트워크 및 보안 설정 모달 -->
+    <div class="modal" id="settings-modal" style="display: none;">
+        <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <i data-lucide="settings" style="width: 20px; height: 20px; color: var(--accent);"></i>
+                <div class="modal-title" style="margin: 0; font-size: 1.25em;" data-i18n="settings_title">네트워크 및 보안 설정</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 14px; box-sizing: border-box; text-align: left;">
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85em; font-weight: 600; color: var(--accent); margin-bottom: 4px;">
+                    <i data-lucide="info" style="width: 14px; height: 14px;"></i> <span data-i18n="settings_network_info">현재 네트워크 접속 정보</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-main);">
+                    <span data-i18n="settings_lan">내부 IP (LAN):</span>
+                    <span id="settings-local-ip" style="font-weight: 600; color: #38bdf8;">127.0.0.1</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-main);">
+                    <span data-i18n="settings_wan">공인 IP (WAN):</span>
+                    <span id="settings-public-ip" style="font-weight: 600; color: #4ade80;" data-i18n="settings_retrieving">가져오는 중...</span>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_bind_ip">접속 호스트 (Bind IP)</label>
+                    <select id="settings-bind-ip" class="modal-input" style="width: 100%; box-sizing: border-box;">
+                        <option value="0.0.0.0" data-i18n="settings_bind_external">0.0.0.0 (외부 접속 허용)</option>
+                        <option value="127.0.0.1" data-i18n="settings_bind_local">127.0.0.1 (로컬만 허용)</option>
+                    </select>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_port">포트 번호</label>
+                    <input type="number" id="settings-port" class="modal-input" placeholder="58220" style="width: 100%; box-sizing: border-box;" min="1024" max="65535">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_password">웹 접속 암호</label>
+                    <input type="password" id="settings-password" class="modal-input" placeholder="미지정 시 로그인 없이 접속" style="width: 100%; box-sizing: border-box;" data-i18n-placeholder="placeholder_password_empty">
+                </div>
+            </div>
+            
+            <!-- 글꼴 및 편집기 설정 -->
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-top: 10px; width: 100%;">
+                <i data-lucide="type" style="width: 18px; height: 18px; color: var(--accent);"></i>
+                <div class="modal-title" style="margin: 0; font-size: 1.1em;" data-i18n="settings_font_title">글꼴 및 에디터 설정</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px; width: 100%;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%;">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_ui_font">기본 UI 글꼴</label>
+                        <select id="settings-ui-font" class="modal-input" style="width: 100%; box-sizing: border-box;">
+                            <option value="Inter">Inter (기본)</option>
+                            <option value="Outfit">Outfit</option>
+                            <option value="Lora">Lora (영문 Serif)</option>
+                            <option value="Malgun Gothic">맑은 고딕</option>
+                            <option value="Nanum Gothic">나눔고딕</option>
+                            <option value="sans-serif">System Default</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_editor_font">에디터 글꼴</label>
+                        <select id="settings-editor-font" class="modal-input" style="width: 100%; box-sizing: border-box;">
+                            <option value="Fira Code">Fira Code (기본)</option>
+                            <option value="JetBrains Mono">JetBrains Mono</option>
+                            <option value="Consolas">Consolas</option>
+                            <option value="D2Coding">D2Coding</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="monospace">System Monospace</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.85em; font-weight: 600; color: var(--text-main);" data-i18n="settings_editor_size">에디터 글자 크기 (px)</label>
+                    <input type="number" id="settings-editor-size" class="modal-input" placeholder="14" style="width: 100%; box-sizing: border-box;" min="12" max="24">
+                </div>
+            </div>
+
+            <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 6px; padding: 10px; font-size: 0.78em; color: #f87171; line-height: 1.4;" data-i18n="settings_warn">
+                호스트/포트 변경은 앱 재시작 후 적용. 암호 변경은 즉시 적용.
+            </div>
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end;">
+                <button class="btn" onclick="closeSettingsModal()" data-i18n="btn_cancel">취소</button>
+                <button class="btn btn-accent" onclick="saveSettings()" data-i18n="btn_save">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 보안 접속 인증 overlay -->
+    <div id="auth-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(9,10,15,0.85); backdrop-filter: blur(25px); z-index: 99999; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif;">
+        <div style="background: rgba(20,22,30,0.7); border: 1px solid rgba(69,243,255,0.15); border-radius: 16px; padding: 40px; width: 420px; max-width: 90%; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; display: flex; flex-direction: column; gap: 24px;">
+            <div style="width: 64px; height: 64px; background: rgba(69,243,255,0.1); border-radius: 50%; border: 1px solid rgba(69,243,255,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                <i data-lucide="shield-alert" style="width: 32px; height: 32px; color: #45f3ff;"></i>
+            </div>
+            <div>
+                <div style="font-size: 1.5em; font-weight: 700; color: #e2e8f0;">Secure Access</div>
+                <div style="font-size: 0.85em; color: #94a3b8; margin-top: 6px;" data-i18n="auth_desc">접속 암호를 입력해 주세요.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="password" id="auth-password-input" placeholder="비밀번호" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 12px 16px; font-size: 1em; outline: none;" onkeydown="if(event.key==='Enter') submitAuthPassword()" data-i18n-placeholder="placeholder_password">
+                <div id="auth-error-msg" style="display: none; color: #ef4444; font-size: 0.8em;" data-i18n="auth_error_msg">암호가 올바르지 않습니다.</div>
+            </div>
+            <button class="btn btn-accent" style="width: 100%; padding: 12px; justify-content: center; gap: 8px; font-weight: 600;" onclick="submitAuthPassword()">
+                <i data-lucide="key" style="width: 16px; height: 16px;"></i> <span data-i18n="auth_btn_connect">접속하기</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 토스트 알림 -->
+    <div class="toast" id="toast">
+        <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
+        <span id="toast-message" data-i18n="toast_default">변경 사항이 저장되었습니다.</span>
+    </div>
+
+    <!-- Mermaid 전체화면 모달 -->
+    <div class="mermaid-fullscreen-modal" id="mermaid-fs-modal" onclick="closeMermaidFullscreen(event)">
+        <button class="fs-close-btn" onclick="closeMermaidFullscreen(event)" title="닫기 (Esc)">
+            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        </button>
+        <div class="fs-modal-content" onclick="event.stopPropagation()">
+            <!-- 클론된 SVG가 여기에 주입됩니다. -->
+        </div>
+    </div>
+
+    <!-- 템플릿 주입 확인 모달 -->
+    <div class="modal" id="template-confirm-modal" style="display: none; z-index: 99997;">
+        <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <i data-lucide="help-circle" style="width: 20px; height: 20px; color: var(--accent);"></i>
+                <div class="modal-title" style="margin: 0; font-size: 1.15em; text-align: left;" data-i18n="template_confirm_title">템플릿 삽입 방식 선택</div>
+            </div>
+            <div style="font-size: 0.88em; line-height: 1.5; color: var(--text-main); text-align: left;" data-i18n="template_confirm_desc">
+                에디터에 기존 작성 중인 내용이 있습니다. 템플릿을 현재 커서 위치에 추가로 삽입하시겠습니까, 아니면 기존 내용을 지우고 전체 덮어쓰시겠습니까?
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                <button class="btn btn-accent" onclick="applyTemplate('insert')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;">
+                    <i data-lucide="file-input" style="width: 16px; height: 16px;"></i>
+                    <span data-i18n="btn_template_insert">현재 위치에 삽입</span>
+                </button>
+                <button class="btn" onclick="applyTemplate('overwrite')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25);">
+                    <i data-lucide="file-output" style="width: 16px; height: 16px;"></i>
+                    <span data-i18n="btn_template_overwrite">전체 덮어쓰기 (기존 내용 삭제)</span>
+                </button>
+            </div>
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn" onclick="closeTemplateConfirmModal()" data-i18n="btn_cancel">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 구글 드라이브 동기화 충돌 해결 모달 -->
+    <div class="modal" id="gdrive-conflict-modal" style="display: none; z-index: 99998;">
+        <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <i data-lucide="alert-triangle" style="width: 20px; height: 20px; color: #fbbf24;"></i>
+                <div class="modal-title" style="margin: 0; font-size: 1.15em; text-align: left;" data-i18n="msg_conflict_found">구글 드라이브에 더 최신 파일이 있습니다. 원하시는 작업을 선택해 주세요.</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                <button class="btn btn-accent" onclick="resolveGdriveConflict('upload')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px;">
+                    <i data-lucide="upload-cloud" style="width: 16px; height: 16px;"></i>
+                    <span data-i18n="btn_resolve_upload">로컬 파일로 업로드 (덮어쓰기)</span>
+                </button>
+                <button class="btn" onclick="resolveGdriveConflict('download')" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25);">
+                    <i data-lucide="download-cloud" style="width: 16px; height: 16px;"></i>
+                    <span data-i18n="btn_resolve_download">드라이브 파일 다운로드 (로컬 덮어쓰기)</span>
+                </button>
+            </div>
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end; margin-top: 10px;">
+                <button class="btn" onclick="closeGdriveConflictModal()" data-i18n="btn_cancel">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 구글 드라이브 클라이언트 인증키(client_secrets.json) 안내 모달 -->
+    <div class="modal" id="gdrive-setup-modal" style="display: none; z-index: 99999;">
+        <div class="modal-card" style="width: 500px; max-width: 95%; padding: 32px; gap: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="key" style="width: 20px; height: 20px; color: var(--accent);"></i>
+                    <div class="modal-title" style="margin: 0; font-size: 1.15em;" data-i18n="gdrive_setup_title">구글 드라이브 연동 설정</div>
+                </div>
+                <button class="icon-btn" onclick="closeGdriveSetupModal()" style="padding: 4px;">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88em; line-height: 1.5; color: var(--text-main); text-align: left;">
+                <p style="margin: 0;" data-i18n="gdrive_setup_desc1">
+                    구글 API 정책에 따라 데스크톱 앱에서 개인 구글 드라이브에 직접 연결하려면 <strong>클라이언트 인증키 (client_secrets.json)</strong> 파일이 필요합니다.
+                </p>
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="font-weight: 600; font-size: 0.9em; color: var(--accent);" data-i18n="gdrive_setup_steps_title">🔑 인증키 발급 및 등록 순서</div>
+                    <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+                        <li>
+                            <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color: var(--accent); text-decoration: underline; font-weight: 500;" data-i18n="gdrive_setup_step1">구글 클라우드 콘솔 방문</a> <span data-i18n="gdrive_setup_step1_tail">(로그인 후 프로젝트 생성)</span>
+                        </li>
+                        <li data-i18n="gdrive_setup_step2"><strong>사용자 인증 정보 만들기</strong> &gt; <strong>OAuth 클라이언트 ID</strong>를 클릭합니다.</li>
+                        <li data-i18n="gdrive_setup_step3">애플리케이션 유형을 <strong>데스크톱 앱 (Desktop app)</strong>으로 선택하고 만듭니다.</li>
+                        <li data-i18n="gdrive_setup_step4">생성된 클라이언트 오른쪽의 <strong>다운로드</strong> 버튼을 눌러 JSON 파일을 받습니다.</li>
+                    </ol>
+                </div>
+                <p style="margin: 0; font-size: 0.82em; opacity: 0.8;" data-i18n="gdrive_setup_desc2">
+                    받으신 JSON 파일을 아래 버튼을 클릭해 선택하면 자동으로 프로그램에 등록됩니다.
+                </p>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px;">
+                <button class="btn btn-accent" onclick="importGdriveClientSecrets()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-size: 0.95em;">
+                    <i data-lucide="file-json" style="width: 18px; height: 18px;"></i>
+                    <span data-i18n="btn_import_client_secrets">client_secrets.json 파일 가져오기</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 해시태그 편집 모달 -->
+    <div class="modal" id="hashtag-modal" style="display: none; z-index: 99999;">
+        <div class="modal-card" style="width: 440px; max-width: 90%; padding: 24px; gap: 16px; text-align: left; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(69, 243, 255, 0.2); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);">
+            <div class="modal-title" style="margin: 0; font-size: 1.15em; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                <i data-lucide="tag" style="width: 18px; height: 18px; color: var(--accent);"></i>
+                <span data-i18n="hashtag_modal_title">해시태그 편집</span>
+            </div>
+            
+            <!-- 현재 적용된 태그 목록 -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 0.8em; font-weight: 600; color: var(--text-main);" data-i18n="hashtag_modal_current_tags">현재 문서 태그</label>
+                <div id="hashtag-current-tags-container" style="display: flex; flex-wrap: wrap; gap: 6px; border: 1px solid var(--border); border-radius: 6px; padding: 10px; min-height: 42px; background: rgba(0,0,0,0.2);">
+                    <!-- 동적으로 태그 추가됨 -->
+                </div>
+            </div>
+            
+            <!-- 태그 추가 입력란 -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 0.8em; font-weight: 600; color: var(--text-main);" data-i18n="hashtag_modal_add_tag">태그 추가</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="hashtag-new-input" placeholder="새 태그 입력 (Enter로 추가)" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); padding: 8px 12px; font-size: 0.9em; outline: none;" onkeydown="if(event.key==='Enter') addHashtagFromInput()" data-i18n-placeholder="placeholder_add_tag_input">
+                    <button class="btn btn-accent" onclick="addHashtagFromInput()" style="padding: 8px 14px;" data-i18n="btn_add">추가</button>
+                </div>
+            </div>
+            
+            <!-- 워크스페이스 내 추천 태그 -->
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 0.8em; font-weight: 600; color: var(--text-muted);" data-i18n="hashtag_modal_suggest_tags">자주 쓰이는 태그 추천 (클릭 시 추가)</label>
+                <div id="hashtag-suggest-tags-container" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 100px; overflow-y: auto; padding: 2px;">
+                    <!-- 다른 문서 태그 추천 -->
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end; gap: 8px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">
+                <button class="btn" onclick="closeHashtagModal()" data-i18n="btn_cancel">취소</button>
+                <button class="btn btn-accent" onclick="saveHashtagChanges()" data-i18n="btn_save">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 태그별 문서 선택 모달 -->
+    <div class="modal" id="tag-select-modal" style="display: none; z-index: 99999;">
+        <div class="modal-card" style="width: 440px; max-width: 90%; padding: 24px; gap: 16px; text-align: left; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(69, 243, 255, 0.2); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);">
+            <div class="modal-title" style="margin: 0; font-size: 1.15em; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                <i data-lucide="file-text" style="width: 18px; height: 18px; color: var(--accent);"></i>
+                <span id="tag-select-modal-title" data-i18n="tag_select_modal_title">해시태그 문서선택</span>
+            </div>
+            
+            <div id="tag-select-files-container" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding: 2px;">
+                <!-- 동적으로 문서 리스트 추가됨 -->
+            </div>
+            
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end; gap: 8px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">
+                <button class="btn" onclick="closeTagSelectModal()" data-i18n="btn_cancel">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 업데이트 알림 모달 (PyPI에 새 버전 출시 시 자동 팝업) -->
+    <div class="modal" id="update-modal" style="display: none; z-index: 99999;">
+        <div class="modal-card" style="width: 480px; max-width: 90%; padding: 32px; gap: 20px; text-align: left; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(30px); border: 1px solid rgba(139, 92, 246, 0.25); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);">
+            <div style="display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: #a855f7;">
+                    <i data-lucide="sparkles" style="width: 20px; height: 20px;"></i>
+                </div>
+                <div>
+                    <div class="modal-title" style="margin: 0; font-size: 1.2em; font-weight: 700; color: #fff;" data-i18n="update_modal_title">새로운 버전 출시 알림</div>
+                    <div style="font-size: 0.76em; color: var(--text-muted); margin-top: 2px;" data-i18n="update_modal_subtitle">최신 기능과 안정화 패치가 적용되었습니다.</div>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 4px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px;">
+                    <div>
+                        <div style="font-size: 0.72em; color: var(--text-muted);" data-i18n="update_lbl_current">현재 버전</div>
+                        <div id="update-current-version" style="font-size: 1.1em; font-weight: 600; color: var(--text-main); font-family: monospace;">v3.9.9</div>
+                    </div>
+                    <div style="color: var(--text-muted); font-size: 1.1em;">➔</div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.72em; color: #a855f7; font-weight: 600;" data-i18n="update_lbl_latest">최신 버전 (PyPI)</div>
+                        <div id="update-latest-version" style="font-size: 1.1em; font-weight: 700; color: #a855f7; font-family: monospace;">v3.9.9</div>
+                    </div>
+                </div>
+
+                <!-- pip 업데이트 방법 영역 -->
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.8em; font-weight: 600; color: var(--text-main);" data-i18n="update_pip_title">📦 pip로 원클릭 업데이트</label>
+                    <div style="display: flex; gap: 8px; align-items: center; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px;">
+                        <code id="pip-update-command" style="flex: 1; font-family: 'Fira Code', 'JetBrains Mono', monospace; font-size: 0.82em; color: #38bdf8; overflow-x: auto; white-space: nowrap; scrollbar-width: none;">pip install --upgrade joy-markdown-studio</code>
+                        <button class="icon-btn-sm" onclick="copyPipCommand()" title="명령어 복사" style="padding: 6px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: var(--text-main);">
+                            <i data-lucide="copy" style="width: 13px; height: 13px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Git 주소 안내 영역 -->
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label style="font-size: 0.8em; font-weight: 600; color: var(--text-main);" data-i18n="update_git_title">🖥️ 공식 GitHub 프로젝트 페이지</label>
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px;">
+                        <span style="font-size: 0.78em; color: var(--text-muted); font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px;">github.com/joyfoxg/jmstudio</span>
+                        <a href="https://github.com/joyfoxg/jmstudio" target="_blank" class="btn btn-accent" style="padding: 6px 12px; font-size: 0.78em; display: flex; align-items: center; gap: 6px; text-decoration: none;">
+                            <i data-lucide="github" style="width: 12px; height: 12px;"></i>
+                            <span data-i18n="btn_visit_git">방문하기</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="width: 100%; justify-content: flex-end; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;">
+                <button class="btn btn-accent" onclick="closeUpdateModal()" style="padding: 8px 18px;" data-i18n="btn_confirm">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 스크립트 파일 로직 -->
+    
+
+    <!-- 모듈화된 JavaScript 자산 로드 (캐시 무력화 버전 적용) -->
+    <script src="/static/js/translations.js?v=3.9.9_hashtag_v1"></script>
+    <script type="module" src="/static/js/editor.js?v=3.9.9_hashtag_v1"></script>
+    <script type="module" src="/static/js/emoji.js?v=3.9.9_hashtag_v1"></script>
+    <script type="module" src="/static/js/templates.js?v=3.9.9_hashtag_v1"></script>
+
+</body>
+</html>

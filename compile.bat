@@ -45,11 +45,11 @@ echo [Step 3] Compiling jmstudio.py into a Standalone Executable...
 echo (This may take 1-2 minutes. Please do not close this window...)
 
 rem app_config.py에서 버전 정보 추출
-for /f "tokens=*" %%a in ('%PY_CMD% -c "import app_config; print(app_config.VERSION)"') do (
+for /f "tokens=*" %%a in ('%PY_CMD% -c "from jmstudio import app_config; print(app_config.VERSION)"') do (
     set APP_VER=v%%a
 )
 
-%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "frontend;frontend" --add-data "client_secrets.json;." --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" main.py
+%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "jmstudio/frontend;jmstudio/frontend" --add-data "client_secrets.json;." --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" jmstudio/__main__.py
 if %errorlevel% neq 0 (
     echo [ERROR] PyInstaller compilation failed!
     pause

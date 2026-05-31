@@ -5,14 +5,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="joy-markdown-studio",
-    version="3.9.18",
+    version="3.9.19",
     author="Joy Fox",
     author_email="joyfoxg@gmail.com",
     description="The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/joyfoxg/jmstudio",
-    py_modules=["jmstudio", "main", "app_config", "api_bridge", "routes", "gdrive_sync"],
+    packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -29,7 +29,7 @@ setup(
     ],
     entry_points={
         "gui_scripts": [
-            "jmstudio=jmstudio:main",
+            "jmstudio=jmstudio.main:main",
         ],
     },
     include_package_data=True,
