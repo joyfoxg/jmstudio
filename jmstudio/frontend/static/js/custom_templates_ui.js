@@ -1,16 +1,20 @@
 // Joy Markdown Studio - 사용자 지정 템플릿 & 원격 구독 UI 플러그인 (custom_templates_ui.js)
 
 (function () {
-    // 1. DOM 로드 후 아이콘 버튼 및 모달 동적 강제 주입
-    document.addEventListener("DOMContentLoaded", () => {
+    let initialized = false;
+    function init() {
+        if (initialized) return;
+        initialized = true;
         injectTriggersAndModals();
         hijackRenderTemplates();
-    });
+    }
+
+    // 1. DOM 로드 후 아이콘 버튼 및 모달 동적 강제 주입
+    document.addEventListener("DOMContentLoaded", init);
 
     // 만약 이미 DOM이 로드된 상태인 경우 즉각 주입
     if (document.readyState === "interactive" || document.readyState === "complete") {
-        injectTriggersAndModals();
-        hijackRenderTemplates();
+        init();
     }
 
     function injectTriggersAndModals() {
@@ -24,7 +28,11 @@
             plusBtn.style.marginRight = '4px';
             plusBtn.title = '현재 문서를 사용자 지정 템플릿으로 추가';
             plusBtn.innerHTML = '<i data-lucide="plus" style="width: 14px; height: 14px; color: var(--accent);"></i>';
-            plusBtn.onclick = openSaveTemplateModal;
+            plusBtn.onclick = () => {
+                if (typeof window.openSaveTemplateModal === 'function') {
+                    window.openSaveTemplateModal();
+                }
+            };
             
             const rssBtn = document.createElement('button');
             rssBtn.id = 'subscription-trigger-btn';
@@ -33,7 +41,11 @@
             rssBtn.style.marginRight = '8px';
             rssBtn.title = '템플릿 원격 저장소 구독 및 동기화 설정';
             rssBtn.innerHTML = '<i data-lucide="rss" style="width: 14px; height: 14px; color: var(--accent);"></i>';
-            rssBtn.onclick = openSubscriptionModal;
+            rssBtn.onclick = () => {
+                if (typeof window.openSubscriptionModal === 'function') {
+                    window.openSubscriptionModal();
+                }
+            };
             
             closeBtn.parentNode.insertBefore(rssBtn, closeBtn);
             closeBtn.parentNode.insertBefore(plusBtn, rssBtn);
