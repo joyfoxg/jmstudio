@@ -106,7 +106,7 @@
             setupSaveTemplateOptions();
         }
 
-        // C. 템플릿 구독 설정 모달 주입 (원격 템플릿 스토어 탭 연동)
+        // C. 템플릿 구독 설정 모달 주입 (원격 템플릿 스토어 탭 연동 및 동기화 피드백 탑재)
         if (!document.getElementById('template-subscription-modal')) {
             const subModalHtml = `
                 <div id="template-subscription-modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 10000;">
@@ -132,6 +132,12 @@
                             </button>
                         </div>
                         
+                        <!-- 자동 동기화 상태 피드백 영역 -->
+                        <div id="sub-sync-status-container" style="display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: rgba(69, 243, 255, 0.05); border: 1px solid rgba(69, 243, 255, 0.15); border-radius: 8px; font-size: 0.78em; color: var(--accent); transition: all 0.3s ease;">
+                            <i id="sub-sync-status-icon" data-lucide="refresh-cw" style="width: 13px; height: 13px; display: inline-block; flex-shrink: 0;"></i>
+                            <span id="sub-sync-status-text" style="font-weight: 500;">동기화 상태 대기 중...</span>
+                        </div>
+                        
                         <!-- 탭 1: 템플릿 추가하기 (스토어) -->
                         <div id="sub-tab-content-store" style="display: flex; flex-direction: column; gap: 12px; min-height: 280px;">
                             <!-- 검색바 -->
@@ -141,7 +147,7 @@
                             </div>
                             
                             <!-- 스토어 원격 템플릿 검색 결과 리스트 -->
-                            <div id="store-templates-list" style="flex: 1; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04); scrollbar-width: thin;">
+                            <div id="store-templates-list" style="flex: 1; max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04); scrollbar-width: thin;">
                                 <!-- 검색 매칭된 원격 템플릿들이 동적 카드로 생성됨 -->
                             </div>
                         </div>
@@ -161,7 +167,7 @@
                             
                             <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
                                 <label style="font-size: 0.8em; font-weight: 500; color: var(--text-muted);">현재 구독 목록</label>
-                                <div id="template-subs-list" style="max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                <div id="template-subs-list" style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
                                     <!-- Subscriptions listed via JS -->
                                 </div>
                             </div>
@@ -411,6 +417,9 @@
         document.getElementById('template-sub-url').value = '';
         switchSubModalTab('store'); // 모달 열었을 때 기본적으로 스토어 검색 탭 로드
         document.getElementById('template-subscription-modal').style.display = 'flex';
+        
+        // 자동 동기화 트리거
+        triggerAutoSync();
     };
 
     window.closeSubscriptionModal = function () {
@@ -491,50 +500,141 @@
 
     window.syncTemplateSubscriptions = async function () {
         const btn = document.getElementById('sync-subs-btn');
-        const origHtml = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<span>동기화중...</span>';
+        const origHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>동기화중...</span>';
+        }
         
-        if (window.pywebview && window.pywebview.api && window.pywebview.api.sync_subscriptions) {
-            const res = await window.pywebview.api.sync_subscriptions();
+        await triggerAutoSync();
+        
+        if (btn) {
             btn.disabled = false;
             btn.innerHTML = origHtml;
-            
-            if (res.status === 'success') {
-                if (typeof window.showToast === 'function') {
-                    window.showToast("모든 템플릿 저장소 동기화 완료!");
-                }
-            } else {
-                alert("동기화 실패: " + res.message);
-            }
-            renderSubscriptionsList();
         }
+        renderSubscriptionsList();
     };
 
     window.restoreDefaultTemplateSubscription = async function () {
         const btn = document.getElementById('restore-default-subs-btn');
-        const origHtml = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<span>복원중...</span>';
+        const origHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>복원중...</span>';
+        }
+        
+        const statusContainer = document.getElementById('sub-sync-status-container');
+        const statusIcon = document.getElementById('sub-sync-status-icon');
+        const statusText = document.getElementById('sub-sync-status-text');
+        
+        if (statusContainer && statusText && statusIcon) {
+            statusContainer.style.background = 'rgba(69, 243, 255, 0.06)';
+            statusContainer.style.borderColor = 'rgba(69, 243, 255, 0.2)';
+            statusContainer.style.color = 'var(--accent)';
+            statusText.innerText = '기본 저장소 복원 및 전체 템플릿 동기화 진행 중...';
+            statusIcon.style.animation = 'spin 1.2s linear infinite';
+            statusIcon.style.display = 'inline-block';
+        }
         
         if (window.pywebview && window.pywebview.api && window.pywebview.api.restore_default_subscription) {
-            const res = await window.pywebview.api.restore_default_subscription();
+            try {
+                const res = await window.pywebview.api.restore_default_subscription();
+                if (statusIcon) statusIcon.style.animation = 'none';
+                
+                if (res.status === 'success') {
+                    if (statusContainer && statusText) {
+                        statusContainer.style.background = 'rgba(16, 185, 129, 0.06)';
+                        statusContainer.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                        statusContainer.style.color = '#34d399';
+                        statusText.innerText = '복원 성공: 기본 저장소 복원 및 동기화 완료!';
+                    }
+                    if (typeof window.showToast === 'function') {
+                        window.showToast("기본 저장소가 성공적으로 복원 및 캐싱되었습니다!");
+                    }
+                    searchStoreTemplates();
+                    renderSubscriptionsList();
+                } else {
+                    if (statusContainer && statusText) {
+                        statusContainer.style.background = 'rgba(239, 68, 68, 0.06)';
+                        statusContainer.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                        statusContainer.style.color = '#f87171';
+                        statusText.innerText = '복원 실패: ' + res.message;
+                    }
+                    alert("복원 실패: " + res.message);
+                }
+            } catch (err) {
+                if (statusIcon) statusIcon.style.animation = 'none';
+                if (statusContainer && statusText) {
+                    statusContainer.style.background = 'rgba(239, 68, 68, 0.06)';
+                    statusContainer.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                    statusContainer.style.color = '#f87171';
+                    statusText.innerText = '복원 처리 중 예외 발생';
+                }
+            }
+        }
+        
+        if (btn) {
             btn.disabled = false;
             btn.innerHTML = origHtml;
-            
-            if (res.status === 'success') {
-                if (typeof window.showToast === 'function') {
-                    window.showToast("기본 저장소가 성공적으로 복원 및 캐싱되었습니다!");
-                }
-                renderSubscriptionsList();
-            } else {
-                alert("복원 실패: " + res.message);
-            }
+        }
+        if (window.lucide) {
+            lucide.createIcons();
         }
     };
     
     // H. 원격 템플릿 스토어 탭 제어 & 검색 & 개별 추가 핸들러
     window.SUBSCRIBED_TEMPLATES_POOL = {}; // 대용량 마크다운/LaTeX 이스케이프 파싱 에러 방지를 위한 전역 메모리 스토어
+
+    async function triggerAutoSync() {
+        const statusContainer = document.getElementById('sub-sync-status-container');
+        const statusIcon = document.getElementById('sub-sync-status-icon');
+        const statusText = document.getElementById('sub-sync-status-text');
+        
+        if (!statusContainer || !statusIcon || !statusText) return;
+        
+        // 1. 진행 중 UI 점등 및 spin 개시
+        statusContainer.style.background = 'rgba(69, 243, 255, 0.06)';
+        statusContainer.style.borderColor = 'rgba(69, 243, 255, 0.2)';
+        statusContainer.style.color = 'var(--accent)';
+        statusText.innerText = '원격 저장소와 템플릿 동기화 진행 중...';
+        statusIcon.style.animation = 'spin 1.2s linear infinite';
+        statusIcon.style.display = 'inline-block';
+        
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.sync_subscriptions) {
+            try {
+                const res = await window.pywebview.api.sync_subscriptions();
+                statusIcon.style.animation = 'none';
+                
+                // 2. 동기화 성공/실패 결과 적용
+                if (res.status === 'success') {
+                    statusContainer.style.background = 'rgba(16, 185, 129, 0.06)';
+                    statusContainer.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                    statusContainer.style.color = '#34d399';
+                    statusText.innerText = '동기화 완료: 최신 원격 템플릿 목록 동기화 성공!';
+                    
+                    searchStoreTemplates();
+                } else {
+                    statusContainer.style.background = 'rgba(239, 68, 68, 0.06)';
+                    statusContainer.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                    statusContainer.style.color = '#f87171';
+                    statusText.innerText = '동기화 실패: ' + res.message;
+                }
+            } catch (err) {
+                statusIcon.style.animation = 'none';
+                statusContainer.style.background = 'rgba(239, 68, 68, 0.06)';
+                statusContainer.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                statusContainer.style.color = '#f87171';
+                statusText.innerText = '동기화 중 오류 발생: ' + err.message;
+            }
+        } else {
+            statusIcon.style.animation = 'none';
+            statusText.innerText = 'API 연결 대기 중...';
+        }
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
 
     window.switchSubModalTab = function (tab) {
         const storeTabBtn = document.getElementById('tab-btn-sub-store');
