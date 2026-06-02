@@ -6225,6 +6225,37 @@ function updateActiveDocumentTags(newTags) {
         // 실행
         setTimeout(setupTablePicker, 100);
 
+// 날짜 및 시간 동적 삽입 함수
+function insertDateTime(type) {
+    const view = window.cmEditor;
+    if (!view) return;
+    
+    const now = new Date();
+    let textToInsert = "";
+    
+    if (type === 'date') {
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        textToInsert = `${year}-${month}-${day}`;
+    } else if (type === 'time') {
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        textToInsert = `${hours}:${minutes}:${seconds}`;
+    }
+    
+    const state = view.state;
+    const selection = state.selection.main;
+    
+    view.dispatch({
+        changes: { from: selection.from, to: selection.to, insert: textToInsert },
+        selection: { anchor: selection.from + textToInsert.length }
+    });
+    view.focus();
+}
+window.insertDateTime = insertDateTime;
+
 // 해시태그 전역 바인딩
 window.openTagsManager = openTagsManager;
 window.openHashtagModal = openHashtagModal;

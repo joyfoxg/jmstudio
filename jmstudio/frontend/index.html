@@ -986,6 +986,31 @@
                         </div>
                     </div>
                     
+                    <!-- 테이블(표) 삽입 버튼 -->
+                    <div class="toolbar-dropdown" id="toolbar-table-dropdown">
+                        <button class="toolbar-btn" id="toolbar-table-btn" title="표(Table) 삽입">
+                            <i data-lucide="table" style="width: 14px; height: 14px;"></i>
+                        </button>
+                        <div class="toolbar-dropdown-menu table-picker-menu" id="toolbar-table-menu">
+                            <div class="table-picker-header">
+                                <span class="table-picker-title">표 삽입</span>
+                                <span class="table-picker-size" id="table-picker-size-display">0 x 0</span>
+                            </div>
+                            <div class="table-picker-grid" id="table-picker-grid"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="toolbar-divider"></div>
+                    
+                    <!-- 날짜 삽입 버튼 -->
+                    <button class="toolbar-btn" onclick="insertDateTime('date')" title="날짜 삽입">
+                        <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <!-- 시간 삽입 버튼 -->
+                    <button class="toolbar-btn" onclick="insertDateTime('time')" title="시간 삽입">
+                        <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    
                     <div class="toolbar-divider"></div>
                     
                     <!-- 해시태그 편집 버튼 -->
