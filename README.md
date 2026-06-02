@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.20 🌟
+# 🧪 Joy Markdown Studio v3.9.21 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -114,6 +114,12 @@
 * **Automatic Default Tag Injection**: Creating a new document automatically inserts default tags (`tags: [새문서]` or `tags: [NewDocument]`), and launching any of the 9 templates pre-populates context-aware tags matching the template's characteristics.
 * **Sidebar Tag Manager**: A dedicated Hashtag tab in the sidebar crawls all markdown files in the workspace to display unique tags, document counts, and lets users browse and launch tagged documents in one click.
 * **Auto-Hide Front Matter in Preview**: While rendering Markdown to HTML, the system automatically detects the top Front Matter block (`---` to `---`) and slices it out of the preview area for a clean reading experience.
+
+### 20. 🎨 Real-time Advanced Hybrid WYSIWYG Rendering & Stability Hotfixes (v3.9.21 New)
+* **Real-time Rendering of Modern Dynamic Elements**: Mermaid diagrams, statistics charts (Chart.js), chemical formula blocks (SMILES), 9 library templates, and GFM Tables render dynamically and flawlessly inside the WYSIWYG editing window, achieving a 100% visual match with the preview layout.
+* **Resolved Equation Enter Crash (JS Error)**: Fixed the strict sorting crash of CodeMirror 6 `RangeSetBuilder` when pressing Enter key on mathematical formulas by introducing single decoration pooling, semantic sorting, and **Overlapping Filtration** steps.
+* **Fixed Fullscreen Capturing & Global Scope Binding**: Exposed fullscreen and zoom helper methods (`openMermaidFullscreen`, etc.) to the `window` global scope so inline `onclick` script logic in custom HTML mindmaps evaluates successfully, and solved the bug where a tiny 13x13px inline arrow icon svg got captured instead of the main chart by implementing `s.closest('button')` filter logic.
+* **Mindmap Scanner Viewport & Empty Line Leak Fixes**: Expanded scanner bounds to the entire document line limits to prevent bottom-area code leaks, and removed the empty line breakout condition so visual HTML mindmaps render correctly even with structural blank lines.
 
 ---
 

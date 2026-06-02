@@ -2119,3 +2119,265 @@
             transform: translateY(-1px);
             text-shadow: 0 0 8px var(--accent);
         }
+
+        /* WYSIWYG Hybrid Edit Mode Styles */
+        .cm-hidden-mark {
+            display: inline-block;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+            opacity: 0 !important;
+            font-size: 0 !important;
+            vertical-align: middle !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .cm-wysiwyg-h1 {
+            font-size: 1.95em !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            font-family: 'Outfit', sans-serif !important;
+            line-height: 1.35 !important;
+            display: inline-block;
+            margin-top: 12px !important;
+            margin-bottom: 8px !important;
+        }
+
+        .cm-wysiwyg-h2 {
+            font-size: 1.55em !important;
+            font-weight: 600 !important;
+            color: #ffffff !important;
+            font-family: 'Outfit', sans-serif !important;
+            line-height: 1.3 !important;
+            display: inline-block;
+            margin-top: 10px !important;
+            margin-bottom: 6px !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            width: 100%;
+        }
+
+        .cm-wysiwyg-h3 {
+            font-size: 1.3em !important;
+            font-weight: 600 !important;
+            color: var(--accent) !important;
+            font-family: 'Outfit', sans-serif !important;
+            display: inline-block;
+            margin-top: 8px !important;
+            margin-bottom: 4px !important;
+        }
+
+        .cm-wysiwyg-h4 {
+            font-size: 1.15em !important;
+            font-weight: 600 !important;
+            color: var(--text-main) !important;
+            display: inline-block;
+            margin-top: 6px !important;
+        }
+
+        .cm-wysiwyg-blockquote {
+            border-left: 4px solid var(--accent) !important;
+            background: rgba(69, 243, 255, 0.04) !important;
+            padding: 8px 16px !important;
+            margin: 6px 0 !important;
+            display: block !important;
+            border-radius: 0 8px 8px 0 !important;
+            color: var(--text-muted) !important;
+            font-style: italic !important;
+        }
+
+        .cm-wysiwyg-math-inline {
+            background: rgba(69, 243, 255, 0.08) !important;
+            border: 1px solid rgba(69, 243, 255, 0.2) !important;
+            border-radius: 6px !important;
+            padding: 2px 8px !important;
+            color: var(--accent) !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .cm-wysiwyg-math-block {
+            background: rgba(255, 255, 255, 0.01) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 10px !important;
+            padding: 20px !important;
+            margin: 16px 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .cm-wysiwyg-smiles-container {
+            background: rgba(0,0,0,0.2) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 10px !important;
+            padding: 16px !important;
+            margin: 16px 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            min-height: 180px !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .cm-wysiwyg-image-container {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 20px 0 !important;
+            padding: 10px !important;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .cm-wysiwyg-image-caption {
+            margin-top: 8px !important;
+            font-size: 0.82em !important;
+            color: var(--text-muted) !important;
+            font-weight: 500 !important;
+        }
+
+        /* ==========================================================================
+           WYSIWYG 모드 고급 문서 레이아웃 & 테마 동기화 (미리보기와 100% 디자인 통일)
+           ========================================================================== */
+        
+        /* 1. 에디터 줄번호(Gutter) 및 불필요한 개발 요소를 접어 순수 글쓰기 캔버스로 변형 */
+        .wysiwyg-active .cm-gutters {
+            display: none !important;
+        }
+        
+        .wysiwyg-active .cm-editor {
+            border: none !important;
+            background: transparent !important;
+        }
+        
+        .wysiwyg-active #pane-editor {
+            background-color: var(--bg-primary) !important;
+            overflow-y: auto !important;
+            display: flex;
+            justify-content: center;
+        }
+        
+        /* 2. 에디터 컨텐트 영역을 중앙 정렬된 A4 용지 형태(미리보기 폭)로 포커스 */
+        .wysiwyg-active .cm-content {
+            font-family: 'Inter', 'Outfit', 'Lora', sans-serif !important;
+            font-size: 1.08em !important;
+            line-height: 1.8 !important;
+            color: #cbd5e1 !important;
+            max-width: 860px !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding: 50px 30px 100px 30px !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* 3. 에디터 가상 활성 라인 배경 미세하게 최적화 */
+        .wysiwyg-active .cm-activeLine {
+            background-color: rgba(255, 255, 255, 0.015) !important;
+            border-radius: 4px;
+        }
+        
+        .wysiwyg-active .cm-activeLineGutter {
+            background-color: transparent !important;
+        }
+        
+        .wysiwyg-active .cm-scroller {
+            font-family: 'Inter', 'Outfit', 'Lora', sans-serif !important;
+        }
+        
+        /* 4. 위지윅 모드 하이브리드 표(Table) 스타일 (미리보기와 완전히 같은 CSS 적용) */
+        .cm-wysiwyg-table-container {
+            width: 100% !important;
+            margin: 24px 0 !important;
+            overflow-x: auto !important;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .cm-wysiwyg-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            background: rgba(255, 255, 255, 0.01) !important;
+            border: 1px solid var(--border) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .cm-wysiwyg-table th, 
+        .cm-wysiwyg-table td {
+            border: 1px solid var(--border) !important;
+            padding: 12px 18px !important;
+            text-align: left !important;
+            color: var(--text-main) !important;
+            font-size: 0.95em !important;
+            line-height: 1.5 !important;
+        }
+
+        .cm-wysiwyg-table th {
+            background: rgba(255, 255, 255, 0.03) !important;
+            font-weight: 600 !important;
+            color: #ffffff !important;
+        }
+
+        .cm-wysiwyg-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.005) !important;
+        }
+
+        /* 5. Mermaid 다이어그램 에디터 스타일 보정 */
+        .cm-wysiwyg-mermaid-container {
+            width: 100% !important;
+            margin: 24px 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            background: rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 10px !important;
+            padding: 20px !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        .cm-wysiwyg-mermaid-container .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+            display: block !important;
+            margin: 0 auto !important;
+        }
+
+        /* 6. Chart.js 차트 에디터 스타일 */
+        .cm-wysiwyg-chart-container {
+            width: 100% !important;
+            max-width: 600px !important;
+            margin: 24px auto !important;
+            background: rgba(255, 255, 255, 0.01) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 10px !important;
+            padding: 20px !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        
+        /* 7. HTML/SVG 블록 컨테이너 에디터 스타일 */
+        .cm-wysiwyg-html-container {
+            width: 100% !important;
+            margin: 24px 0 !important;
+            overflow-x: auto !important;
+            display: block !important;
+        }
+        
+        .cm-wysiwyg-html-container svg {
+            max-width: 100% !important;
+            height: auto !important;
+            display: block !important;
+            margin: 0 auto !important;
+        }

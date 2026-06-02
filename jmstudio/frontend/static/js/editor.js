@@ -375,8 +375,10 @@ class UndoManager {
                 return;
             }
             
+
             const cm = window.cm6;
             window.cmPlaceholderConf = new cm.Compartment();
+            window.cmWysiwygConf = new cm.Compartment();
             
             const state = cm.EditorState.create({
                 doc: "",
@@ -384,6 +386,7 @@ class UndoManager {
                     cm.basicSetup,
                     cm.markdown(),
                     window.cmPlaceholderConf.of(cm.placeholder(t('msg_editor_placeholder'))),
+                    window.cmWysiwygConf.of([]),
                     cm.keymap.of([{ key: "Enter", run: handleEnterKey }]),
                     cm.EditorView.updateListener.of((update) => {
                         if (update.docChanged) {
@@ -1461,6 +1464,22 @@ class UndoManager {
             return html;
         }
 
+        function resolveImagePaths(html) {
+            // 이미지 주소가 relative일 경우 /workspace/ 경로로 우회 서빙
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            
+            const images = div.querySelectorAll('img');
+            images.forEach(img => {
+                const src = img.getAttribute('src');
+                if (src && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('data:')) {
+                    // relative 경로는 백엔드 Bottle static 서버 경로로 라우팅
+                    img.setAttribute('src', `/workspace/${src}`);
+                }
+            });
+            return div.innerHTML;
+        }
+
         function parseCallouts(text) {
             // 1. Quarto 스타일 콜아웃: ::: {.callout-note} ... :::
             const quartoRegex = new RegExp(":::[\\s]*[\\{][\\s]*[\\.]callout-([\\w]+)[\\s]*[\\}][\\s]*[\\n]([\\s\\S]*?)[\\n][\\s]*:::", "g");
@@ -1484,22 +1503,6 @@ class UndoManager {
             });
             
             return text;
-        }
-
-        function resolveImagePaths(html) {
-            // 이미지 주소가 relative일 경우 /workspace/ 경로로 우회 서빙
-            const div = document.createElement('div');
-            div.innerHTML = html;
-            
-            const images = div.querySelectorAll('img');
-            images.forEach(img => {
-                const src = img.getAttribute('src');
-                if (src && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('data:')) {
-                    // relative 경로는 백엔드 Bottle static 서버 경로로 라우팅
-                    img.setAttribute('src', `/workspace/${src}`);
-                }
-            });
-            return div.innerHTML;
         }
 
         async function renderMermaid(container) {
@@ -1567,7 +1570,7 @@ class UndoManager {
                     if (bindFunctions) {
                         bindFunctions(graphDiv);
                     }
-                    lucide.createIcons();
+                    if (window.lucide) lucide.createIcons();
                 } catch (err) {
                     // 에러 시 컨트롤 패널 제거
                     controlsDiv.remove();
@@ -1581,21 +1584,22 @@ class UndoManager {
                             <pre style="margin: 0; background: rgba(0,0,0,0.2) !important; font-size:0.8em; color: #ef4444; border:none; padding:8px;">${err.message || err}</pre>
                         </div>
                     `;
-                    lucide.createIcons();
+                    if (window.lucide) lucide.createIcons();
                 }
             }
         }
 
         function toggleMermaidZoom(btn) {
-            const container = btn.closest('.mermaid-container');
+            const container = btn.closest('.mermaid-container') || btn.closest('.cm-wysiwyg-mermaid-container');
+            if (!container) return;
             const isZoomed = container.classList.toggle('zoomed');
-            const svg = container.querySelector('.mermaid svg');
+            const svg = container.querySelector('svg:not(.lucide)');
             const icon = btn.querySelector('[data-lucide]');
             
             if (svg) {
                 if (isZoomed) {
                     btn.querySelector('span').innerText = t('mermaid_zoom_fit');
-                    icon.setAttribute('data-lucide', 'minimize-2');
+                    if (icon) icon.setAttribute('data-lucide', 'minimize-2');
                     
                     // 원본 크기로 강제 확대하기 위해 viewBox 또는 원래 style의 max-width 값을 width로 임시 설정
                     const maxWidthStyle = svg.style.maxWidth;
@@ -1616,7 +1620,7 @@ class UndoManager {
                     }
                 } else {
                     btn.querySelector('span').innerText = t('mermaid_zoom_orig');
-                    icon.setAttribute('data-lucide', 'maximize-2');
+                    if (icon) icon.setAttribute('data-lucide', 'maximize-2');
                     
                     // 원래 상태로 환원
                     svg.style.width = '';
@@ -1625,27 +1629,46 @@ class UndoManager {
             } else {
                 if (isZoomed) {
                     btn.querySelector('span').innerText = t('mermaid_zoom_fit');
-                    icon.setAttribute('data-lucide', 'minimize-2');
+                    if (icon) icon.setAttribute('data-lucide', 'minimize-2');
                 } else {
                     btn.querySelector('span').innerText = t('mermaid_zoom_orig');
-                    icon.setAttribute('data-lucide', 'maximize-2');
+                    if (icon) icon.setAttribute('data-lucide', 'maximize-2');
                 }
             }
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         function openMermaidFullscreen(btn) {
-            const container = btn.closest('.mermaid-container');
-            const svg = container.querySelector('.mermaid svg');
+            const container = btn.closest('.mermaid-container') || 
+                              btn.closest('.cm-wysiwyg-mermaid-container') || 
+                              btn.closest('.cm-wysiwyg-html-container') || 
+                              btn.closest('.cm-content') || 
+                              btn.parentElement.parentElement;
+                              
+            if (!container) return;
+            
+            // 버튼 내부의 아이콘 svg를 완전히 배제하고 진짜 본체 svg만 골라냄
+            let svgs = container.querySelectorAll('svg');
+            let svg = null;
+            for (let s of svgs) {
+                if (s.closest('button')) continue; // 버튼 자식으로 포섭된 아이콘 svg 필터링
+                if (s.classList.contains('lucide') || s.getAttribute('data-lucide')) continue;
+                svg = s;
+                break;
+            }
+            
+            if (!svg) {
+                svg = container.querySelector('.mermaid svg') || container.querySelector('svg[id*="svg"]') || container.querySelector('svg');
+                if (svg && svg.closest('button')) svg = null;
+            }
+            
             if (!svg) return;
             
             const modal = document.getElementById('mermaid-fs-modal');
             const content = modal.querySelector('.fs-modal-content');
             
-            // SVG를 깊은 클론(Deep Clone)하여 주입
             content.innerHTML = svg.outerHTML;
             
-            // 전체화면 모달 내 wiki-link 클릭 시 파일 이동 + 모달 닫기
             content.querySelectorAll('.wiki-link').forEach(el => {
                 el.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -1654,18 +1677,15 @@ class UndoManager {
                 });
             });
             
-            // 모달 노출 및 애니메이션 트리거
             modal.style.display = 'flex';
-            modal.offsetHeight; // force reflow
+            modal.offsetHeight;
             modal.classList.add('show');
             
-            // 모달 내부 SVG 크기 최대화 스타일 지정
             const fsSvg = content.querySelector('svg');
             if (fsSvg) {
-                // viewBox에서 실제 가로/세로 추출하여 고정 픽셀로 지정 (CSS 순환 허탈 방지)
                 const viewBox = fsSvg.getAttribute('viewBox');
                 if (viewBox) {
-                    const parts = viewBox.split(/\\s+/);
+                    const parts = viewBox.split(/\s+/);
                     if (parts.length >= 4) {
                         const vbWidth = parseFloat(parts[2]);
                         const vbHeight = parseFloat(parts[3]);
@@ -1679,11 +1699,11 @@ class UndoManager {
                     fsSvg.style.setProperty('height', 'auto', 'important');
                 }
                 fsSvg.style.setProperty('max-width', '100%', 'important');
-                fsSvg.style.setProperty('max-height', '80vh', 'important');
+                fsSvg.style.setProperty('max-height', '90vh', 'important');
             }
             
             document.addEventListener('keydown', handleFsEsc);
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         }
 
         function closeMermaidFullscreen(event) {
@@ -1705,6 +1725,11 @@ class UndoManager {
                 closeMermaidFullscreen();
             }
         }
+
+        // 글로벌 바인딩 (사용자 수동 HTML/SVG 마인드맵의 onclick 속성 대응)
+        window.openMermaidFullscreen = openMermaidFullscreen;
+        window.closeMermaidFullscreen = closeMermaidFullscreen;
+        window.toggleMermaidZoom = toggleMermaidZoom;
 
         function undoEditor() {
             if (window.undoManager) {
@@ -2539,7 +2564,51 @@ class UndoManager {
                 li.className = `toc-item toc-${h.tagName.toLowerCase()}`;
                 li.innerText = h.innerText;
                 li.onclick = () => {
-                    h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // 1. 미리보기 스크롤 (미리보기 및 스플릿 모드)
+                    if (currentViewMode === 'preview' || currentViewMode === 'split') {
+                        h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                    
+                    // 2. 에디터 스크롤 (WYSIWYG, 편집기 및 스플릿 모드)
+                    if (currentViewMode === 'edit' || currentViewMode === 'wysiwyg' || currentViewMode === 'split') {
+                        if (window.cmEditor) {
+                            const doc = window.cmEditor.state.doc;
+                            const cleanText = h.innerText.trim();
+                            const level = parseInt(h.tagName.substring(1));
+                            
+                            let targetPos = -1;
+                            const prefix = "#".repeat(level) + " ";
+                            
+                            // A. 정확한 헤더 레벨 매칭
+                            for (let i = 1; i <= doc.lines; i++) {
+                                const lineText = doc.line(i).text.trim();
+                                if (lineText.startsWith(prefix) && lineText.substring(prefix.length).trim() === cleanText) {
+                                    targetPos = doc.line(i).from;
+                                    break;
+                                }
+                            }
+                            
+                            // B. 매칭 실패 시 부분 검색 폴백
+                            if (targetPos === -1) {
+                                for (let i = 1; i <= doc.lines; i++) {
+                                    const lineText = doc.line(i).text.trim();
+                                    if (lineText.startsWith("#") && lineText.includes(cleanText)) {
+                                        targetPos = doc.line(i).from;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (targetPos !== -1) {
+                                window.cmEditor.dispatch({
+                                    selection: { anchor: targetPos, head: targetPos },
+                                    scrollIntoView: true
+                                });
+                                window.cmEditor.focus();
+                            }
+                        }
+                    }
+                    
                     // 활성화 표시
                     document.querySelectorAll('.toc-item').forEach(el => el.classList.remove('active'));
                     li.classList.add('active');
@@ -2571,14 +2640,21 @@ class UndoManager {
         function setViewMode(mode) {
             currentViewMode = mode;
             
+            if (mode === 'wysiwyg') {
+                document.body.classList.add('wysiwyg-active');
+            } else {
+                document.body.classList.remove('wysiwyg-active');
+            }
+            
             const paneEditor = document.getElementById('pane-editor');
             const panePreview = document.getElementById('pane-preview');
             const resizer = document.getElementById('pane-resizer');
             
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`mode-${mode}`).classList.add('active');
+            const modeBtn = document.getElementById(`mode-${mode}`);
+            if (modeBtn) modeBtn.classList.add('active');
             
-            if (mode === 'edit') {
+            if (mode === 'edit' || mode === 'wysiwyg') {
                 paneEditor.style.display = 'flex';
                 paneEditor.style.flex = '1';
                 paneEditor.style.width = '';
@@ -2604,6 +2680,19 @@ class UndoManager {
                     paneEditor.style.width = '';
                     panePreview.style.flex = '1';
                     panePreview.style.width = '';
+                }
+            }
+            
+            // CodeMirror 6 WYSIWYG 확장 적용/해제
+            if (window.cmEditor && window.cmWysiwygConf && window.cm6) {
+                if (mode === 'wysiwyg') {
+                    window.cmEditor.dispatch({
+                        effects: window.cmWysiwygConf.reconfigure(window.wysiwygExtension || [])
+                    });
+                } else {
+                    window.cmEditor.dispatch({
+                        effects: window.cmWysiwygConf.reconfigure([])
+                    });
                 }
             }
             
@@ -3189,19 +3278,889 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
 
         // CodeMirror 6 모듈 가져오기 및 글로벌 바인딩
         import { basicSetup, EditorView } from 'https://esm.sh/codemirror';
-        import { EditorState, Compartment } from 'https://esm.sh/@codemirror/state';
+        import { EditorState, Compartment, RangeSetBuilder } from 'https://esm.sh/@codemirror/state';
         import { markdown } from 'https://esm.sh/@codemirror/lang-markdown';
-        import { placeholder, keymap } from 'https://esm.sh/@codemirror/view';
+        import { placeholder, keymap, Decoration, ViewPlugin, WidgetType } from 'https://esm.sh/@codemirror/view';
+        import { syntaxTree } from 'https://esm.sh/@codemirror/language';
 
         window.cm6 = {
             basicSetup,
             EditorView,
             EditorState,
             Compartment,
+            RangeSetBuilder,
             markdown,
             placeholder,
-            keymap
+            keymap,
+            Decoration,
+            ViewPlugin,
+            WidgetType,
+            syntaxTree
         };
+
+        // --- WYSIWYG 하이브리드 에디터 데코레이션 및 위젯 정의 ---
+        const hideDeco = Decoration.mark({ class: "cm-hidden-mark" });
+        const h1Deco = Decoration.mark({ class: "cm-wysiwyg-h1" });
+        const h2Deco = Decoration.mark({ class: "cm-wysiwyg-h2" });
+        const h3Deco = Decoration.mark({ class: "cm-wysiwyg-h3" });
+        const h4Deco = Decoration.mark({ class: "cm-wysiwyg-h4" });
+        const quoteDeco = Decoration.mark({ class: "cm-wysiwyg-blockquote" });
+
+        // 1. KaTeX 수식 위젯
+        class KaTeXWidget extends WidgetType {
+            constructor(math, block) {
+                super();
+                this.math = math;
+                this.block = block;
+            }
+            eq(other) {
+                return other.math === this.math && other.block === this.block;
+            }
+            toDOM() {
+                const span = document.createElement("span");
+                span.className = this.block ? "cm-wysiwyg-math-block" : "cm-wysiwyg-math-inline";
+                try {
+                    if (typeof katex !== 'undefined') {
+                        katex.render(this.math, span, {
+                            displayMode: this.block,
+                            throwOnError: false
+                        });
+                    } else {
+                        span.textContent = this.math;
+                    }
+                } catch (err) {
+                    span.textContent = this.math;
+                    span.style.color = "#ef4444";
+                }
+                return span;
+            }
+            ignoreEvent() { return true; }
+        }
+
+        // 2. 이미지 위젯
+        class ImageWidget extends WidgetType {
+            constructor(alt, url) {
+                super();
+                this.alt = alt;
+                this.url = url;
+            }
+            eq(other) {
+                return other.url === this.url && other.alt === this.alt;
+            }
+            toDOM() {
+                const div = document.createElement("div");
+                div.className = "cm-wysiwyg-image-container";
+                
+                const img = document.createElement("img");
+                img.src = this.url;
+                img.alt = this.alt;
+                img.style.maxWidth = "100%";
+                img.style.maxHeight = "400px";
+                img.style.borderRadius = "8px";
+                img.style.border = "1px solid var(--border)";
+                img.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+                
+                const caption = document.createElement("div");
+                caption.className = "cm-wysiwyg-image-caption";
+                caption.textContent = this.alt || "Image";
+                caption.style.fontSize = "0.8em";
+                caption.style.color = "var(--text-muted)";
+                caption.style.marginTop = "4px";
+                caption.style.textAlign = "center";
+                
+                div.appendChild(img);
+                div.appendChild(caption);
+                return div;
+            }
+            ignoreEvent() { return true; }
+        }
+
+        // 3. SMILES 분자식 위젯
+        class SmilesWidget extends WidgetType {
+            constructor(smiles) {
+                super();
+                this.smiles = smiles;
+            }
+            eq(other) {
+                return other.smiles === this.smiles;
+            }
+            toDOM() {
+                const div = document.createElement("div");
+                div.className = "cm-wysiwyg-smiles-container";
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.style.width = "200px";
+                svg.style.height = "200px";
+                svg.style.display = "block";
+                div.appendChild(svg);
+                
+                setTimeout(() => {
+                    try {
+                        if (typeof SmilesDrawer !== 'undefined') {
+                            const drawer = new SmilesDrawer.SvgDrawer({
+                                width: 200,
+                                height: 200,
+                                compactDrawing: true
+                            });
+                            SmilesDrawer.parse(this.smiles, (tree) => {
+                                drawer.draw(tree, svg, 'dark', false);
+                            }, (err) => {
+                                console.error(err);
+                                div.textContent = `[SMILES Error: ${this.smiles}]`;
+                            });
+                        } else {
+                            div.textContent = `CC(=O)OC1=CC=CC=C1C(=O)O (SMILES: ${this.smiles})`;
+                        }
+                    } catch (e) {
+                        div.textContent = `[SMILES Error: ${this.smiles}]`;
+                    }
+                }, 0);
+                
+                return div;
+            }
+            ignoreEvent() { return true; }
+        }
+
+        // 3.5. 표(Table) 위젯
+        class TableWidget extends WidgetType {
+            constructor(rawMarkdown) {
+                super();
+                this.rawMarkdown = rawMarkdown;
+            }
+            eq(other) {
+                return other.rawMarkdown === this.rawMarkdown;
+            }
+            toDOM() {
+                const div = document.createElement("div");
+                div.className = "cm-wysiwyg-table-container";
+                
+                const lines = this.rawMarkdown.trim().split("\n");
+                if (lines.length < 2) {
+                    div.textContent = this.rawMarkdown;
+                    return div;
+                }
+                
+                const table = document.createElement("table");
+                table.className = "cm-wysiwyg-table";
+                
+                // 헤더 파싱
+                const parseCols = (lineText) => {
+                    return lineText.split("|").map(s => s.trim()).filter((s, i, a) => {
+                        if (i === 0 && s === "") return false;
+                        if (i === a.length - 1 && s === "") return false;
+                        return true;
+                    });
+                };
+                
+                const headers = parseCols(lines[0]);
+                const thead = document.createElement("thead");
+                const headerRow = document.createElement("tr");
+                headers.forEach(h => {
+                    const th = document.createElement("th");
+                    th.innerHTML = h;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // 데이터 행 파싱 (두번째 구분선 행 제외)
+                const tbody = document.createElement("tbody");
+                for (let i = 2; i < lines.length; i++) {
+                    const cells = parseCols(lines[i]);
+                    const row = document.createElement("tr");
+                    cells.forEach(c => {
+                        const td = document.createElement("td");
+                        td.innerHTML = c;
+                        row.appendChild(td);
+                    });
+                    tbody.appendChild(row);
+                }
+                table.appendChild(tbody);
+                div.appendChild(table);
+                return div;
+            }
+            ignoreEvent() { return true; }
+        }
+
+        // 3.6. HTML/SVG 블록 위젯 (마인드맵 등 직접 구성된 SVG 렌더링 지원)
+        class HTMLBlockWidget extends WidgetType {
+            constructor(html) {
+                super();
+                this.html = html;
+            }
+            eq(other) {
+                return other.html === this.html;
+            }
+            toDOM() {
+                const div = document.createElement("div");
+                div.className = "cm-wysiwyg-html-container";
+                div.style.width = "100%";
+                div.style.overflowX = "auto";
+                div.style.margin = "16px 0";
+                div.style.display = "block";
+                
+                // HTML/SVG 주입
+                div.innerHTML = this.html;
+                
+                // 만약 주입된 SVG에 명시적인 height 스타일이 없다면 가독성을 위해 auto 설정
+                const svgElement = div.querySelector('svg');
+                if (svgElement) {
+                    svgElement.style.maxWidth = "100%";
+                    svgElement.style.height = "auto";
+                    svgElement.style.display = "block";
+                    svgElement.style.margin = "0 auto";
+                }
+                
+                // 스크립트 노드가 있는 경우 활성화 처리
+                const scripts = div.querySelectorAll("script");
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement("script");
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+                
+                return div;
+            }
+            ignoreEvent() { return true; }
+        }
+
+        // 3.7. Mermaid 다이어그램 위젯
+        class MermaidWidget extends WidgetType {
+            constructor(code) {
+                super();
+                this.code = code;
+            }
+            eq(other) {
+                return other.code === this.code;
+            }
+            toDOM() {
+                const div = document.createElement("div");
+                div.className = "cm-wysiwyg-mermaid-container";
+                div.style.margin = "16px auto";
+                div.style.padding = "16px";
+                div.style.background = "rgba(0,0,0,0.2)";
+                div.style.border = "1px solid var(--border)";
+                div.style.borderRadius = "10px";
+                div.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
+                div.style.display = "flex";
+                div.style.flexDirection = "column";
+                div.style.alignItems = "center";
+                div.style.justifyContent = "center";
+                
+                const id = `wysiwyg-mermaid-${Math.random().toString(36).substr(2, 9)}`;
+                const graphDiv = document.createElement("div");
+                graphDiv.className = "mermaid";
+                graphDiv.id = id;
+                graphDiv.style.width = "100%";
+                graphDiv.style.display = "block";
+                graphDiv.innerHTML = `<div style="text-align: center; padding: 10px; color: var(--text-muted); font-size: 0.85em;"><i data-lucide="loader" class="spinner" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 6px;"></i>Mermaid 렌더링 중...</div>`;
+                div.appendChild(graphDiv);
+                
+                setTimeout(async () => {
+                    try {
+                        if (typeof mermaid !== 'undefined') {
+                            await mermaid.parse(this.code);
+                            const { svg, bindFunctions } = await mermaid.render(`wysiwyg-svg-${id}`, this.code);
+                            graphDiv.innerHTML = svg;
+                            
+                            const renderedSvg = graphDiv.querySelector('svg');
+                            if (renderedSvg) {
+                                renderedSvg.style.maxWidth = "100%";
+                                renderedSvg.style.height = "auto";
+                                renderedSvg.style.display = "block";
+                                renderedSvg.style.margin = "0 auto";
+                            }
+                            if (bindFunctions) {
+                                bindFunctions(graphDiv);
+                            }
+                        } else {
+                            graphDiv.textContent = "Mermaid 라이브러리를 로드하지 못했습니다.";
+                        }
+                    } catch (err) {
+                        graphDiv.innerHTML = `
+                            <div style="color: #ef4444; padding: 12px; border: 1px solid rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); border-radius: 8px; font-size: 0.9em; font-family: 'Inter', sans-serif; width: 100%;">
+                                <div style="font-weight: 600; margin-bottom: 4px; display: flex; alignItems: center; gap: 6px;">
+                                    <i data-lucide="alert-triangle" style="width: 16px; height: 16px;"></i> Mermaid 문법 오류
+                                </div>
+                                <pre style="margin: 0; font-family: monospace; white-space: pre-wrap; font-size: 0.85em; background: transparent; border: none; padding: 0; color: #ef4444;">${err.message || err}</pre>
+                            </div>
+                        `;
+                        if (window.lucide) lucide.createIcons();
+                    }
+                    if (window.lucide) lucide.createIcons();
+                }, 50);
+                
+                return div;
+            }
+            ignoreEvent() { return true; }
+        }
+
+        // 3.8. Chart.js 연동 차트 위젯
+        class ChartWidget extends WidgetType {
+            constructor(code) {
+                super();
+                this.code = code;
+            }
+            eq(other) {
+                return other.code === this.code;
+            }
+            toDOM() {
+                const div = document.createElement("div");
+                div.className = "cm-wysiwyg-chart-container";
+                div.style.position = "relative";
+                div.style.margin = "16px auto";
+                div.style.maxWidth = "600px";
+                div.style.padding = "20px";
+                div.style.background = "rgba(255, 255, 255, 0.01)";
+                div.style.border = "1px solid var(--border)";
+                div.style.borderRadius = "10px";
+                div.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
+                div.style.backdropFilter = "blur(8px)";
+                div.style.webkitBackdropFilter = "blur(8px)";
+                
+                const canvas = document.createElement("canvas");
+                canvas.style.maxWidth = "100%";
+                canvas.style.height = "auto";
+                div.appendChild(canvas);
+                
+                const loadChartJS = () => {
+                    return new Promise((resolve, reject) => {
+                        if (typeof Chart !== 'undefined') { resolve(); return; }
+                        const s = document.createElement('script');
+                        s.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                        s.onload = () => resolve();
+                        s.onerror = () => reject(new Error('Chart.js 로드 실패'));
+                        document.head.appendChild(s);
+                    });
+                };
+                
+                setTimeout(async () => {
+                    try {
+                        await loadChartJS();
+                        let config;
+                        try {
+                            config = JSON.parse(this.code);
+                        } catch (e) {
+                            config = this.parseFallbackConfig(this.code);
+                        }
+                        
+                        if (config) {
+                            // 다크모드 차트 테마 최적화 적용
+                            if (!config.options) config.options = {};
+                            if (!config.options.plugins) config.options.plugins = {};
+                            if (!config.options.plugins.legend) config.options.plugins.legend = {};
+                            if (!config.options.plugins.legend.labels) config.options.plugins.legend.labels = {};
+                            config.options.plugins.legend.labels.color = '#e2e8f0';
+                            config.options.plugins.legend.labels.font = { family: 'Inter, sans-serif', size: 12 };
+                            
+                            if (config.options.scales) {
+                                Object.keys(config.options.scales).forEach(scaleKey => {
+                                    const scale = config.options.scales[scaleKey];
+                                    if (!scale.grid) scale.grid = {};
+                                    scale.grid.color = 'rgba(255, 255, 255, 0.08)';
+                                    if (!scale.ticks) scale.ticks = {};
+                                    scale.ticks.color = '#94a3b8';
+                                    scale.ticks.font = { family: 'Fira Code, monospace', size: 10 };
+                                });
+                            }
+                            
+                            new Chart(canvas, config);
+                        } else {
+                            div.innerHTML = `<div style="color: #ef4444; font-size: 0.9em; text-align: center; padding: 10px;">차트 데이터 포맷이 유효하지 않습니다. (JSON 또는 type/labels/data 형식이 필요합니다)</div>`;
+                        }
+                    } catch (err) {
+                        div.innerHTML = `<div style="color: #ef4444; font-size: 0.9em; text-align: center; padding: 10px;">차트 드로잉 중 오류 발생: ${err.message}</div>`;
+                    }
+                }, 50);
+                
+                return div;
+            }
+            
+            parseFallbackConfig(code) {
+                const lines = code.split("\n");
+                let type = "bar";
+                let labels = [];
+                let data = [];
+                let label = "Data";
+                
+                for (let line of lines) {
+                    const parts = line.split(":");
+                    if (parts.length < 2) continue;
+                    const key = parts[0].trim().toLowerCase();
+                    const val = parts.slice(1).join(":").trim();
+                    
+                    if (key === "type") {
+                        type = val;
+                    } else if (key === "label") {
+                        label = val;
+                    } else if (key === "labels") {
+                        labels = val.replace(/[\[\]]/g, "").split(",").map(s => s.trim());
+                    } else if (key === "data") {
+                        data = val.replace(/[\[\]]/g, "").split(",").map(s => parseFloat(s.trim()));
+                    }
+                }
+                
+                if (labels.length > 0 && data.length > 0) {
+                    return {
+                        type: type,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: label,
+                                data: data,
+                                backgroundColor: 'rgba(69, 243, 255, 0.35)',
+                                borderColor: '#45f3ff',
+                                borderWidth: 1.5
+                            }]
+                        },
+                        options: {
+                            responsive: true
+                        }
+                    };
+                }
+                return null;
+            }
+            
+            ignoreEvent() { return true; }
+        }
+
+        // 4. WYSIWYG 뷰 플러그인 (뷰포트 내 렌더링 최적화)
+        const wysiwygPlugin = ViewPlugin.fromClass(class {
+            constructor(view) {
+                this.decorations = this.getDecorations(view);
+            }
+            update(update) {
+                if (update.docChanged || update.selectionSet || update.viewportChanged) {
+                    this.decorations = this.getDecorations(update.view);
+                }
+            }
+            getDecorations(view) {
+                const state = view.state;
+                
+                // 선택(커서)이 놓여있는 행들 계산 -> 해당 행은 생얼 마크다운 유지
+                const selectedLines = new Set();
+                for (const range of state.selection.ranges) {
+                    const lineStart = state.doc.lineAt(range.from).number;
+                    const lineEnd = state.doc.lineAt(range.to).number;
+                    for (let i = lineStart; i <= lineEnd; i++) {
+                        selectedLines.add(i);
+                    }
+                }
+                
+                const { from, to } = view.viewport;
+                const docLines = state.doc.lines;
+                const rawDecos = [];
+                
+                // Lezer 구문 트리를 기반으로 마크다운 장식물 숨김/스타일 적용
+                syntaxTree(state).iterate({
+                    from, to,
+                    enter(node) {
+                        const nodeLine = state.doc.lineAt(node.from).number;
+                        if (selectedLines.has(nodeLine)) {
+                            return; // 현재 편집 중인 행은 그대로 둠
+                        }
+                        
+                        const name = node.name;
+                        
+                        // 마크다운 구문 문자 기호 숨기기
+                        if (name === "EmphasisMark" || name === "HeaderMark" || name === "CodeMark" || name === "ListMark" || name === "QuoteMark") {
+                            rawDecos.push({ from: node.from, to: node.to, value: hideDeco, type: "mark" });
+                        } else if (name === "LinkMark" || name === "ImageMark") {
+                            rawDecos.push({ from: node.from, to: node.to, value: hideDeco, type: "mark" });
+                        } else if (name === "URL") {
+                            rawDecos.push({ from: node.from, to: node.to, value: hideDeco, type: "mark" });
+                        }
+                        
+                        // 헤더 스타일링 (ATXHeading1 ~ ATXHeading6)
+                        if (name.startsWith("ATXHeading")) {
+                            const level = name.replace("ATXHeading", "");
+                            let headerStyle = h1Deco;
+                            if (level === "2") headerStyle = h2Deco;
+                            else if (level === "3") headerStyle = h3Deco;
+                            else if (level === "4") headerStyle = h4Deco;
+                            else if (level === "5" || level === "6") headerStyle = h4Deco;
+                            rawDecos.push({ from: node.from, to: node.to, value: headerStyle, type: "mark" });
+                        }
+                        
+                        // 인용구 스타일링
+                        if (name === "Blockquote") {
+                            rawDecos.push({ from: node.from, to: node.to, value: quoteDeco, type: "mark" });
+                        }
+                    }
+                });
+                
+                // 블록단위 위젯 렌더링 (KaTeX, 이미지, SMILES, Table, Mermaid, Chart, HTML/SVG)
+                const startLine = state.doc.lineAt(from).number;
+                const endLine = state.doc.lineAt(Math.min(to, state.doc.length)).number;
+                
+                for (let l = startLine; l <= endLine; l++) {
+                    const line = state.doc.line(l);
+                    const text = line.text.trim();
+                    
+                    // A. 표(Table) 실시간 디텍팅
+                    if (text.startsWith("|")) {
+                        let tableLines = [];
+                        let isTable = false;
+                        
+                        // 구분선(| --- |) 라인이 있는지 확인하여 표 여부 판단
+                        if (l + 1 <= docLines) {
+                            const nextLineText = state.doc.line(l + 1).text.trim();
+                            if (nextLineText.startsWith("|") && (nextLineText.includes("---") || nextLineText.includes(":-"))) {
+                                isTable = true;
+                            }
+                        }
+                        
+                        if (isTable) {
+                            tableLines.push(line.text);
+                            let tableEndLine = l;
+                            for (let nextL = l + 1; nextL <= docLines; nextL++) {
+                                const nextLineText = state.doc.line(nextL).text.trim();
+                                if (nextLineText.startsWith("|")) {
+                                    tableLines.push(state.doc.line(nextL).text);
+                                    tableEndLine = nextL;
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            // 표 라인 중 하나라도 커서가 닿아있으면 소스 텍스트 그대로 표시
+                            let tableActive = false;
+                            for (let tL = l; tL <= tableEndLine; tL++) {
+                                if (selectedLines.has(tL)) {
+                                    tableActive = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!tableActive) {
+                                const tableCode = tableLines.join("\n");
+                                rawDecos.push({
+                                    from: line.from,
+                                    to: line.to,
+                                    value: Decoration.replace({ widget: new TableWidget(tableCode) }),
+                                    type: "replace"
+                                });
+                                for (let currL = l + 1; currL <= tableEndLine; currL++) {
+                                    const currLine = state.doc.line(currL);
+                                    rawDecos.push({
+                                        from: currLine.from,
+                                        to: currLine.from,
+                                        value: Decoration.line({ attributes: { style: "display: none !important;" } }),
+                                        type: "line"
+                                    });
+                                }
+                                l = tableEndLine; // 스캔 점프
+                                continue;
+                            }
+                        }
+                    }
+                    
+                    // B. HTML/SVG 블록 검출 (커스텀 마인드맵 등 직접 구현된 SVG/HTML 대응)
+                    if (text.startsWith("<svg") || text.startsWith("<div") || text.startsWith("<defs") || text.startsWith("<style") || text.startsWith("<linearGradient") || text.startsWith("<span") || text.startsWith("<button")) {
+                        let htmlLines = [];
+                        let htmlEndLine = l;
+                        
+                        htmlLines.push(state.doc.line(l).text);
+                        
+                        for (let nextL = l + 1; nextL <= docLines; nextL++) {
+                            const nextLineText = state.doc.line(nextL).text.trim();
+                            
+                            // 새로운 마크다운 요소(헤더, 코드블록, 목록, 표 등)가 시작되면 블록의 끝으로 판정
+                            if (nextLineText.startsWith("#") || 
+                                nextLineText.startsWith("---") || 
+                                nextLineText.startsWith("```") || 
+                                nextLineText.startsWith("- ") || 
+                                nextLineText.startsWith("* ") || 
+                                nextLineText.startsWith("|")) {
+                                break;
+                            }
+                            
+                            htmlLines.push(state.doc.line(nextL).text);
+                            htmlEndLine = nextL;
+                        }
+                        
+                        let htmlActive = false;
+                        for (let hL = l; hL <= htmlEndLine; hL++) {
+                            if (selectedLines.has(hL)) {
+                                htmlActive = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!htmlActive) {
+                            const htmlCode = htmlLines.join("\n");
+                            rawDecos.push({
+                                from: line.from,
+                                to: line.to,
+                                value: Decoration.replace({ widget: new HTMLBlockWidget(htmlCode) }),
+                                type: "replace"
+                            });
+                            for (let currL = l + 1; currL <= htmlEndLine; currL++) {
+                                const currLine = state.doc.line(currL);
+                                rawDecos.push({
+                                    from: currLine.from,
+                                    to: currLine.from,
+                                    value: Decoration.line({ attributes: { style: "display: none !important;" } }),
+                                    type: "line"
+                                });
+                            }
+                            l = htmlEndLine; // 스캔 점프
+                            continue;
+                        }
+                    }
+                    
+                    if (selectedLines.has(l)) {
+                        continue; // 편집 중인 행은 아래 개별 위젯 치환 건너뜀
+                    }
+                    
+                    // C. SMILES 코드 블록
+                    if (text.startsWith("```smiles")) {
+                        let smilesLines = [];
+                        let foundEnd = false;
+                        let smilesEndLine = l;
+                        for (let nextL = l + 1; nextL <= docLines; nextL++) {
+                            const nextLineText = state.doc.line(nextL).text.trim();
+                            smilesEndLine = nextL;
+                            if (nextLineText === "```") {
+                                foundEnd = true;
+                                break;
+                            }
+                            smilesLines.push(state.doc.line(nextL).text);
+                        }
+                        if (foundEnd && smilesLines.length > 0) {
+                            const smilesCode = smilesLines.join("\n").trim();
+                            rawDecos.push({
+                                from: line.from,
+                                to: line.to,
+                                value: Decoration.replace({ widget: new SmilesWidget(smilesCode) }),
+                                type: "replace"
+                            });
+                            for (let currL = l + 1; currL <= smilesEndLine; currL++) {
+                                const currLine = state.doc.line(currL);
+                                rawDecos.push({
+                                    from: currLine.from,
+                                    to: currLine.from,
+                                    value: Decoration.line({ attributes: { style: "display: none !important;" } }),
+                                    type: "line"
+                                });
+                            }
+                            l = smilesEndLine;
+                            continue;
+                        }
+                    }
+                    
+                    // D. Mermaid 다이어그램 코드 블록
+                    if (text.startsWith("```mermaid")) {
+                        let mermaidLines = [];
+                        let foundEnd = false;
+                        let mermaidEndLine = l;
+                        for (let nextL = l + 1; nextL <= docLines; nextL++) {
+                            const nextLineText = state.doc.line(nextL).text.trim();
+                            mermaidEndLine = nextL;
+                            if (nextLineText === "```") {
+                                foundEnd = true;
+                                break;
+                            }
+                            mermaidLines.push(state.doc.line(nextL).text);
+                        }
+                        
+                        let mermaidActive = false;
+                        for (let mL = l; mL <= mermaidEndLine; mL++) {
+                            if (selectedLines.has(mL)) {
+                                mermaidActive = true;
+                                break;
+                            }
+                        }
+                        
+                        if (foundEnd && mermaidLines.length > 0 && !mermaidActive) {
+                            const mermaidCode = mermaidLines.join("\n").trim();
+                            rawDecos.push({
+                                from: line.from,
+                                to: line.to,
+                                value: Decoration.replace({ widget: new MermaidWidget(mermaidCode) }),
+                                type: "replace"
+                            });
+                            for (let currL = l + 1; currL <= mermaidEndLine; currL++) {
+                                const currLine = state.doc.line(currL);
+                                rawDecos.push({
+                                    from: currLine.from,
+                                    to: currLine.from,
+                                    value: Decoration.line({ attributes: { style: "display: none !important;" } }),
+                                    type: "line"
+                                });
+                            }
+                            l = mermaidEndLine;
+                            continue;
+                        }
+                    }
+                    
+                    // E. Chart 차트 코드 블록
+                    if (text.startsWith("```chart")) {
+                        let chartLines = [];
+                        let foundEnd = false;
+                        let chartEndLine = l;
+                        for (let nextL = l + 1; nextL <= docLines; nextL++) {
+                            const nextLineText = state.doc.line(nextL).text.trim();
+                            chartEndLine = nextL;
+                            if (nextLineText === "```") {
+                                foundEnd = true;
+                                break;
+                            }
+                            chartLines.push(state.doc.line(nextL).text);
+                        }
+                        
+                        let chartActive = false;
+                        for (let cL = l; cL <= chartEndLine; cL++) {
+                            if (selectedLines.has(cL)) {
+                                chartActive = true;
+                                break;
+                            }
+                        }
+                        
+                        if (foundEnd && chartLines.length > 0 && !chartActive) {
+                            const chartCode = chartLines.join("\n").trim();
+                            rawDecos.push({
+                                from: line.from,
+                                to: line.to,
+                                value: Decoration.replace({ widget: new ChartWidget(chartCode) }),
+                                type: "replace"
+                            });
+                            for (let currL = l + 1; currL <= chartEndLine; currL++) {
+                                const currLine = state.doc.line(currL);
+                                rawDecos.push({
+                                    from: currLine.from,
+                                    to: currLine.from,
+                                    value: Decoration.line({ attributes: { style: "display: none !important;" } }),
+                                    type: "line"
+                                });
+                            }
+                            l = chartEndLine;
+                            continue;
+                        }
+                    }
+                    
+                    // F. 블록 수식 $$formula$$
+                    if (text.startsWith("$$") && text.endsWith("$$") && text.length > 4) {
+                        const math = text.substring(2, text.length - 2);
+                        rawDecos.push({
+                            from: line.from,
+                            to: line.to,
+                            value: Decoration.replace({ widget: new KaTeXWidget(math, true) }),
+                            type: "replace"
+                        });
+                        continue;
+                    }
+                    
+                    // G. 인라인 수식 $formula$
+                    let mathRegex = /\$([^\$]+?)\$/g;
+                    let match;
+                    while ((match = mathRegex.exec(line.text)) !== null) {
+                        const startPos = line.from + match.index;
+                        const endPos = startPos + match[0].length;
+                        rawDecos.push({
+                            from: startPos,
+                            to: endPos,
+                            value: Decoration.replace({ widget: new KaTeXWidget(match[1], false) }),
+                            type: "replace"
+                        });
+                    }
+                    
+                    // H. 이미지 ![alt](url)
+                    let imgRegex = /!\[(.*?)\]\((.*?)\)/g;
+                    while ((match = imgRegex.exec(line.text)) !== null) {
+                        const startPos = line.from + match.index;
+                        const endPos = startPos + match[0].length;
+                        rawDecos.push({
+                            from: startPos,
+                            to: endPos,
+                            value: Decoration.replace({ widget: new ImageWidget(match[1], match[2]) }),
+                            type: "replace"
+                        });
+                    }
+                }
+                
+                // --- 겹침 필터링 및 정렬 프로세스 ---
+                // 1. replace 타입 데코레이션만 먼저 추려내어 겹치지 않는 확실한 영역을 매핑
+                const replaces = rawDecos.filter(d => d.type === "replace").sort((a, b) => a.from - b.from);
+                const filteredReplaces = [];
+                
+                let lastReplaceEnd = -1;
+                for (const r of replaces) {
+                    if (r.from >= lastReplaceEnd) {
+                        filteredReplaces.push(r);
+                        lastReplaceEnd = r.to;
+                    }
+                }
+                
+                // 2. 다른 데코레이션(mark, line 등)들을 replace 영역과 겹치는지 체크하여 걸러냄
+                const finalDecos = [...filteredReplaces];
+                const nonReplaces = rawDecos.filter(d => d.type !== "replace");
+                
+                for (const d of nonReplaces) {
+                    if (d.type === "line") {
+                        // line 데코레이션은 라인 시작 위치에 적용되므로 겹치지 않게 그대로 둠
+                        finalDecos.push(d);
+                    } else if (d.type === "mark") {
+                        // mark 데코레이션은 replace 범위 내부에 포함되거나 걸치면 무시
+                        let overlaps = false;
+                        for (const r of filteredReplaces) {
+                            if (d.from < r.to && d.to > r.from) {
+                                overlaps = true;
+                                break;
+                            }
+                        }
+                        if (!overlaps) {
+                            finalDecos.push(d);
+                        }
+                    }
+                }
+                
+                // 3. 최종 데코레이션을 from 순서로 정렬
+                finalDecos.sort((a, b) => {
+                    if (a.from !== b.from) {
+                        return a.from - b.from;
+                    }
+                    if (a.type === "line" && b.type !== "line") return -1;
+                    if (a.type !== "line" && b.type === "line") return 1;
+                    return 0;
+                });
+                
+                // 4. RangeSetBuilder에 순차적으로 추가
+                const builder = new RangeSetBuilder();
+                let lastAddedFrom = -1;
+                let lastAddedTo = -1;
+                
+                for (const deco of finalDecos) {
+                    if (deco.from < 0 || deco.to > state.doc.length || deco.from > deco.to) {
+                        continue;
+                    }
+                    
+                    if (deco.from >= lastAddedFrom) {
+                        if (deco.from === lastAddedFrom && deco.type === "replace" && lastAddedTo > deco.from) {
+                            console.warn("Skipping overlapping replace deco at same start point:", deco);
+                            continue;
+                        }
+                        
+                        try {
+                            builder.add(deco.from, deco.to, deco.value);
+                            lastAddedFrom = deco.from;
+                            lastAddedTo = deco.to;
+                        } catch (e) {
+                            console.warn("Error adding decoration to RangeSetBuilder, skipping:", e, deco);
+                        }
+                    } else {
+                        console.warn("Out of order decoration skipped:", deco, "lastAddedFrom:", lastAddedFrom);
+                    }
+                }
+                
+                return builder.finish();
+            }
+        }, {
+            decorations: v => v.decorations
+        });
+
+        window.wysiwygExtension = [wysiwygPlugin];
+
         // 모듈 로드 완료 이벤트 발생
         window.dispatchEvent(new Event('cm6-loaded'));
 
