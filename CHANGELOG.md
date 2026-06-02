@@ -8,7 +8,8 @@ This document contains the chronological history of updates, releases, and patch
 
 | Version | Date | Key Patches & Features | Status |
 | :--- | :--- | :--- | :--- |
-| **v3.9.23** | 2026-06-02 | Quant Portfolio and K-Stock Trading Diary Templates Launch | **Latest Stable** |
+| **v3.9.24** | 2026-06-02 | Hotfix for KaTeX formula backslash escaping in WYSIWYG rendering | **Latest Stable** |
+| **v3.9.23** | 2026-06-02 | Quant Portfolio and K-Stock Trading Diary Templates Launch | Stable |
 | **v3.9.22** | 2026-06-02 | Premium PDF print & preview static pagination engine | Stable |
 | **v3.9.21** | 2026-05-31 | Real-time WYSIWYG rendering, CM6 equation enter crash fix | Stable |
 | **v3.9.20** | 2026-05-28 | Glassmorphism custom confirm dialog modal, multi-language fixes | Stable |
@@ -23,7 +24,12 @@ This document contains the chronological history of updates, releases, and patch
 
 ## 📢 Detailed Release History (v3.9.0 ~ Present)
 
-### 🚀 v3.9.23 (2026-06-02) - Quantitative Portfolio & K-Stock Trading Diary Templates Launch [Latest Stable]
+### 🚀 v3.9.24 (2026-06-02) - WYSIWYG Mode KaTeX Backslash Escaping Hotfix [Latest Stable]
+*   **WYSIWYG Editor KaTeX Formula Rendering Hotfix**:
+    *   Corrected the backslash double-escaping bug (`\\` -> `\`) inside KaTeX math blocks for both the Quantitative Portfolio and K-Stock Trading Diary templates in `templates.js`.
+    *   This hotfix resolves the duplicate backslash display issue in the WYSIWYG editor, guaranteeing math equations render identically in both live preview and WYSIWYG modes with pristine KaTeX typesetting.
+
+### 🚀 v3.9.23 (2026-06-02) - Quantitative Portfolio & K-Stock Trading Diary Templates Launch [Stable]
 *   **Quant Portfolio & Asset Allocation Planner Template**:
     *   Features a math-backed **Kelly Criterion ($f^*$) KaTeX formula model** calculating optimal risk-adjusted allocation size.
     *   Natively embeds a **Mermaid Pie Chart** dynamically visualizing equity, cryptocurrency, commodities, and fiat ratios.
