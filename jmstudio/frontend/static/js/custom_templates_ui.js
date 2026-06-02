@@ -135,10 +135,16 @@
                         </div>
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
-                            <button onclick="syncTemplateSubscriptions()" style="padding: 10px 16px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); font-weight: 500; font-size: 0.9em; cursor: pointer; display: flex; align-items: center; gap: 6px;" id="sync-subs-btn">
-                                <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i>
-                                <span>모두 동기화</span>
-                            </button>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="syncTemplateSubscriptions()" style="padding: 10px 14px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); font-weight: 500; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; gap: 6px;" id="sync-subs-btn">
+                                    <i data-lucide="refresh-cw" style="width: 13px; height: 13px;"></i>
+                                    <span>동기화</span>
+                                </button>
+                                <button onclick="restoreDefaultTemplateSubscription()" style="padding: 10px 14px; border-radius: 6px; background: rgba(69, 243, 255, 0.05); border: 1px solid rgba(69, 243, 255, 0.2); color: var(--accent); font-weight: 500; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; gap: 6px;" id="restore-default-subs-btn">
+                                    <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i>
+                                    <span>기본값 복원</span>
+                                </button>
+                            </div>
                             <button onclick="closeSubscriptionModal()" style="padding: 10px 16px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--text-main); font-weight: 500; font-size: 0.9em; cursor: pointer;">닫기</button>
                         </div>
                     </div>
@@ -485,6 +491,28 @@
                 alert("동기화 실패: " + res.message);
             }
             renderSubscriptionsList();
+        }
+    };
+
+    window.restoreDefaultTemplateSubscription = async function () {
+        const btn = document.getElementById('restore-default-subs-btn');
+        const origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span>복원중...</span>';
+        
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.restore_default_subscription) {
+            const res = await window.pywebview.api.restore_default_subscription();
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+            
+            if (res.status === 'success') {
+                if (typeof window.showToast === 'function') {
+                    window.showToast("기본 저장소가 성공적으로 복원 및 캐싱되었습니다!");
+                }
+                renderSubscriptionsList();
+            } else {
+                alert("복원 실패: " + res.message);
+            }
         }
     };
 

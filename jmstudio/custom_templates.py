@@ -22,9 +22,49 @@ class CustomTemplateManager:
             with open(self.local_json, 'w', encoding='utf-8') as f:
                 json.dump([], f, ensure_ascii=False, indent=4)
                 
+        default_repo = "https://github.com/joyfoxg/md-template.git"
         if not os.path.exists(self.sub_json):
             with open(self.sub_json, 'w', encoding='utf-8') as f:
-                json.dump([], f, ensure_ascii=False, indent=4)
+                json.dump([default_repo], f, ensure_ascii=False, indent=4)
+            # 첫 기동 시 기본 템플릿 즉시 백그라운드 다운로드 동기화
+            import threading
+            threading.Thread(target=self.sync_subscriptions, daemon=True).start()
+        else:
+            # 존재하더라도 비어있거나 구버전 주소가 있다면 교체/복원 및 동기화
+            try:
+                with open(self.sub_json, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                updated = False
+                if not isinstance(data, list):
+                    data = []
+                
+                old_default = "https://github.com/joyfoxg/md-template"
+                new_data = []
+                has_default = False
+                for item in data:
+                    item_clean = item.rstrip('/')
+                    if item_clean == old_default:
+                        new_data.append(default_repo)
+                        updated = True
+                        has_default = True
+                    elif item_clean == default_repo:
+                        new_data.append(item)
+                        has_default = True
+                    else:
+                        new_data.append(item)
+                
+                if not new_data:
+                    new_data = [default_repo]
+                    updated = True
+                
+                if updated:
+                    with open(self.sub_json, 'w', encoding='utf-8') as f:
+                        json.dump(new_data, f, ensure_ascii=False, indent=4)
+                    import threading
+                    threading.Thread(target=self.sync_subscriptions, daemon=True).start()
+            except Exception:
+                pass
 
     def _load_json(self, path):
         try:
@@ -203,6 +243,8 @@ class CustomTemplateManager:
     def _get_repo_slug(self, url):
         # Parses github.com/user/repo into 'user_repo'
         url_clean = url.rstrip('/')
+        if url_clean.endswith('.git'):
+            url_clean = url_clean[:-4]
         parts = url_clean.split('/')
         if len(parts) >= 2:
             user = parts[-2]
@@ -234,8 +276,12 @@ class CustomTemplateManager:
                 success = False
                 zip_temp = os.path.join(self.base_dir, f"{repo_slug}_temp.zip")
                 
+                clean_url = url.rstrip('/')
+                if clean_url.endswith('.git'):
+                    clean_url = clean_url[:-4]
+                
                 for branch in ['main', 'master']:
-                    zip_url = f"{url.rstrip('/')}/archive/refs/heads/{branch}.zip"
+                    zip_url = f"{clean_url}/archive/refs/heads/{branch}.zip"
                     try:
                         req = urllib.request.Request(zip_url, headers={'User-Agent': 'Mozilla/5.0'})
                         with urllib.request.urlopen(req, timeout=5.0) as response:
@@ -282,6 +328,24 @@ class CustomTemplateManager:
             return {"status": "error", "message": "; ".join(errors)}
         return {"status": "success", "message": "All subscriptions synchronized successfully!"}
 
+    def restore_default_subscription(self):
+        default_repo = "https://github.com/joyfoxg/md-template.git"
+        subs = self._load_json(self.sub_json)
+        
+        # 중복 방지
+        normalized_subs = [s.rstrip('/').lower().replace('.git', '') for s in subs]
+        target_norm = default_repo.lower().replace('.git', '')
+        
+        if target_norm not in normalized_subs:
+            subs.append(default_repo)
+            self._save_json(self.sub_json, subs)
+            
+        sync_res = self.sync_subscriptions()
+        if sync_res["status"] == "success":
+            return {"status": "success", "message": "기본 템플릿 저장소가 성공적으로 복원 및 동기화되었습니다!"}
+        else:
+            return {"status": "success", "message": f"복원되었으나 동기화 실패: {sync_res['message']}"}
+
 class ExtendedMdViewerApi(MdViewerApi):
     def __init__(self):
         super().__init__()
@@ -307,3 +371,6 @@ class ExtendedMdViewerApi(MdViewerApi):
 
     def sync_subscriptions(self):
         return self.template_manager.sync_subscriptions()
+
+    def restore_default_subscription(self):
+        return self.template_manager.restore_default_subscription()
