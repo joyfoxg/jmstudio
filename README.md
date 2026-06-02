@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.21 🌟
+# 🧪 Joy Markdown Studio v3.9.22 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -50,9 +50,11 @@
 * Exports the editing markdown as a completely standalone HTML file for external sharing.
 * The exported file preserves KaTeX equations, Prism syntax highlighting, Mermaid diagrams, and SMILES molecular models, rendering normally in any browser with an internet connection without needing a viewer.
 
-### 8. 🖨️ Premium Driverless PDF Printing
+### 8. 🖨️ Premium Driverless PDF Printing & Static Page Engine (v3.9.22 Hotfix)
 * **Custom Print of Preview Screen Only**: Clicking the PDF print button automatically removes unnecessary editor text areas, sidebars, headers, and other UI elements, outputting **only the markdown preview output formatted cleanly for A4 size**.
 * **Intelligent Ink Saving & Theme Switching**: Even if printing from dark mode, the document **temporarily auto-renders in a white/high-contrast theme for printing** to prevent wasting ink/toner and maximize readability, and returns to dark mode immediately after printing completes.
+* **JavaScript-Based Static Pagination Engine**: Resolved a critical Chromium WebView2 printing bug under `@media print` where the `counter(page)` state scope breaks, resulting in page numbers freezing as `0 / n` or `0 / 0`. By dynamically measuring document content heights in physical A4 pixel ratios and splitting them into static print page containers (`.print-page-wrapper`), it directly injects exact hardcoded page numbers like **`1 / 2`, `2 / 2`**, bypassing the renderer bug.
+* **Eliminated Header/Footer Overlaps & Precise Padding Guard**: Completely fixed the layout issue where page headers and footers overlapped with content text from page 2 onward due to negative margins and broken print views. Discarded negative margins entirely, fixed headers at `top: 0` and footers at `bottom: 0`, and dynamically calculated and applied precise safe body padding (`bodyPaddingTopBottom`) to ensure perfect vertical isolation.
 
 ### 9. 🌐 External Mobile Device Connection & Security Password Protection
 * **Mobile and Tablet Remote Connection**: Supports multi-networking so you can access the workspace from other PCs or mobile devices on the same Wi-Fi/network. Enter the **Network Access URL (e.g., `http://192.168.x.x:58220`)** shown in the console to view your library wirelessly.

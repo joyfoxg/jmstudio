@@ -2362,7 +2362,7 @@ class UndoManager {
                 const start = textarea.selectionStart;
                 const end = textarea.selectionEnd;
                 const text = textarea.value;
-                const smilesBlock = "\\n" + "```smiles\\n" + currentSearchResultSmiles + "\\n" + "```\\n";
+                const smilesBlock = "\n" + "```smiles\n" + currentSearchResultSmiles + "\n" + "```\n";
                 textarea.value = text.substring(0, start) + smilesBlock + text.substring(end);
                 textarea.selectionStart = textarea.selectionEnd = start + smilesBlock.length;
                 handleEditorInput();
@@ -2375,7 +2375,7 @@ class UndoManager {
             if (ranges.length === 0) return;
             
             const start = ranges[0].from;
-            const smilesBlock = "\\n" + "```smiles\\n" + currentSearchResultSmiles + "\\n" + "```\\n";
+            const smilesBlock = "\n" + "```smiles\n" + currentSearchResultSmiles + "\n" + "```\n";
             
             view.dispatch(view.state.replaceSelection(smilesBlock));
             
@@ -2820,35 +2820,552 @@ class UndoManager {
             }
         }
 
-        // PDF 인쇄 실행 (미리보기 화면만 밝은 테마로 자동 최적화하여 깔끔하게 출력)
+        // 콤보박스 선택에 따른 사용자 지정 입력 필드 토글 전역 헬퍼
+        window.toggleCustomInput = function(id) {
+            const sel = document.getElementById(id + '-select');
+            const custom = document.getElementById(id + '-custom');
+            if (sel && custom) {
+                if (sel.value === 'custom') {
+                    custom.style.display = 'block';
+                } else {
+                    custom.style.display = 'none';
+                }
+            }
+        };
+
+        // PDF 인쇄 실행 (머리말/꼬리말 고급 설정 모달 팝업으로 연계)
         async function printDocument() {
+            openPrintSettingsModal();
+        }
+
+        function openPrintSettingsModal() {
             if (!currentFilePath) {
                 alert(t('msg_print_no_file'));
                 return;
             }
             
+            // 오늘 날짜 포맷팅 (예: 2026. 06. 02.)
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${year}. ${month}. ${day}.`;
+            
+            // 파일명 추출
+            const filename = currentFilePath.split(/[\\/]/).pop() || "document.md";
+            
+            // 기본 선택값 세팅
+            document.getElementById('print-header-left-select').value = 'date';
+            document.getElementById('print-header-center-select').value = 'none';
+            
+            document.getElementById('print-header-right-select').value = 'custom';
+            document.getElementById('print-header-right-custom').value = filename;
+            
+            document.getElementById('print-footer-left-select').value = 'custom';
+            document.getElementById('print-footer-left-custom').value = "Joy Markdown Studio";
+            
+            document.getElementById('print-footer-center-select').value = 'page_total';
+            document.getElementById('print-footer-right-select').value = 'none';
+            
+            // 모든 부위의 토글 상태 강제 적용
+            toggleCustomInput('print-header-left');
+            toggleCustomInput('print-header-center');
+            toggleCustomInput('print-header-right');
+            toggleCustomInput('print-footer-left');
+            toggleCustomInput('print-footer-center');
+            toggleCustomInput('print-footer-right');
+            
+            // 모달 열기
+            document.getElementById('print-settings-modal').style.display = 'flex';
+            
+            if (window.lucide) lucide.createIcons();
+        }
+        
+        function closePrintSettingsModal() {
+            document.getElementById('print-settings-modal').style.display = 'none';
+        }
+        
+        async function executePrintWithSettings() {
+            // 선택 콤보박스 및 커스텀 입력 매핑 헬퍼
+            const getSelectedValue = (id) => {
+                const sel = document.getElementById(id + '-select');
+                if (!sel) return "";
+                const val = sel.value;
+                
+                if (val === 'none') return "";
+                if (val === 'custom') {
+                    const customInput = document.getElementById(id + '-custom');
+                    return customInput ? customInput.value.trim() : "";
+                }
+                if (val === 'date') {
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const day = String(today.getDate()).padStart(2, '0');
+                    return `${year}. ${month}. ${day}.`;
+                }
+                if (val === 'time') {
+                    const today = new Date();
+                    const hours = String(today.getHours()).padStart(2, '0');
+                    const minutes = String(today.getMinutes()).padStart(2, '0');
+                    return `${hours}:${minutes}`;
+                }
+                if (val === 'page') {
+                    return '<span class="print-page-number"></span>';
+                }
+                if (val === 'page_total') {
+                    return '<span class="print-page-number-total"></span>';
+                }
+                return "";
+            };
+
+            const leftText = getSelectedValue('print-header-left');
+            const centerText = getSelectedValue('print-header-center');
+            const rightText = getSelectedValue('print-header-right');
+            
+            const fLeftText = getSelectedValue('print-footer-left');
+            const fCenterText = getSelectedValue('print-footer-center');
+            const fRightText = getSelectedValue('print-footer-right');
+            
+            const marginStyle = document.getElementById('print-margin-style').value;
+            const themeMode = document.getElementById('print-theme-mode').value;
+            
+            // 모달 닫기
+            closePrintSettingsModal();
+            
+            // 기존에 남아있을 수 있는 인쇄 엘리먼트 제거
+            cleanupPrintElements();
+            
+            // 인쇄 텍스트 HTML 정제 헬퍼
+            const formatPrintText = (val) => {
+                if (!val) return "";
+                // 이미 span 엘리먼트 태그를 포함한 템일릿 스트링인 경우 이스케이프 방지
+                if (val.includes('<span class="print-page-number')) {
+                    return val;
+                }
+                const escaped = val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                return escaped.replace(/\[page\]/gi, '<span class="print-page-number"></span>');
+            };
+            
+            // 2. 인쇄 여백 스타일에 따른 동적 수치 계산
+            let pageMarginSideMm = 18;
+            let pageMarginTopBottomMm = 22;
+            let showHeaderFooter = "flex";
+            let bodyPaddingTopBottomMm = 14;
+            
+            if (marginStyle === "narrow") {
+                pageMarginSideMm = 8;
+                pageMarginTopBottomMm = 14;
+                bodyPaddingTopBottomMm = 10;
+            } else if (marginStyle === "none") {
+                pageMarginSideMm = 0;
+                pageMarginTopBottomMm = 0;
+                bodyPaddingTopBottomMm = 0;
+                showHeaderFooter = "none";
+            }
+
+            const pageMarginTopBottom = `${pageMarginTopBottomMm}mm`;
+            const pageMarginSide = `${pageMarginSideMm}mm`;
+            
+            // 2.1 A4 정밀 시뮬레이션을 활용한 자바스크립트 기반 동적 페이지 수 계산
+            const printableWidthMm = 210 - (pageMarginSideMm * 2);
+            const printableHeightMm = 297 - (pageMarginTopBottomMm * 2);
+            
+            const pageWidthPx = Math.round((printableWidthMm * 96) / 25.4);
+            const pageHeightPx = Math.round((printableHeightMm * 96) / 25.4);
+
+            const previewContent = document.getElementById('preview-content');
+            const printClone = previewContent.cloneNode(true);
+            printClone.id = 'dynamic-print-clone';
+            
+            const printWrapper = document.createElement('div');
+            printWrapper.id = 'dynamic-print-wrapper-container';
+            printWrapper.appendChild(printClone);
+            
+            // 임시 측정용 오프스크린 스타일 강제 부여
+            printWrapper.style.position = 'absolute';
+            printWrapper.style.left = '-9999px';
+            printWrapper.style.top = '0';
+            printWrapper.style.width = `${pageWidthPx}px`;
+            printWrapper.style.display = 'block';
+            printWrapper.style.visibility = 'hidden';
+            printWrapper.style.boxSizing = 'border-box';
+            
+            document.body.appendChild(printWrapper);
+            
+            // 2.2 자바스크립트 기반 정적 페이지 분할 & 정적 헤더/푸터 강제 주입 엔진 기동
+            const headerHeightPx = 30 + 15; // 머리글 높이 30px + 마진 15px
+            const footerHeightPx = 30 + 15;
+            const pureContentHeightPx = pageHeightPx - (showHeaderFooter === "none" ? 0 : (headerHeightPx + footerHeightPx)); // 순수 텍스트 가용 한도
+            
+            const children = Array.from(printClone.children);
+            printClone.innerHTML = ""; // 기존 콘텐츠 비움
+            
+            let currentPageEl = document.createElement('div');
+            currentPageEl.className = 'print-page-wrapper';
+            currentPageEl.style.position = 'relative';
+            currentPageEl.style.height = `${pageHeightPx}px`;
+            currentPageEl.style.boxSizing = 'border-box';
+            currentPageEl.style.display = 'flex';
+            currentPageEl.style.flexDirection = 'column';
+            currentPageEl.style.justifyContent = 'space-between';
+            printClone.appendChild(currentPageEl);
+            
+            // 1페이지 정적 머리글 삽입
+            const staticHeader1 = document.createElement('div');
+            staticHeader1.className = 'custom-print-header-static';
+            staticHeader1.innerHTML = `
+                <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${formatPrintText(leftText)}</div>
+                <div style="flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${formatPrintText(centerText)}</div>
+                <div style="flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${formatPrintText(rightText)}</div>
+            `;
+            currentPageEl.appendChild(staticHeader1);
+            
+            // 본문 콘텐츠를 담을 내부 영역 생성
+            let currentContentEl = document.createElement('div');
+            currentContentEl.className = 'custom-print-body-content';
+            currentContentEl.style.flex = '1';
+            currentContentEl.style.overflow = 'hidden';
+            currentPageEl.appendChild(currentContentEl);
+            
+            // 1페이지 정적 바닥글 공간 확보를 위해 임시 바닥글 생성
+            let staticFooter1 = document.createElement('div');
+            staticFooter1.className = 'custom-print-footer-static';
+            currentPageEl.appendChild(staticFooter1);
+            
+            let currentAccumulatedHeight = 0;
+            let pageIndex = 1;
+            
+            children.forEach((child) => {
+                // 임시 추가하여 높이 측정
+                currentContentEl.appendChild(child);
+                const childHeight = child.offsetHeight;
+                
+                if (currentAccumulatedHeight + childHeight > pureContentHeightPx && currentAccumulatedHeight > 0) {
+                    // 한도 초과 시, 방금 넣은 자식을 다시 빼서 다음 페이지로 보냄
+                    currentContentEl.removeChild(child);
+                    
+                    // 현재 페이지 실제 바닥글 세팅!
+                    staticFooter1.innerHTML = `
+                        <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${formatPrintText(fLeftText)}</div>
+                        <div style="flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pageIndex} / <span class="total-pages-placeholder"></span></div>
+                        <div style="flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${formatPrintText(fRightText)}</div>
+                    `;
+                    
+                    // 다음 가상 페이지 생성!
+                    pageIndex++;
+                    currentPageEl = document.createElement('div');
+                    currentPageEl.className = 'print-page-wrapper';
+                    currentPageEl.style.position = 'relative';
+                    currentPageEl.style.height = `${pageHeightPx}px`;
+                    currentPageEl.style.boxSizing = 'border-box';
+                    currentPageEl.style.display = 'flex';
+                    currentPageEl.style.flexDirection = 'column';
+                    currentPageEl.style.justifyContent = 'space-between';
+                    currentPageEl.style.pageBreakBefore = 'always';
+                    currentPageEl.style.breakBefore = 'page';
+                    
+                    // 새 페이지 머리글 세팅!
+                    const staticHeaderNext = document.createElement('div');
+                    staticHeaderNext.className = 'custom-print-header-static';
+                    staticHeaderNext.innerHTML = `
+                        <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${formatPrintText(leftText)}</div>
+                        <div style="flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600;">${formatPrintText(centerText)}</div>
+                        <div style="flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${formatPrintText(rightText)}</div>
+                    `;
+                    currentPageEl.appendChild(staticHeaderNext);
+                    
+                    // 새 페이지 본문 영역 세팅!
+                    currentContentEl = document.createElement('div');
+                    currentContentEl.className = 'custom-print-body-content';
+                    currentContentEl.style.flex = '1';
+                    currentContentEl.style.overflow = 'hidden';
+                    currentPageEl.appendChild(currentContentEl);
+                    
+                    // 새 페이지 바닥글 세팅! (바닥글 높이 유지를 위해 삽입)
+                    const staticFooterNext = document.createElement('div');
+                    staticFooterNext.className = 'custom-print-footer-static';
+                    currentPageEl.appendChild(staticFooterNext);
+                    
+                    printClone.appendChild(currentPageEl);
+                    
+                    // 뺐던 자식을 새 본문 영역에 추가
+                    currentContentEl.appendChild(child);
+                    currentAccumulatedHeight = child.offsetHeight;
+                    
+                    // 다음 루프에서 사용할 수 있도록 꼬리글 레퍼런스 업데이트
+                    staticFooter1 = staticFooterNext;
+                } else {
+                    currentAccumulatedHeight += childHeight;
+                }
+            });
+            
+            // 마지막 페이지 바닥글 최종 확정 세팅
+            staticFooter1.innerHTML = `
+                <div style="flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${formatPrintText(fLeftText)}</div>
+                <div style="flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pageIndex} / <span class="total-pages-placeholder"></span></div>
+                <div style="flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${formatPrintText(fRightText)}</div>
+            `;
+            
+            // 전체 페이지 플레이스홀더 채우기
+            printClone.querySelectorAll('.total-pages-placeholder').forEach((el) => {
+                el.textContent = pageIndex;
+            });
+            
+            // 오프스크린 측정 완료되었으므로 absolute 스타일 제거
+            printWrapper.style.position = '';
+            printWrapper.style.left = '';
+            printWrapper.style.top = '';
+            printWrapper.style.width = '';
+            printWrapper.style.display = '';
+            printWrapper.style.visibility = '';
+            printWrapper.style.boxSizing = '';
+            
+            // 3. 인쇄시 화면 레이아웃 및 폰트를 보정하는 동적 CSS 주입
+            const styleEl = document.createElement('style');
+            styleEl.id = 'dynamic-print-style';
+            styleEl.innerHTML = `
+                @media print {
+                    @page {
+                        size: auto;
+                        margin: 0 !important;
+                    }
+                    
+                    html, body {
+                        background: #ffffff !important;
+                        color: #000000 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        overflow: visible !important;
+                        display: block !important;
+                        position: static !important;
+                    }
+                    
+                    /* 화면 전용 컨테이너들을 강력하게 숨김 */
+                    body > header,
+                    body > main,
+                    body .workspace-panes,
+                    body #pane-preview,
+                    body #preview-pane,
+                    body #preview-content,
+                    body .sidebar-slide-toggle,
+                    body .toc-slide-toggle,
+                    body .pane-header,
+                    body .modal,
+                    body .toast,
+                    body #splash-screen {
+                        display: none !important;
+                    }
+                    
+                    /* 오직 인쇄용 복제 컨테이너만 인쇄 영역에 노출 */
+                    #dynamic-print-wrapper-container {
+                        display: block !important;
+                        width: 100% !important;
+                        background: #ffffff !important;
+                        color: #000000 !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        box-sizing: border-box !important;
+                        position: static !important;
+                    }
+                    
+                    /* 가상 A4 페이지 단위 */
+                    .print-page-wrapper {
+                        width: 210mm !important;
+                        height: 297mm !important;
+                        padding-top: ${pageMarginTopBottom} !important;
+                        padding-bottom: ${pageMarginTopBottom} !important;
+                        padding-left: ${pageMarginSide} !important;
+                        padding-right: ${pageMarginSide} !important;
+                        box-sizing: border-box !important;
+                        background: #ffffff !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: space-between !important;
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
+                    
+                    #dynamic-print-clone {
+                        background: transparent !important;
+                        color: #000000 !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        display: block !important;
+                    }
+                    
+                    .custom-print-header-static {
+                        width: 100% !important;
+                        height: 30px !important;
+                        display: ${showHeaderFooter} !important;
+                        justify-content: space-between !important;
+                        align-items: center !important;
+                        border-bottom: 0.5px solid #ccc !important;
+                        font-size: 8.5pt !important;
+                        color: #555 !important;
+                        font-family: 'Inter', 'Segoe UI', 'Malgun Gothic', sans-serif !important;
+                        background: transparent !important;
+                        box-sizing: border-box !important;
+                        margin-bottom: 15px !important;
+                    }
+                    
+                    .custom-print-footer-static {
+                        width: 100% !important;
+                        height: 30px !important;
+                        display: ${showHeaderFooter} !important;
+                        justify-content: space-between !important;
+                        align-items: center !important;
+                        border-top: 0.5px solid #ccc !important;
+                        font-size: 8.5pt !important;
+                        color: #555 !important;
+                        font-family: 'Inter', 'Segoe UI', 'Malgun Gothic', sans-serif !important;
+                        background: transparent !important;
+                        box-sizing: border-box !important;
+                        margin-top: 15px !important;
+                    }
+                    
+                    .markdown-body {
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        background: transparent !important;
+                        max-width: 100% !important;
+                    }
+                    
+                    /* 테이블 좌우 테두리선 잘림 현상 완벽 방지 */
+                    #dynamic-print-clone table {
+                        width: calc(100% - 2px) !important;
+                        max-width: calc(100% - 2px) !important;
+                        box-sizing: border-box !important;
+                        margin: 0 1px 16px 1px !important;
+                        border-collapse: collapse !important;
+                    }
+                    
+                    #dynamic-print-clone th, #dynamic-print-clone td {
+                        box-sizing: border-box !important;
+                    }
+                }
+                
+                @media screen {
+                    .custom-print-header-static, .custom-print-footer-static, #dynamic-print-wrapper-container {
+                        display: none !important;
+                    }
+                }
+            `;
+            
+            document.head.appendChild(styleEl);
+            
+            // 4. 임시 브라우저 인쇄 타이틀 변경 (브라우저 기본 머리글에 반영)
+            const originalDocTitle = document.title;
+            if (centerText) {
+                document.title = centerText;
+            } else if (rightText) {
+                document.title = rightText.replace(/\.md$/i, "");
+            }
+            
+            // 5.2. 마운트된 복제본 내의 SMILES 화학식 요소를 인쇄에 최적화된 라이트(light) 모드로 강제 재렌더링
+            const smilesContainers = printWrapper.querySelectorAll('.smiles-container');
+            smilesContainers.forEach((container, idx) => {
+                const svg = container.querySelector('svg');
+                const infoDiv = container.querySelector('div');
+                if (svg && infoDiv) {
+                    const textContent = infoDiv.textContent || "";
+                    const smilesText = textContent.replace(/^분자식:\s*/i, "").trim();
+                    if (smilesText && typeof SmilesDrawer !== 'undefined') {
+                        const printSvgId = `print-smiles-svg-${Date.now()}-${idx}`;
+                        svg.id = printSvgId;
+                        svg.innerHTML = ""; // 기존 다크 드로잉 소거
+                        
+                        const drawerOptions = {
+                            width: 320,
+                            height: 320,
+                            theme: 'light', // 무조건 라이트 테마 강제
+                            bondThickness: 2.2,
+                            bondLength: 18,
+                            fontSizeLarge: 6,
+                            fontSizeSmall: 4,
+                            overlapSensitivity: 1.8,
+                            doubleBondSpacing: 4
+                        };
+                        
+                        try {
+                            const drawer = new SmilesDrawer.SvgDrawer(drawerOptions);
+                            SmilesDrawer.parse(smilesText, function(tree) {
+                                drawer.draw(tree, printSvgId, 'light', false);
+                            }, function(err) {
+                                console.error("Print SMILES parse error:", err);
+                            });
+                        } catch (e) {
+                            console.error("Print SMILES render exception:", e);
+                        }
+                    }
+                }
+            });
+            
+            // 6. 가독성 모드 테마 토글 처리 및 인쇄 실행
             const originalTheme = currentTheme;
             
-            // 다크 테마인 경우, 인쇄 가독성을 위해 일시적으로 고대비 라이트 테마로 자동 전환
-            if (originalTheme === 'dark') {
-                setTheme('light', false); // 파일 DB 저장을 우회하여 메모리 상에서만 테마 상태 변경
-                
-                // 테마가 가볍게 바뀐 뒤, Mermaid 다이어그램 및 화학 구조식(SMILES)이
-                // 화이트 인쇄용 테마로 고해상도 리렌더링을 완전히 완료할 때까지 대기 (450ms)
-                setTimeout(() => {
-                    window.print();
-                    
-                    // 인쇄창이 호출되거나 닫힌 즉시 원래의 세련된 다크 테마로 깜쪽같이 원복
-                    setTimeout(() => {
-                        setTheme('dark', false);
-                        showToast(t('msg_print_success'));
-                    }, 100);
-                }, 450);
-            } else {
-                // 이미 라이트 테마인 경우 즉시 출력
+            const restoreAll = () => {
+                if (themeMode !== originalTheme) {
+                    setTheme(originalTheme, false);
+                }
+                document.title = originalDocTitle;
+                cleanupPrintElements();
+                showToast(t('msg_print_success'));
+            };
+            
+            let restored = false;
+            const onAfterPrint = () => {
+                if (!restored) {
+                    restored = true;
+                    restoreAll();
+                    window.removeEventListener('afterprint', onAfterPrint);
+                }
+            };
+            window.addEventListener('afterprint', onAfterPrint);
+            
+            const triggerPrint = () => {
                 window.print();
+                
+                // afterprint 비활성 상태 대비용 세이프가드
+                setTimeout(() => {
+                    if (!restored) {
+                        restored = true;
+                        restoreAll();
+                        window.removeEventListener('afterprint', onAfterPrint);
+                    }
+                }, 1500);
+            };
+            
+            if (themeMode !== originalTheme) {
+                setTheme(themeMode, false);
+                setTimeout(triggerPrint, 450);
+            } else {
+                setTimeout(triggerPrint, 250);
             }
         }
+        
+        function cleanupPrintElements() {
+            const h = document.getElementById('dynamic-custom-print-header');
+            if (h) h.remove();
+            
+            const f = document.getElementById('dynamic-custom-print-footer');
+            if (f) f.remove();
+            
+            const s = document.getElementById('dynamic-print-style');
+            if (s) s.remove();
+            
+            const w = document.getElementById('dynamic-print-wrapper-container');
+            if (w) w.remove();
+        }
+
+        // 전역 노출 바인딩
+        window.openPrintSettingsModal = openPrintSettingsModal;
+        window.closePrintSettingsModal = closePrintSettingsModal;
+        window.executePrintWithSettings = executePrintWithSettings;
 
         // ----------------- 모달 & 파일 트리 CRUD 연동 -----------------
         
@@ -3425,13 +3942,317 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
             constructor(rawMarkdown) {
                 super();
                 this.rawMarkdown = rawMarkdown;
+                this.activeRowIdx = -1;
+                this.activeColIdx = -1;
             }
             eq(other) {
                 return other.rawMarkdown === this.rawMarkdown;
             }
-            toDOM() {
+            ignoreEvent(e) {
+                return true;
+            }
+            
+            getCleanCellText(cell) {
+                const clone = cell.cloneNode(true);
+                const controls = clone.querySelectorAll('.wysiwyg-table-col-add, .wysiwyg-table-row-add, .wysiwyg-table-btn, .wysiwyg-table-control, .wysiwyg-table-col-delete, .wysiwyg-table-row-delete');
+                controls.forEach(el => el.remove());
+                return clone.textContent.trim().replace(/\r?\n/g, ' ');
+            }
+            
+            syncTableToEditor() {
+                const view = this.view || window.cmEditor;
+                if (!view) return;
+                
+                const table = this.dom.querySelector("table");
+                if (!table) return;
+                
+                const headerCells = table.querySelectorAll("thead th");
+                const headers = [];
+                headerCells.forEach(th => {
+                    headers.push(this.getCleanCellText(th));
+                });
+                
+                if (headers.length === 0) return;
+                
+                let newMarkdown = "\n| " + headers.join(" | ") + " |\n";
+                newMarkdown += "| " + headers.map(() => "---").join(" | ") + " |\n";
+                
+                const rows = table.querySelectorAll("tbody tr");
+                rows.forEach(tr => {
+                    const cells = tr.querySelectorAll("td");
+                    const rowData = [];
+                    cells.forEach(td => {
+                        rowData.push(this.getCleanCellText(td));
+                    });
+                    newMarkdown += "| " + rowData.join(" | ") + " |\n";
+                });
+                newMarkdown += "\n";
+                
+                // 불필요한 중복 갱신 및 화면 포커스 소실 방지용 최적화
+                if (newMarkdown.trim() === this.rawMarkdown.trim()) return;
+                
+                
+                let pos = -1;
+                try {
+                    pos = view.posAtDOM(this.dom);
+                } catch(e) {}
+                
+                const docText = view.state.doc.toString();
+                let occurrences = [];
+                let idx = docText.indexOf(this.rawMarkdown);
+                while (idx !== -1) {
+                    occurrences.push(idx);
+                    idx = docText.indexOf(this.rawMarkdown, idx + 1);
+                }
+                
+                let targetPos = -1;
+                if (occurrences.length === 0) {
+                    let trimmed = this.rawMarkdown.trim();
+                    let trimmedIdx = docText.indexOf(trimmed);
+                    if (trimmedIdx !== -1) {
+                        targetPos = trimmedIdx;
+                    }
+                } else if (occurrences.length === 1) {
+                    targetPos = occurrences[0];
+                } else if (pos !== -1) {
+                    let closest = occurrences[0];
+                    let minDiff = Math.abs(occurrences[0] - pos);
+                    for (let i = 1; i < occurrences.length; i++) {
+                        let diff = Math.abs(occurrences[i] - pos);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closest = occurrences[i];
+                        }
+                    }
+                    targetPos = closest;
+                } else {
+                    targetPos = occurrences[0];
+                }
+                
+                if (targetPos !== -1) {
+                    const len = occurrences.length === 0 ? this.rawMarkdown.trim().length : this.rawMarkdown.length;
+                    view.dispatch({
+                        changes: { from: targetPos, to: targetPos + len, insert: newMarkdown }
+                    });
+                    this.rawMarkdown = newMarkdown;
+                }
+            }
+            
+            rebindHelperSelectors() {
+                const table = this.dom.querySelector("table");
+                if (!table) return;
+                
+                const tbody = table.querySelector("tbody");
+                if (!tbody) return;
+                
+                const rows = tbody.querySelectorAll("tr");
+                rows.forEach(tr => {
+                    const cells = tr.querySelectorAll("td");
+                    cells.forEach((td, cIdx) => {
+                        const existingAdd = td.querySelector(".wysiwyg-table-row-add");
+                        if (existingAdd) existingAdd.remove();
+                        
+                        if (cIdx === 0) {
+                            const rowAdd = document.createElement("span");
+                            rowAdd.className = "wysiwyg-table-row-add";
+                            rowAdd.innerText = "+";
+                            rowAdd.title = "아래에 행 추가";
+                            rowAdd.contentEditable = "false";
+                            rowAdd.addEventListener("mousedown", (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const currentRIdx = Array.from(tbody.querySelectorAll("tr")).indexOf(tr);
+                                this.insertRow(currentRIdx + 1);
+                            });
+                            td.appendChild(rowAdd);
+                        }
+                    });
+                });
+            }
+            
+            insertRow(rowIdx) {
+                const table = this.dom.querySelector("table");
+                if (!table) return;
+                
+                const tbody = table.querySelector("tbody");
+                if (!tbody) return;
+                
+                const headers = table.querySelectorAll("thead th");
+                const colCount = headers.length;
+                
+                const tr = document.createElement("tr");
+                for (let c = 0; c < colCount; c++) {
+                    const td = document.createElement("td");
+                    td.contentEditable = "true";
+                    td.innerHTML = "";
+                    
+                    td.addEventListener("blur", () => {
+                        this.syncTableToEditor();
+                    });
+                    
+                    td.addEventListener("focus", () => {
+                        this.activeRowIdx = Array.from(tbody.querySelectorAll("tr")).indexOf(tr);
+                        this.activeColIdx = Array.from(tr.querySelectorAll("td")).indexOf(td);
+                    });
+                    
+                    tr.appendChild(td);
+                }
+                
+                const existingRows = tbody.querySelectorAll("tr");
+                if (rowIdx >= existingRows.length) {
+                    tbody.appendChild(tr);
+                } else {
+                    tbody.insertBefore(tr, existingRows[rowIdx]);
+                }
+                
+                this.rebindHelperSelectors();
+                this.syncTableToEditor();
+            }
+            
+            insertColumn(colIdx) {
+                const table = this.dom.querySelector("table");
+                if (!table) return;
+                
+                const theadRow = table.querySelector("thead tr");
+                if (!theadRow) return;
+                
+                const th = document.createElement("th");
+                th.contentEditable = "true";
+                th.innerHTML = "Header";
+                
+                th.addEventListener("blur", () => {
+                    this.syncTableToEditor();
+                });
+                
+                th.addEventListener("focus", () => {
+                    this.activeRowIdx = -1;
+                    const headerCells = Array.from(theadRow.querySelectorAll("th"));
+                    this.activeColIdx = headerCells.indexOf(th);
+                });
+                
+                const colAdd = document.createElement("span");
+                colAdd.className = "wysiwyg-table-col-add";
+                colAdd.innerText = "+";
+                colAdd.title = "우측에 열 추가";
+                colAdd.contentEditable = "false";
+                colAdd.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const headerCells = Array.from(theadRow.querySelectorAll("th"));
+                    const currentColIdx = headerCells.indexOf(th);
+                    this.insertColumn(currentColIdx + 1);
+                });
+                th.appendChild(colAdd);
+                
+                const headers = theadRow.querySelectorAll("th");
+                if (colIdx >= headers.length) {
+                    theadRow.appendChild(th);
+                } else {
+                    theadRow.insertBefore(th, headers[colIdx]);
+                }
+                
+                const tbody = table.querySelector("tbody");
+                if (tbody) {
+                    const rows = tbody.querySelectorAll("tr");
+                    rows.forEach(tr => {
+                        const td = document.createElement("td");
+                        td.contentEditable = "true";
+                        td.innerHTML = "";
+                        
+                        td.addEventListener("blur", () => {
+                            this.syncTableToEditor();
+                        });
+                        
+                        td.addEventListener("focus", () => {
+                            this.activeRowIdx = Array.from(tbody.querySelectorAll("tr")).indexOf(tr);
+                            const cells = Array.from(tr.querySelectorAll("td"));
+                            this.activeColIdx = cells.indexOf(td);
+                        });
+                        
+                        const cells = tr.querySelectorAll("td");
+                        if (colIdx >= cells.length) {
+                            tr.appendChild(td);
+                        } else {
+                            tr.insertBefore(td, cells[colIdx]);
+                        }
+                    });
+                }
+                
+                this.rebindHelperSelectors();
+                this.syncTableToEditor();
+            }
+            
+            deleteActiveRow() {
+                const table = this.dom.querySelector("table");
+                if (!table) return;
+                
+                const tbody = table.querySelector("tbody");
+                if (!tbody) return;
+                
+                const rows = tbody.querySelectorAll("tr");
+                if (rows.length <= 1) {
+                    alert("최소한 1개의 행이 존재해야 합니다.");
+                    return;
+                }
+                
+                let targetRowIdx = this.activeRowIdx;
+                if (targetRowIdx === -1) {
+                    alert("삭제할 행을 선택(클릭)해주세요.");
+                    return;
+                }
+                
+                if (targetRowIdx >= 0 && targetRowIdx < rows.length) {
+                    rows[targetRowIdx].remove();
+                    this.activeRowIdx = -1;
+                    this.rebindHelperSelectors();
+                    this.syncTableToEditor();
+                }
+            }
+            
+            deleteActiveColumn() {
+                const table = this.dom.querySelector("table");
+                if (!table) return;
+                
+                const theadRow = table.querySelector("thead tr");
+                if (!theadRow) return;
+                
+                const headerCells = theadRow.querySelectorAll("th");
+                if (headerCells.length <= 1) {
+                    alert("최소한 1개의 열이 존재해야 합니다.");
+                    return;
+                }
+                
+                let targetColIdx = this.activeColIdx;
+                if (targetColIdx === -1) {
+                    alert("삭제할 열을 선택(클릭)해주세요.");
+                    return;
+                }
+                
+                if (targetColIdx >= 0 && targetColIdx < headerCells.length) {
+                    headerCells[targetColIdx].remove();
+                    
+                    const tbody = table.querySelector("tbody");
+                    if (tbody) {
+                        const rows = tbody.querySelectorAll("tr");
+                        rows.forEach(tr => {
+                            const cells = tr.querySelectorAll("td");
+                            if (cells[targetColIdx]) {
+                                cells[targetColIdx].remove();
+                            }
+                        });
+                    }
+                    
+                    this.activeColIdx = -1;
+                    this.rebindHelperSelectors();
+                    this.syncTableToEditor();
+                }
+            }
+            
+            toDOM(view) {
                 const div = document.createElement("div");
                 div.className = "cm-wysiwyg-table-container";
+                this.dom = div;
+                this.view = view;
                 
                 const lines = this.rawMarkdown.trim().split("\n");
                 if (lines.length < 2) {
@@ -3442,43 +4263,123 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
                 const table = document.createElement("table");
                 table.className = "cm-wysiwyg-table";
                 
-                // 헤더 파싱
                 const parseCols = (lineText) => {
-                    return lineText.split("|").map(s => s.trim()).filter((s, i, a) => {
-                        if (i === 0 && s === "") return false;
-                        if (i === a.length - 1 && s === "") return false;
-                        return true;
-                    });
+                    const parts = lineText.split(/(?<!\\)\|/).map(s => s.trim());
+                    let filtered = [...parts];
+                    if (filtered[0] === "") filtered.shift();
+                    if (filtered[filtered.length - 1] === "") filtered.pop();
+                    return filtered.map(s => s.replace(/\\\|/g, '|'));
                 };
                 
                 const headers = parseCols(lines[0]);
                 const thead = document.createElement("thead");
                 const headerRow = document.createElement("tr");
-                headers.forEach(h => {
+                
+                headers.forEach((h, colIdx) => {
                     const th = document.createElement("th");
+                    th.contentEditable = "true";
                     th.innerHTML = h;
+                    
+                    th.addEventListener("focus", () => {
+                        this.activeRowIdx = -1;
+                        this.activeColIdx = Array.from(headerRow.querySelectorAll("th")).indexOf(th);
+                    });
+                    
+                    const colAdd = document.createElement("span");
+                    colAdd.className = "wysiwyg-table-col-add";
+                    colAdd.innerText = "+";
+                    colAdd.title = "우측에 열 추가";
+                    colAdd.contentEditable = "false";
+                    colAdd.addEventListener("mousedown", (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const headerCells = Array.from(headerRow.querySelectorAll("th"));
+                        const currentColIdx = headerCells.indexOf(th);
+                        this.insertColumn(currentColIdx + 1);
+                    });
+                    th.appendChild(colAdd);
+                    
+                    th.addEventListener("blur", () => {
+                        this.syncTableToEditor();
+                    });
+                    
                     headerRow.appendChild(th);
                 });
                 thead.appendChild(headerRow);
                 table.appendChild(thead);
                 
-                // 데이터 행 파싱 (두번째 구분선 행 제외)
                 const tbody = document.createElement("tbody");
                 for (let i = 2; i < lines.length; i++) {
                     const cells = parseCols(lines[i]);
                     const row = document.createElement("tr");
-                    cells.forEach(c => {
+                    
+                    while (cells.length < headers.length) {
+                        cells.push("");
+                    }
+                    
+                    cells.forEach((c, colIdx) => {
                         const td = document.createElement("td");
+                        td.contentEditable = "true";
                         td.innerHTML = c;
+                        
+                        td.addEventListener("focus", () => {
+                            this.activeRowIdx = Array.from(tbody.querySelectorAll("tr")).indexOf(row);
+                            this.activeColIdx = Array.from(row.querySelectorAll("td")).indexOf(td);
+                        });
+                        
+                        td.addEventListener("blur", () => {
+                            this.syncTableToEditor();
+                        });
+                        
                         row.appendChild(td);
                     });
                     tbody.appendChild(row);
                 }
                 table.appendChild(tbody);
                 div.appendChild(table);
+                
+                this.rebindHelperSelectors();
+                
+                const configPanel = document.createElement("div");
+                configPanel.className = "wysiwyg-table-config";
+                configPanel.contentEditable = "false";
+                
+                const deleteRowBtn = document.createElement("button");
+                deleteRowBtn.className = "table-conf-btn";
+                deleteRowBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    <span>행 삭제</span>
+                `;
+                deleteRowBtn.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.deleteActiveRow();
+                });
+                
+                const deleteColBtn = document.createElement("button");
+                deleteColBtn.className = "table-conf-btn";
+                deleteColBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    <span>열 삭제</span>
+                `;
+                deleteColBtn.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.deleteActiveColumn();
+                });
+                
+                configPanel.appendChild(deleteRowBtn);
+                configPanel.appendChild(deleteColBtn);
+                div.appendChild(configPanel);
+                
                 return div;
             }
-            ignoreEvent() { return true; }
         }
 
         // 3.6. HTML/SVG 블록 위젯 (마인드맵 등 직접 구성된 SVG 렌더링 지원)
@@ -3823,35 +4724,25 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
                                 }
                             }
                             
-                            // 표 라인 중 하나라도 커서가 닿아있으면 소스 텍스트 그대로 표시
-                            let tableActive = false;
-                            for (let tL = l; tL <= tableEndLine; tL++) {
-                                if (selectedLines.has(tL)) {
-                                    tableActive = true;
-                                    break;
-                                }
-                            }
-                            
-                            if (!tableActive) {
-                                const tableCode = tableLines.join("\n");
+                            // WYSIWYG 모드에서는 표가 항상 테이블 위젯으로 유지되어 인라인 편집을 지원합니다.
+                            const tableCode = tableLines.join("\n");
+                            rawDecos.push({
+                                from: line.from,
+                                to: line.to,
+                                value: Decoration.replace({ widget: new TableWidget(tableCode) }),
+                                type: "replace"
+                            });
+                            for (let currL = l + 1; currL <= tableEndLine; currL++) {
+                                const currLine = state.doc.line(currL);
                                 rawDecos.push({
-                                    from: line.from,
-                                    to: line.to,
-                                    value: Decoration.replace({ widget: new TableWidget(tableCode) }),
-                                    type: "replace"
+                                    from: currLine.from,
+                                    to: currLine.from,
+                                    value: Decoration.line({ attributes: { style: "display: none !important;" } }),
+                                    type: "line"
                                 });
-                                for (let currL = l + 1; currL <= tableEndLine; currL++) {
-                                    const currLine = state.doc.line(currL);
-                                    rawDecos.push({
-                                        from: currLine.from,
-                                        to: currLine.from,
-                                        value: Decoration.line({ attributes: { style: "display: none !important;" } }),
-                                        type: "line"
-                                    });
-                                }
-                                l = tableEndLine; // 스캔 점프
-                                continue;
                             }
+                            l = tableEndLine; // 스캔 점프
+                            continue;
                         }
                     }
                     
@@ -5197,6 +6088,97 @@ function updateActiveDocumentTags(newTags) {
             }
         }
 
+        // 1+4 테이블(표) 네온 그리드 셀렉터 초기화 및 이벤트 등록
+        function setupTablePicker() {
+            const gridContainer = document.getElementById('table-picker-grid');
+            const sizeDisplay = document.getElementById('table-picker-size-display');
+            if (!gridContainer || !sizeDisplay) return;
+
+            // 1. 10x10 격자 셀(100개) 동적 생성
+            gridContainer.innerHTML = '';
+            for (let r = 1; r <= 10; r++) {
+                for (let c = 1; c <= 10; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    
+                    // 마우스 진입 시 해당 범위(1,1 ~ r,c) 하이라이트 처리
+                    cell.addEventListener('mouseover', () => {
+                        highlightGrid(r, c);
+                    });
+                    
+                    // 클릭 시 해당 행렬 크기 마크다운 표 코드 삽입
+                    cell.addEventListener('click', () => {
+                        insertMarkdownTable(r, c);
+                    });
+                    
+                    gridContainer.appendChild(cell);
+                }
+            }
+
+            // 마우스가 그리드 밖으로 나가면 0 x 0으로 리셋
+            gridContainer.addEventListener('mouseleave', () => {
+                highlightGrid(0, 0);
+            });
+
+            // 그리드 하이라이팅 연출 함수 (네온 발광 유도)
+            function highlightGrid(maxRow, maxCol) {
+                const cells = gridContainer.querySelectorAll('.grid-cell');
+                cells.forEach(cell => {
+                    const r = parseInt(cell.dataset.row);
+                    const c = parseInt(cell.dataset.col);
+                    if (r <= maxRow && c <= maxCol) {
+                        cell.classList.add('highlighted');
+                    } else {
+                        cell.classList.remove('highlighted');
+                    }
+                });
+                sizeDisplay.innerText = `${maxRow} x ${maxCol}`;
+            }
+
+            // 마크다운 표 스니펫 에디터 삽입 함수
+            function insertMarkdownTable(rows, cols) {
+                const view = window.cmEditor;
+                if (!view) return;
+
+                let tableMarkdown = "\n";
+                
+                // 1. 헤더 생성
+                let headerLine = "|";
+                let dividerLine = "|";
+                for (let c = 1; c <= cols; c++) {
+                    headerLine += ` Header ${c} |`;
+                    dividerLine += " --- |";
+                }
+                tableMarkdown += headerLine + "\n" + dividerLine + "\n";
+                
+                // 2. 데이터 행 생성
+                for (let r = 1; r <= rows; r++) {
+                    let rowLine = "|";
+                    for (let c = 1; c <= cols; c++) {
+                        rowLine += ` Cell (${r},${c}) |`;
+                    }
+                    tableMarkdown += rowLine + "\n";
+                }
+                tableMarkdown += "\n";
+
+                const state = view.state;
+                const selection = state.selection.main;
+                
+                view.dispatch({
+                    changes: { from: selection.from, to: selection.to, insert: tableMarkdown },
+                    selection: { anchor: selection.from + tableMarkdown.length }
+                });
+                view.focus();
+
+                document.getElementById('toolbar-table-dropdown').classList.remove('show');
+            }
+        }
+
+        // 실행
+        setTimeout(setupTablePicker, 100);
+
 // 해시태그 전역 바인딩
 window.openTagsManager = openTagsManager;
 window.openHashtagModal = openHashtagModal;
@@ -5213,3 +6195,4 @@ window.clearTagSearch = clearTagSearch;
 window.updateFloatingTagsContainer = updateFloatingTagsContainer;
 window.openTagSelectModal = openTagSelectModal;
 window.closeTagSelectModal = closeTagSelectModal;
+window.setupTablePicker = setupTablePicker;

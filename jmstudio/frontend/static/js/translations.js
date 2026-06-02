@@ -1,5 +1,7 @@
 const translations = {
             ko: {
+                "tooltip_insert_table": "표 삽입 (10x10 그리드)",
+                "table_picker_title": "표 삽입",
                 // Header
                 "btn_add_doc": "문서 추가",
                 "tooltip_add_doc": "서재에 마크다운 문서(.md) 추가",
@@ -532,6 +534,8 @@ const translations = {
                 "placeholder_math_search": "수식 키워드 검색...",
             },
             en: {
+                "tooltip_insert_table": "Insert Table (10x10 Grid)",
+                "table_picker_title": "Insert Table",
                 // Header
                 "btn_add_doc": "Add Document",
                 "tooltip_add_doc": "Add Markdown Document (.md) to Library",
