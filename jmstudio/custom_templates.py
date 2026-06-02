@@ -346,6 +346,35 @@ class CustomTemplateManager:
         else:
             return {"status": "success", "message": f"복원되었으나 동기화 실패: {sync_res['message']}"}
 
+    def import_subscribed_template(self, title, desc, icon, color, content, tags=None):
+        if not title:
+            return {"status": "error", "message": "Title cannot be empty"}
+            
+        templates = self._load_json(self.local_json)
+        
+        # 중복 등록 방지 (제목 기준)
+        for t in templates:
+            if t["title"].strip() == title.strip():
+                return {"status": "error", "message": "이미 동일한 이름의 템플릿이 서재 라이브러리에 등록되어 있습니다."}
+                
+        template_id = f"custom_template_{int(time.time())}"
+        
+        new_template = {
+            "id": template_id,
+            "title": title,
+            "desc": desc or "",
+            "icon": icon or "file-text",
+            "color": color or "#3b82f6",
+            "content": content or "",
+            "tags": tags or ["사용자지정"]
+        }
+        
+        templates.append(new_template)
+        if self._save_json(self.local_json, templates):
+            return {"status": "success", "template_id": template_id}
+        else:
+            return {"status": "error", "message": "Failed to save imported template"}
+
 class ExtendedMdViewerApi(MdViewerApi):
     def __init__(self):
         super().__init__()
@@ -374,3 +403,6 @@ class ExtendedMdViewerApi(MdViewerApi):
 
     def restore_default_subscription(self):
         return self.template_manager.restore_default_subscription()
+
+    def import_subscribed_template(self, title, desc, icon, color, content, tags=None):
+        return self.template_manager.import_subscribed_template(title, desc, icon, color, content, tags)

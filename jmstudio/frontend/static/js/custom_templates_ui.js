@@ -106,36 +106,67 @@
             setupSaveTemplateOptions();
         }
 
-        // C. 템플릿 구독 설정 모달 주입
+        // C. 템플릿 구독 설정 모달 주입 (원격 템플릿 스토어 탭 연동)
         if (!document.getElementById('template-subscription-modal')) {
             const subModalHtml = `
                 <div id="template-subscription-modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 10000;">
-                    <div style="width: 520px; max-width: 90%; background: rgba(20, 20, 25, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); color: var(--text-main); font-family: 'Inter', sans-serif; display: flex; flex-direction: column; gap: 16px; position: relative;">
-                        <h3 style="font-size: 1.1em; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin: 0;">
-                            <i data-lucide="rss" style="width: 18px; height: 18px;"></i>
-                            <span>템플릿 원격 구독 설정 및 동기화</span>
+                    <div style="width: 560px; max-width: 95%; background: rgba(20, 20, 25, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); color: var(--text-main); font-family: 'Inter', sans-serif; display: flex; flex-direction: column; gap: 16px; position: relative;">
+                        <!-- 헤더 -->
+                        <h3 style="font-size: 1.1em; font-weight: 600; color: var(--accent); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; margin: 0;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="layout-template" style="width: 18px; height: 18px;"></i>
+                                <span>원격 템플릿 스토어 및 구독</span>
+                            </div>
+                            <button onclick="closeSubscriptionModal()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2em; display:flex; align-items:center; justify-content:center; padding: 4px;">&times;</button>
                         </h3>
                         
-                        <div style="display: flex; gap: 8px; align-items: flex-end;">
-                            <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
-                                <label style="font-size: 0.8em; font-weight: 500; color: var(--text-muted);">GitHub 리포지토리 주소</label>
-                                <input type="text" id="template-sub-url" placeholder="예: https://github.com/user/templates" style="width: 100%; padding: 10px 12px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); font-size: 0.9em; outline: none;" />
-                            </div>
-                            <button onclick="addTemplateSubscription()" style="padding: 10px 16px; border-radius: 6px; background: var(--accent); border: none; color: #000; font-weight: 600; font-size: 0.9em; cursor: pointer; height: 38px; display: flex; align-items: center; gap: 4px;">
-                                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
-                                <span>추가</span>
+                        <!-- 탭 버튼 영역 -->
+                        <div style="display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px;">
+                            <button id="tab-btn-sub-store" onclick="switchSubModalTab('store')" style="flex: 1; padding: 8px; background: transparent; border: none; border-bottom: 2px solid var(--accent); color: var(--text-main); font-weight: 600; font-size: 0.85em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                <i data-lucide="shopping-bag" style="width: 14px; height: 14px;"></i>
+                                <span>템플릿 추가하기 (스토어)</span>
+                            </button>
+                            <button id="tab-btn-sub-manage" onclick="switchSubModalTab('manage')" style="flex: 1; padding: 8px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); font-weight: 500; font-size: 0.85em; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                <i data-lucide="settings" style="width: 14px; height: 14px;"></i>
+                                <span>구독 저장소 관리</span>
                             </button>
                         </div>
                         
-                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                            <label style="font-size: 0.8em; font-weight: 500; color: var(--text-muted);">현재 구독 목록</label>
-                            <div id="template-subs-list" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
-                                <!-- Subscriptions listed via JS -->
+                        <!-- 탭 1: 템플릿 추가하기 (스토어) -->
+                        <div id="sub-tab-content-store" style="display: flex; flex-direction: column; gap: 12px; min-height: 280px;">
+                            <!-- 검색바 -->
+                            <div style="display: flex; position: relative; width: 100%;">
+                                <input type="text" id="store-search-input" placeholder="원격 템플릿 이름 또는 #해시태그 검색..." oninput="searchStoreTemplates()" style="width: 100%; padding: 10px 12px 10px 36px; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); font-size: 0.88em; outline: none; transition: border-color 0.2s;" />
+                                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-muted);"></i>
+                            </div>
+                            
+                            <!-- 스토어 원격 템플릿 검색 결과 리스트 -->
+                            <div id="store-templates-list" style="flex: 1; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04); scrollbar-width: thin;">
+                                <!-- 검색 매칭된 원격 템플릿들이 동적 카드로 생성됨 -->
                             </div>
                         </div>
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px;">
-                            <div style="display: flex; gap: 8px;">
+                        <!-- 탭 2: 구독 저장소 관리 -->
+                        <div id="sub-tab-content-manage" style="display: none; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; gap: 8px; align-items: flex-end;">
+                                <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                                    <label style="font-size: 0.8em; font-weight: 500; color: var(--text-muted);">GitHub 리포지토리 주소</label>
+                                    <input type="text" id="template-sub-url" placeholder="예: https://github.com/user/templates.git" style="width: 100%; padding: 10px 12px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); font-size: 0.9em; outline: none;" />
+                                </div>
+                                <button onclick="addTemplateSubscription()" style="padding: 10px 16px; border-radius: 6px; background: var(--accent); border: none; color: #000; font-weight: 600; font-size: 0.9em; cursor: pointer; height: 38px; display: flex; align-items: center; gap: 4px;">
+                                    <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                                    <span>추가</span>
+                                </button>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                                <label style="font-size: 0.8em; font-weight: 500; color: var(--text-muted);">현재 구독 목록</label>
+                                <div id="template-subs-list" style="max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                    <!-- Subscriptions listed via JS -->
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: flex-start; align-items: center; gap: 8px; margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px;">
                                 <button onclick="syncTemplateSubscriptions()" style="padding: 10px 14px; border-radius: 6px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); font-weight: 500; font-size: 0.85em; cursor: pointer; display: flex; align-items: center; gap: 6px;" id="sync-subs-btn">
                                     <i data-lucide="refresh-cw" style="width: 13px; height: 13px;"></i>
                                     <span>동기화</span>
@@ -145,7 +176,11 @@
                                     <span>기본값 복원</span>
                                 </button>
                             </div>
-                            <button onclick="closeSubscriptionModal()" style="padding: 10px 16px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--text-main); font-weight: 500; font-size: 0.9em; cursor: pointer;">닫기</button>
+                        </div>
+                        
+                        <!-- 푸터 -->
+                        <div style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 4px;">
+                            <button onclick="closeSubscriptionModal()" style="padding: 10px 20px; border-radius: 6px; background: transparent; border: 1px solid var(--border); color: var(--text-main); font-weight: 500; font-size: 0.9em; cursor: pointer;">닫기</button>
                         </div>
                     </div>
                 </div>
@@ -249,26 +284,8 @@
                     container.insertAdjacentHTML('beforeend', cardHtml);
                 });
                 
-                // 3. 원격 구독 템플릿 추가
-                subscribed.forEach(c => {
-                    window.DOCUMENT_TEMPLATES[c.id] = c.content;
-                    
-                    const cardHtml = `
-                        <div class="template-card custom-card-item" id="card-${c.id}" onclick="insertTemplate('${c.id}')" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-left: 3px solid ${c.color}; border-radius: 6px; cursor: pointer; transition: all 0.2s ease-in-out; backdrop-filter: blur(8px); position: relative;">
-                            <div class="template-card-icon" style="width: 30px; height: 30px; border-radius: 50%; background: ${c.color}20; border: 1px solid ${c.color}40; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${c.color};">
-                                <i data-lucide="${c.icon}" style="width: 14px; height: 14px;"></i>
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 2px; text-align: left; overflow: hidden; flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span style="font-size: 0.78em; font-weight: 600; color: var(--text-main); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${c.title}</span>
-                                    <span style="font-size: 0.6em; font-weight: 700; color: #3b82f6; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); padding: 0.5px 4px; border-radius: 3px; font-family: Outfit;">RSS</span>
-                                </div>
-                                <span style="font-size: 0.66em; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${c.desc}</span>
-                            </div>
-                        </div>
-                    `;
-                    container.insertAdjacentHTML('beforeend', cardHtml);
-                });
+                // 3. 원격 구독 템플릿 전체 렌더링 제거 (사용자 선택 추가 기능을 위해 사이드바 강제 노출 생략)
+                // 구독 템플릿은 모달 검색창에서 골라서 '추가'한 후 User 뱃지로 사이드바에 렌더링되게 변경되었습니다.
                 
                 if (window.lucide) {
                     lucide.createIcons();
@@ -392,7 +409,7 @@
 
     window.openSubscriptionModal = function () {
         document.getElementById('template-sub-url').value = '';
-        renderSubscriptionsList();
+        switchSubModalTab('store'); // 모달 열었을 때 기본적으로 스토어 검색 탭 로드
         document.getElementById('template-subscription-modal').style.display = 'flex';
     };
 
@@ -513,6 +530,157 @@
             } else {
                 alert("복원 실패: " + res.message);
             }
+        }
+    };
+    
+    // H. 원격 템플릿 스토어 탭 제어 & 검색 & 개별 추가 핸들러
+    window.switchSubModalTab = function (tab) {
+        const storeTabBtn = document.getElementById('tab-btn-sub-store');
+        const manageTabBtn = document.getElementById('tab-btn-sub-manage');
+        const storeContent = document.getElementById('sub-tab-content-store');
+        const manageContent = document.getElementById('sub-tab-content-manage');
+        
+        if (!storeTabBtn || !manageTabBtn) return;
+        
+        if (tab === 'store') {
+            storeTabBtn.style.borderBottomColor = 'var(--accent)';
+            storeTabBtn.style.color = 'var(--text-main)';
+            storeTabBtn.style.fontWeight = '600';
+            
+            manageTabBtn.style.borderBottomColor = 'transparent';
+            manageTabBtn.style.color = 'var(--text-muted)';
+            manageTabBtn.style.fontWeight = '500';
+            
+            storeContent.style.display = 'flex';
+            manageContent.style.display = 'none';
+            
+            searchStoreTemplates();
+        } else {
+            manageTabBtn.style.borderBottomColor = 'var(--accent)';
+            manageTabBtn.style.color = 'var(--text-main)';
+            manageTabBtn.style.fontWeight = '600';
+            
+            storeTabBtn.style.borderBottomColor = 'transparent';
+            storeTabBtn.style.color = 'var(--text-muted)';
+            storeTabBtn.style.fontWeight = '500';
+            
+            manageContent.style.display = 'flex';
+            storeContent.style.display = 'none';
+            
+            renderSubscriptionsList();
+        }
+    };
+
+    window.searchStoreTemplates = async function () {
+        const container = document.getElementById('store-templates-list');
+        if (!container) return;
+        
+        const searchInput = document.getElementById('store-search-input');
+        const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+        
+        if (!window.pywebview || !window.pywebview.api || !window.pywebview.api.get_custom_templates) {
+            container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.82em; text-align: center; padding: 16px; display: block;">API 로딩 대기 중...</span>`;
+            return;
+        }
+        
+        try {
+            const res = await window.pywebview.api.get_custom_templates();
+            if (!res) return;
+            
+            const subscribed = res.subscribed || [];
+            
+            // 검색 필터링 (제목, 설명, #해시태그 매칭)
+            let filtered = subscribed;
+            if (query) {
+                const isTagQuery = query.startsWith('#');
+                const cleanQuery = isTagQuery ? query.substring(1) : query;
+                
+                filtered = subscribed.filter(t => {
+                    const titleMatch = t.title.toLowerCase().includes(cleanQuery);
+                    const descMatch = t.desc.toLowerCase().includes(cleanQuery);
+                    
+                    let tagMatch = false;
+                    if (t.tags && Array.isArray(t.tags)) {
+                        tagMatch = t.tags.some(tag => tag.toLowerCase().includes(cleanQuery));
+                    }
+                    
+                    if (isTagQuery) {
+                        return tagMatch;
+                    }
+                    return titleMatch || descMatch || tagMatch;
+                });
+            }
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.82em; text-align: center; padding: 24px; display: block;">검색어와 일치하는 원격 템플릿이 없습니다.</span>`;
+                return;
+            }
+            
+            container.innerHTML = filtered.map(t => {
+                const tagsHtml = (t.tags || []).map(tag => `
+                    <span style="font-size: 0.62em; padding: 1px 5px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 4px; color: #60a5fa; font-family: 'Outfit';">#${tag}</span>
+                `).join(' ');
+                
+                const dataAttr = encodeURIComponent(JSON.stringify(t));
+                
+                return `
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid ${t.color}; border-radius: 6px; text-align: left;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: ${t.color}20; border: 1px solid ${t.color}40; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${t.color};">
+                            <i data-lucide="${t.icon}" style="width: 14px; height: 14px;"></i>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 3px; flex: 1; overflow: hidden; padding-right: 8px;">
+                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <span style="font-size: 0.82em; font-weight: 600; color: var(--text-main); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${t.title}</span>
+                                ${tagsHtml}
+                            </div>
+                            <span style="font-size: 0.68em; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${t.desc}</span>
+                        </div>
+                        <button onclick="importSubscribedTemplate('${dataAttr}')" style="padding: 6px 12px; border-radius: 4px; background: var(--accent); border: none; color: #000; font-weight: 600; font-size: 0.76em; cursor: pointer; display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                            <i data-lucide="download" style="width: 11px; height: 11px;"></i>
+                            <span>추가</span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        } catch (err) {
+            console.error("Error drawing store templates:", err);
+            container.innerHTML = `<span style="color: #ef4444; font-size: 0.82em; text-align: center; padding: 16px; display: block;">오류 발생: ${err.message}</span>`;
+        }
+    };
+
+    window.importSubscribedTemplate = async function (encodedData) {
+        try {
+            const template = JSON.parse(decodeURIComponent(encodedData));
+            if (!template) return;
+            
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.import_subscribed_template) {
+                const res = await window.pywebview.api.import_subscribed_template(
+                    template.title,
+                    template.desc,
+                    template.icon,
+                    template.color,
+                    template.content,
+                    template.tags
+                );
+                
+                if (res.status === 'success') {
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(`'${template.title}' 템플릿이 서재 라이브러리에 성공적으로 추가되었습니다!`);
+                    } else {
+                        alert(`'${template.title}' 템플릿이 성공적으로 추가되었습니다.`);
+                    }
+                    renderCustomTemplates();
+                } else {
+                    alert("템플릿 추가 실패: " + res.message);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to import template:", err);
+            alert("템플릿 로딩 및 추가 중 오류가 발생했습니다.");
         }
     };
 
