@@ -8,7 +8,8 @@ This document contains the chronological history of updates, releases, and patch
 
 | Version | Date | Key Patches & Features | Status |
 | :--- | :--- | :--- | :--- |
-| **v3.9.22** | 2026-06-02 | Premium PDF print & preview static pagination engine | **Latest Stable** |
+| **v3.9.23** | 2026-06-02 | Quant Portfolio and K-Stock Trading Diary Templates Launch | **Latest Stable** |
+| **v3.9.22** | 2026-06-02 | Premium PDF print & preview static pagination engine | Stable |
 | **v3.9.21** | 2026-05-31 | Real-time WYSIWYG rendering, CM6 equation enter crash fix | Stable |
 | **v3.9.20** | 2026-05-28 | Glassmorphism custom confirm dialog modal, multi-language fixes | Stable |
 | **v3.9.19** | 2026-05-25 | Native python packaging (`jmstudio`), socket bind timeout fix | Stable |
@@ -21,6 +22,18 @@ This document contains the chronological history of updates, releases, and patch
 ---
 
 ## 📢 Detailed Release History (v3.9.0 ~ Present)
+
+### 🚀 v3.9.23 (2026-06-02) - Quantitative Portfolio & K-Stock Trading Diary Templates Launch [Latest Stable]
+*   **Quant Portfolio & Asset Allocation Planner Template**:
+    *   Features a math-backed **Kelly Criterion ($f^*$) KaTeX formula model** calculating optimal risk-adjusted allocation size.
+    *   Natively embeds a **Mermaid Pie Chart** dynamically visualizing equity, cryptocurrency, commodities, and fiat ratios.
+    *   Constructs a **Mermaid Trading Flowchart** mapping logical rule-based SMA crossovers and RSI oversold buy/wait decisions alongside comprehensive asset grids.
+*   **Korean Stock Trading Diary (K-Stock) Template**:
+    *   Natively embeds the **K-Stock Net Yield ($R_{net}$) KaTeX formula model** strictly deducting local trading taxes (securities transaction tax & agricultural special tax) and brokerage commissions.
+    *   Provides trading flow diagrams monitoring active market sectors, domestic sugyup (forex/institutional net buys), cash reserves, and **anti-FOMO rule-based trading reviews**.
+*   **Integrated Sidebar Card Selection & Localization Mapping**:
+    *   Embedded two new styling cards `quant` (icon: `line-chart`) and `kstock` (icon: `trending-up`) in the template helper sidebar.
+    *   Updated translation schemas in `translations.js` to intelligently auto-generate localized default files in Split View.
 
 ### 🚀 v3.9.22 (2026-06-02) - Premium PDF Printing Layout & Static Page Numbering Engine [Latest Stable]
 *   **JavaScript-Based Static Pagination Engine**:

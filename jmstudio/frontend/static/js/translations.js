@@ -532,6 +532,12 @@ const translations = {
                 "math_label_voltage_divider": "분압 법칙",
                 "math_label_z_trans": "Z-변환",
                 "placeholder_math_search": "수식 키워드 검색...",
+                "template_quant_filename": "퀀트투자_포트폴리오_템플릿.md",
+                "template_quant_title": "퀀트 투자 & 자산 배분",
+                "template_quant_desc": "수학적 켈리 공식, 자산 비중 Mermaid 차트 및 의사결정 매매 알고리즘 설계.",
+                "template_kstock_filename": "한국주식_매매일지_템플릿.md",
+                "template_kstock_title": "한국주식 투자 다이어리",
+                "template_kstock_desc": "국장 전용 거래세율 차감 세후 수익률 공식, 주도 테마 수급 분류 및 오답노트.",
             },
             en: {
                 "tooltip_insert_table": "Insert Table (10x10 Grid)",
@@ -1064,5 +1070,11 @@ const translations = {
                 "math_label_voltage_divider": "Voltage Divider",
                 "math_label_z_trans": "Z-Transform",
                 "placeholder_math_search": "Search formula keywords...",
+                "template_quant_filename": "Quant_Portfolio_Template.md",
+                "template_quant_title": "Quant Portfolio & Asset Allocation",
+                "template_quant_desc": "Mathematical Kelly criterion, asset weight pie charts, and trading decision tree.",
+                "template_kstock_filename": "KStock_Trading_Diary_Template.md",
+                "template_kstock_title": "K-Stock Trading Diary",
+                "template_kstock_desc": "Tax/fees net yield formulas, K-Stock market theme filters, and trading reviews.",
             };
 window.translations = translations;
