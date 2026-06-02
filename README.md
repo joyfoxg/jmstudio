@@ -3,6 +3,9 @@
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
 
+> [!TIP]
+> **💡 You can view the detailed release notes and updates history for all versions in the [CHANGELOG.md](file:///e:/jm_studio/CHANGELOG.md) document.**
+
 ---
 
 ## 📸 Overview
@@ -12,14 +15,12 @@
 
 ## ✨ Key Features
 
-### 1. 📝 CodeMirror 6 Editor Core & Full Modularization
+### 1. 📝 CodeMirror 6 Editor Core
 * **High-Speed Modern Editor Engine**: Replaced the standard textarea with the high-performance CodeMirror 6 engine. It provides a fast and stable typing environment even with massive markdown documents.
 * **Maximizing Coding Productivity**: Packed with essential coding assists such as auto-close brackets, robust undo/redo history, and custom shortcuts found in modern editors.
 
 ### 2. 📐 Academic Math Helper (KaTeX Integration)
 * **Real-time Formula Rendering**: Equipped with a fast and accurate KaTeX engine to render inline math (`$...$`) and block math (`$$...$$`) seamlessly.
-* **KaTeX Math Input Helper & Preview Enhancements (v3.8.9 New)**: Upgraded the KaTeX library to version 0.17.0 globally, restored mathematical previews for previously non-rendering items (such as `\sout` strikeout, `\overbracket`, and `\underbracket`), added dedicated cards for actuarial angles (`\angl`, `\angln`), and fixed the layout overlap issue for `\mathclap` by enforcing limits rendering.
-* **Electrical & Electronics (EE) Subtab Revamp (v3.8.8)**: Revamped the Electrical/Electronics subtab into 6 clear subdivisions (Basic Operators, Circuit Theory, Electromagnetics, Signals & Systems, Semiconductor Physics, Control Engineering) with 3-column unified grid, and fixed math preview tooltips by resolving LaTeX escaping.
 * **Three Science & Engineering Tabbed Helper Panels**: 
   * **Math (📐)**: One-click insertion of fractions, roots, calculus, limits, Greek letters, and key symbols.
   * **Physics (⚛️)**: Provides essential formulas such as Coulomb's law, universal gravitation, Schrödinger's equation, Lorentz force, etc.
@@ -27,19 +28,18 @@
 * **Smart Cursor and Wildcards**: When inserting a formula template, the area to be edited (`?`) is automatically focused as a mouse selection, minimizing typing movement.
 
 ### 3. 🧬 PubChem Real-time Chemical Molecular Structure Visualization
-* **PubChem API Integration**: When searching for chemical compound names in Korean or English (e.g., `아스피린`, `caffeine`, `capsaicin`), it retrieves molecular data and SMILES strings in real time from the US National Library of Medicine (NLM) PubChem database.
+* **PubChem API Integration**: Search for chemical compound names in Korean or English (e.g., `aspirin`, `caffeine`) to retrieve molecular data and SMILES strings in real time from the US NLM PubChem database.
 * **2D Molecular Structure Preview**: Displays the 2D vector structural formula of the searched compound as real-time graphics inside the panel.
 * **SMILES Code Drawer**: When inserted into the editor as a ````smiles ```` code block, it is automatically visualized as a beautiful chemical skeletal structure model in the main preview area.
-* **Built-in Korean-English Mapping**: When searching for Korean compound names, it intelligently maps to the corresponding English term to query the API.
 
 ### 4. 📊 Dynamic Diagrams (Mermaid.js)
 * Instantly visualizes flowcharts, sequence diagrams, Gantt charts, mind maps, etc., directly from markdown text code.
-* **Mermaid Fullscreen & Zoom Mode**: Double-clicking a rendered diagram or clicking the icon opens it in a high-resolution fullscreen modal for detailed observation.
+* **Mermaid Fullscreen & Zoom Mode**: Double-clicking a rendered diagram or clicking the zoom icon opens it in a high-resolution fullscreen modal for detailed observation.
 
 ### 5. 🗂️ Smart & Safe Library File Management
 * **Tree Explorer**: Displays the folder and file structure within the workspace in an elegant layout.
-* **User Data Protection (Safe Unregister)**: Deleting a document does not delete the physical disk file; it only unregisters it from the library database (`md_viewer_config.json`), preventing accidental loss of research source code or documents.
-* **Drag and Drop Support**: Dropping markdown files (`.md`, `.qmd`, `.txt`) from Windows Explorer onto the app screen loads them instantly with a visual guideline overlay.
+* **User Data Protection**: Deleting a document does not delete the physical disk file; it only unregisters it from the library database (`md_viewer_config.json`), preventing accidental loss of research source code or documents.
+* **Drag and Drop Support**: Dropping markdown files (`.md`, `.qmd`, `.txt`) from Windows Explorer onto the app screen loads them instantly.
 
 ### 6. 🚀 Modern Design & Responsive UI
 * **Glassmorphism & Neon Themes**: Supports smooth transitions between dark mode (default) and light mode, with an eye-friendly color palette and accent glowing effects.
@@ -48,80 +48,21 @@
 
 ### 7. 🌐 Standalone HTML Export
 * Exports the editing markdown as a completely standalone HTML file for external sharing.
-* The exported file preserves KaTeX equations, Prism syntax highlighting, Mermaid diagrams, and SMILES molecular models, rendering normally in any browser with an internet connection without needing a viewer.
+* The exported file preserves KaTeX equations, Prism syntax highlighting, Mermaid diagrams, and SMILES molecular models, rendering normally in any browser with an internet connection.
 
-### 8. 🖨️ Premium Driverless PDF Printing & Static Page Engine (v3.9.22 Hotfix)
-* **Custom Print of Preview Screen Only**: Clicking the PDF print button automatically removes unnecessary editor text areas, sidebars, headers, and other UI elements, outputting **only the markdown preview output formatted cleanly for A4 size**.
-* **Intelligent Ink Saving & Theme Switching**: Even if printing from dark mode, the document **temporarily auto-renders in a white/high-contrast theme for printing** to prevent wasting ink/toner and maximize readability, and returns to dark mode immediately after printing completes.
-* **JavaScript-Based Static Pagination Engine**: Resolved a critical Chromium WebView2 printing bug under `@media print` where the `counter(page)` state scope breaks, resulting in page numbers freezing as `0 / n` or `0 / 0`. By dynamically measuring document content heights in physical A4 pixel ratios and splitting them into static print page containers (`.print-page-wrapper`), it directly injects exact hardcoded page numbers like **`1 / 2`, `2 / 2`**, bypassing the renderer bug.
-* **Eliminated Header/Footer Overlaps & Precise Padding Guard**: Completely fixed the layout issue where page headers and footers overlapped with content text from page 2 onward due to negative margins and broken print views. Discarded negative margins entirely, fixed headers at `top: 0` and footers at `bottom: 0`, and dynamically calculated and applied precise safe body padding (`bodyPaddingTopBottom`) to ensure perfect vertical isolation.
+### 8. 🖨️ Premium Driverless PDF Printing & Static Page Engine
+* **Custom Print of Preview Screen Only**: Clicking the PDF print button automatically removes unnecessary editor text areas, sidebars, headers, and other UI elements, outputting only the markdown preview output formatted cleanly for A4 size.
+* **Intelligent Ink Saving & Theme Switching**: Even if printing from dark mode, the document temporarily auto-renders in a white/high-contrast theme for printing to prevent wasting ink/toner, and returns to dark mode immediately after printing completes.
+* **Precise A4 Margin Separation**: Discarded negative margins entirely. Placed headers fixed at `top: 0` and footers at `bottom: 0`, and dynamically calculated and applied precise safe body padding (`bodyPaddingTopBottom`) to ensure perfect vertical isolation with accurate static page numbers (**`1 / 2`**, **`2 / 2`**).
 
 ### 9. 🌐 External Mobile Device Connection & Security Password Protection
-* **Mobile and Tablet Remote Connection**: Supports multi-networking so you can access the workspace from other PCs or mobile devices on the same Wi-Fi/network. Enter the **Network Access URL (e.g., `http://192.168.x.x:58220`)** shown in the console to view your library wirelessly.
-* **Access Password Configuration**: You can set an access password via the **Settings icon (⚙️)** in the top right. When configured, a sleek and secure **Lock Screen** is activated for external network access.
-* **Custom Port & Host Binding**: Easily change the binding host (IP: `0.0.0.0` or `127.0.0.1`) and web service port number from the settings modal, which is saved permanently.
+* **Mobile and Tablet Remote Connection**: Supports multi-networking so you can access the workspace from other PCs or mobile devices on the same Wi-Fi/network wirelessly.
+* **Access Password Configuration**: Set an access password via the Settings icon (⚙️). When configured, a sleek and secure Lock Screen is activated for external network access.
 
-### 10. 🌐 Bilingual UI Language Toggle
-* **Real-time UI Translation**: Switch the entire application interface (sidebar tabs, header buttons, labels, placeholders, tooltips, and dialog alerts) between Korean and English instantly via the **KR/EN** toggle button in the header.
-* **Settings Persistence**: The selected language is saved in real time to the local browser's `localStorage` and the `md_viewer_config.json` configuration file, automatically restoring the last state on startup.
-
-### 11. ☁️ Bidirectional Real-time Google Drive Sync & Remote Browsing (v3.9.1 New)
-* **Easy Cloud Connection**: Seamlessly connect to Google Drive using the dedicated 'Cloud Sync' accordion menu located right under your local file tree.
-* **Zero-Configuration Browser Login**: Standard credentials are built directly into the compiled application. General users do not need to download or manually configure client_secrets.json files; clicking connect immediately opens their system web browser for OAuth.
-* **App-Specific Scope for Safety**: Operates under the drive.file scope, meaning it can only see and manage files created by this application. Your other personal Google Drive folders remain completely isolated and secure.
-* **Smart Syncing & Conflict Resolution**: Supports automatic background syncing on save as well as manual triggers. Detects local/remote modified time (mtime) differences and prompts an intelligent conflict resolution modal if a newer file exists on the cloud.
-* **Remote File Browser & Import**: View markdown documents safely stored in your Google Drive cloud workspace. Import any file that is not yet locally registered with a single click.
-* **Custom Credentials Override**: If you wish to use your own private GCP project keys, you can easily load your custom client_secrets.json file directly through the in-app setup guide dialog.
-* **How to Obtain Private Credentials**: Detailed step-by-step instructions on generating and downloading your own `client_secrets.json` from the Google Cloud Console can be found in the [Google Drive API Connection Key Setup Guide](file:///e:/jm_studio/doc/google_drive_api_setup_guide_en.md) document.
-
-### 12. 🎨 UI & Editor Font Customization (v3.9.2 New)
-* **Custom UI & Preview Fonts**: Easily change the typography of the entire application interface and markdown preview area. Choose from modern sans-serif fonts like `Inter` and `Outfit`, elegant serif fonts like `Lora` (ideal for academic reading), or use system defaults.
-* **Professional Coding Fonts**: Select from popular developer monospaced fonts including `Fira Code` (with beautiful ligatures), `JetBrains Mono` (the highest readability coding font), `Consolas`, `D2Coding` (popular Korean coding font), `Courier New`, or system monospace fallbacks.
-* **Dynamic Editor Font Size**: Control the text size of the editor dynamically with range bounds from 12px to 24px (default is 14px).
-* **Instant Dynamic CSS Injection**: All font changes apply instantly in real time via `<style>` tag updates without reloading or restarting the app.
-* **Seamless Settings Sync**: Configured fonts are saved in browser `localStorage` for immediate styling on startup and synchronized to the backend `md_viewer_config.json` for persistence.
-
-### 13. 😃 Emoji Picker Performance Boost & Perfect Offline Integration (v3.9.3 New)
-* **Local Emoji Serving (Offline-First)**: Eliminated external CDN server dependency by fully embedding the 430KB emoji metadata dataset (`emoji-data.json`) as a local server asset. The emoji picker loads instantly even in completely offline network environments.
-* **Zero-Lag Click Response via Background Pre-rendering**: Improved the initial click rendering lag (0.5s–1s) by pre-rendering the emoji picker in the background shortly after the application starts. Clicking the emoji button now gives **instant, 0ms responses**.
-* **GPU 3D Accelerated & Isolated Containment Scrolling**: Enforced CSS `contain: content/paint` layout rules alongside `will-change: transform` to isolate repainting and prevent the heavy CodeMirror text editor layout from redrawing during emoji scrolling, delivering silky-smooth 60fps+ hardware-accelerated scrolling.
-* **Expanded Frequent Emojis (Up to 30)**: Provides up to 30 frequently used emojis arranged in a clean 10x3 grid at the very top, and resolved the virtual scrolling viewport offset issue for flawless category tab navigation.
-
-### 14. 🛠️ Standalone Build Debug Tool Deactivation & Performance Stabilization (v3.9.4 New)
-* **Deactivated Developer Tools for Release**: Completely disabled the Chromium Developer Tools debug flag in the main webview shell setup, ensuring a clean, secure, and professional desktop academic workspace for the final compiled application.
-* **Emoji Rendering Layer Isolation Completed**: Successfully stabilized the system behavior, ensuring that the local offline serving and GPU hardware-accelerated scroll layers function flawlessly without memory leakage or stuttering in non-debugging mode.
-
-### 15. 🎨 Emoji Grid Layout Optimization & Category Tab Fix (v3.9.5 New)
-* **Expanded Dropdown Container**: Fixed the layout issue where the 10th column in the 10-column layout got truncated at the right border by expanding the dropdown menu width to `398px` and perfectly synchronizing the component's parent container width.
-* **Fine-Tuned Emojis and Button Sizing**: Adjusted individual emoji rendering size to `22px` and button bounding grid boxes to `34px`. Emojis, borders, and top category icons (including flags) now render beautifully with appropriate side padding and zero edge clipping.
-
-### 16. 🐛 External Absolute Path Document Loading & Backend API Bridge Crash Fix (v3.9.6 New)
-* **Resolved External Absolute Path Document Loading Crash**: Fixed a critical frontend TypeError where opening a file located outside the active workspace directory (with path like `C:/...`) triggered a crash due to `workspaceRoot` being Falsy (null/undefined) during replacement operations. Built bulletproof exception fallback handling for all file openings.
-* **Normalized Windows Paths**: Standardized Windows-style backslashes (`\`) to slashes (`/`) when paths are received from the backend, ensuring flawless filename substring parsing and accurate physical path tooltips.
-* **Optimized Backend API Bridge Binding**: Resolved the backend bottleneck where browsing via external web browsers caused an `AttributeError: Window object has no attribute js_api` error at the Bottle API endpoint. Bound the main API instance directly to the `api_bridge` module for maximum stability and speed.
-
-### 17. 📝 Document Template Helper (9 Templates) and Smart Insertion UX (v3.9.7 New)
-* **9 Built-in Standard Templates**: Provides 9 professionally designed templates including Academic Thesis (incorporating abstract, KaTeX formulas, and Mermaid architecture graphs), University & Business Report, Knowledge & Wiki Note, Task Checklist (TODO), Shopping List, Life Bucket List, Detailed Travel Planner, Weekly Timetable (markdown table scheduler), and Idea Quick Memo.
-* **Independent Source Code Isolation (`templates.js`)**: Isolated large markdown template data and dedicated rendering logic from `editor.js` into a standalone `templates.js` module, greatly improving code readability and application startup performance.
-* **Compact Sidebar-Integrated Selector UX**: Moved away from the bulky tab layout. Added a `Create from Template` button directly in the `My Library` explorer header next to the `New File` button. Clicking it instantly switches the library tree into a highly compact, sidebar-optimized card list of the 9 templates.
-* **One-Click Localized File Creation & Split-View Auto-Open**: Clicking any template immediately opens a file creation dialog, prefilled with a localized default filename based on language settings (e.g., `학술논문_템플릿.md` or `thesis_template.md`). On creation, the template content is auto-injected and saved, and the editor automatically switches to Split View mode for instant editing, while returning the sidebar to standard folder tree view.
-
-### 18. 📦 PyPI Latest Version Check & Automatic Upgrade Notification (v3.9.8 New)
-* **Asynchronous PyPI API Query**: Queries the official PyPI database (`https://pypi.org/pypi/joy-markdown-studio/json`) in the background on startup, utilizing a 2-second timeout to check for the latest package version without blocking the application startup or UI responsiveness.
-* **Intelligent Version Comparator**: Compares local and remote version strings as semantic version tuples to trigger upgrade alerts only when a newer version is officially released on PyPI.
-* **Premium Glassmorphism Upgrade Modal**: Greets the user 1.8 seconds after the splash screen fades out with a modern blur-effect modal showing current/latest versions, one-click `pip` command clipboard copying, and GitHub official link redirect.
-
-### 19. 🏷️ YAML Front Matter-based Hashtag & Intelligent Tag Manager (v3.9.9 New)
-* **Editor Top Tag Editor**: Clicking the hashtag shortcut button in the top toolbar opens a modal allowing users to manage YAML Front Matter `tags` metadata of the active document in real time (adding/deleting tags, or selecting suggested tags).
-* **Automatic Default Tag Injection**: Creating a new document automatically inserts default tags (`tags: [새문서]` or `tags: [NewDocument]`), and launching any of the 9 templates pre-populates context-aware tags matching the template's characteristics.
-* **Sidebar Tag Manager**: A dedicated Hashtag tab in the sidebar crawls all markdown files in the workspace to display unique tags, document counts, and lets users browse and launch tagged documents in one click.
-* **Auto-Hide Front Matter in Preview**: While rendering Markdown to HTML, the system automatically detects the top Front Matter block (`---` to `---`) and slices it out of the preview area for a clean reading experience.
-
-### 20. 🎨 Real-time Advanced Hybrid WYSIWYG Rendering & Stability Hotfixes (v3.9.21 New)
-* **Real-time Rendering of Modern Dynamic Elements**: Mermaid diagrams, statistics charts (Chart.js), chemical formula blocks (SMILES), 9 library templates, and GFM Tables render dynamically and flawlessly inside the WYSIWYG editing window, achieving a 100% visual match with the preview layout.
-* **Resolved Equation Enter Crash (JS Error)**: Fixed the strict sorting crash of CodeMirror 6 `RangeSetBuilder` when pressing Enter key on mathematical formulas by introducing single decoration pooling, semantic sorting, and **Overlapping Filtration** steps.
-* **Fixed Fullscreen Capturing & Global Scope Binding**: Exposed fullscreen and zoom helper methods (`openMermaidFullscreen`, etc.) to the `window` global scope so inline `onclick` script logic in custom HTML mindmaps evaluates successfully, and solved the bug where a tiny 13x13px inline arrow icon svg got captured instead of the main chart by implementing `s.closest('button')` filter logic.
-* **Mindmap Scanner Viewport & Empty Line Leak Fixes**: Expanded scanner bounds to the entire document line limits to prevent bottom-area code leaks, and removed the empty line breakout condition so visual HTML mindmaps render correctly even with structural blank lines.
+### 10. ☁️ One-Click Bidirectional Google Drive Sync
+* **Zero-Configuration OAuth Login**: Standard credentials are built directly into the compiled application. General users do not need to download or manually configure client_secrets.json files.
+* **App-Specific Scope for Safety**: Operates under the drive.file scope, meaning it can only see and manage files created by this application.
+* **Smart Syncing & Conflict Resolution**: Supports automatic background syncing on save, modification time (mtime) conflict resolution, and remote cloud library browsing to download and import notes instantly.
 
 ---
 
@@ -129,7 +70,7 @@
 
 Joy Markdown Studio adopts a powerful hybrid architecture combining a Python desktop shell and a modern web frontend.
 
-```{mermaid}
+```mermaid
 graph TD
     subgraph backend ["Python Backend"]
         A[jmstudio.py Main Entry] --> B[PyWebView Shell]
@@ -148,7 +89,7 @@ graph TD
     end
     
     subgraph cloud ["Cloud APIs"]
-        E -->|GET API Request| K[PubChem PUG REST API]
+        E -->|GET API Request| K[PubChem NLM REST API]
     end
 ```
 
@@ -168,6 +109,8 @@ e:\jm_studio\
 ├── git_push.bat                 # Script to push to GitHub remote repository (jmstudio)
 ├── .gitignore                   # Excludes build outputs, temporary cache, and config files from Git
 ├── md_viewer_config.json        # Database storing library files, recently opened file, theme, and settings
+├── CHANGELOG.md                 # [NEW] English detailed release history and release notes
+├── CHANGELOG_kr.md              # [NEW] Korean detailed release history and release notes
 ├── app_icon.png                 # Studio launcher logo image
 ├── app_icon.ico                 # Multi-size system tray and frame icon generated automatically
 ├── document.md                  # Temporary markdown storage sample
@@ -175,83 +118,43 @@ e:\jm_studio\
 ├── README_kr.md                 # Korean help document
 ├── setup.py                     # Python package configuration script for PyPI uploading
 ├── MANIFEST.in                  # Manifest file specifying static assets to include in PyPI package
-├── frontend/                    # Frontend static web assets directory
-│   ├── index.html               # Single Page Application (SPA) skeleton with modular script loader
-│   └── static/                  # Static assets directory
-│       ├── css/
-│       │   └── style.css        # Vanilla CSS file containing glassmorphism design tokens & themes
-│       └── js/
-│           ├── translations.js  # Multilingual translations database (Korean / English)
-│           └── editor.js        # CodeMirror 6 editor engine, KateX math, chemical drawer, diagrams, & window bindings
-└── doc/                         # Academic and rendering guide documents folder (KR/EN)
-    ├── chemical_formula_guide_kr.md        # Chemical formula (SMILES) rendering guide (Korean)
-    ├── chemical_formula_guide_en.md        # Chemical formula (SMILES) rendering guide (English)
-    ├── chemistry_encyclopedia_kr.md        # Chemical encyclopedia and SMILES database (Korean)
-    ├── chemistry_encyclopedia_en.md        # Chemical encyclopedia and SMILES database (English)
-    ├── computer_science_guide_kr.md        # Computer science diagram and math guide (Korean)
-    ├── computer_science_guide_en.md        # Computer science diagram and math guide (English)
-    ├── flowchart_guide_kr.md               # Flowchart and chart creation guide (Korean)
-    ├── flowchart_guide_en.md               # Flowchart and chart creation guide (English)
-    ├── geometry_guide_kr.md                # Geometry and physics diagram guide (Korean)
-    ├── geometry_guide_en.md                # Geometry and physics diagram guide (English)
-    ├── markdown_guide_kr.md                # Basic markdown syntax and style guide (Korean)
-    ├── markdown_guide_en.md                # Basic markdown syntax and style guide (English)
-    ├── math_science_guide_kr.md            # KaTeX math & science formula guide (Korean)
-    ├── math_science_guide_en.md            # KaTeX math & science formula guide (English)
-    ├── mermaid_guide_kr.md                 # Mermaid diagram visualization guide (Korean)
-    └── mermaid_guide_en.md                 # Mermaid diagram visualization guide (English)
+└── frontend/                    # Frontend static web assets directory
 ```
 
 ---
 
 ## 🆚 Why Joy Markdown Studio? (vs Obsidian)
 
-While both **Joy Markdown Studio (JM-STUDIO)** and **Obsidian** are powerful local markdown editors, their core philosophy, target audience, and out-of-the-box features are distinctly different.
+Joy Markdown Studio (JM-STUDIO) and Obsidian are both powerful local markdown editors, but their core philosophy, target audience, and out-of-the-box features are distinctly different.
 
 ### 1. 🧪 Out-of-the-Box STEM Research Environment
-* **Obsidian**: Focuses on general personal knowledge management (PKM) and Zettelkasten. To comfortably write complex equations or chemistry formulas, you have to find, install, and configure numerous community plugins.
-* **JM-STUDIO**: A fully-equipped environment for mathematicians, physicists, and chemists is **built-in from the moment you install it**. Dedicated helper panels allow you to insert complex templates like limits, Lorentz force, and the Schrödinger equation with a single click.
+* **Obsidian**: Focuses on general personal knowledge management (PKM). To write equations or chemistry formulas, you must manually install numerous community plugins.
+* **JM-STUDIO**: A fully-equipped environment for mathematicians, physicists, and chemists is built-in out-of-the-box. Dedicated helper panels allow you to insert complex equations with a single click.
 
-### 2. 🧬 Real-time PubChem Molecule Visualization (Killer Feature)
+### 2. 🧬 Real-time PubChem Molecule Visualization
 * **Obsidian**: No native feature to search or render chemical molecular structures.
-* **JM-STUDIO**: Natively integrated with the **NLM PubChem API**. Search for compounds (like "Aspirin" or "Caffeine") to view real-time 2D molecular structures, and automatically insert SMILES codes to render beautiful molecular graphics directly in your markdown document.
+* **JM-STUDIO**: Natively integrated with the NLM PubChem API. Search for compounds to view real-time 2D molecular structures, and automatically insert SMILES codes.
 
 ### 3. 🌐 Built-in Free Remote Web Access & Security
-* **Obsidian**: Real-time sync and remote viewing require paid services (Obsidian Sync) or complex third-party cloud configurations.
-* **JM-STUDIO**: Automatically spins up an internal web server. By entering the network URL (`http://192.168.x.x:58220`) into a browser on your tablet or smartphone on the same Wi-Fi, you get **instant remote access to your library**. It even supports a custom Lock Screen password for perfect security.
-
-### 4. 🎨 Premium Glassmorphism UI
-* **Obsidian**: The default UI is utilitarian and requires manual CSS theme tweaking to look modern.
-* **JM-STUDIO**: Features a stunning, translucent glassmorphism interface and smooth micro-animations right out of the box, providing visual delight and a premium experience while you research.
-
-### 5. 🖨️ Intelligent PDF Printing & Standalone HTML Export
-* **Obsidian**: Printing PDFs with dark themes can be cumbersome and wastes ink.
-* **JM-STUDIO**: When printing from Dark Mode, JM-STUDIO intelligently **auto-renders a high-contrast white theme in 0.1 seconds** just for the PDF export to save ink and maximize readability, instantly reverting to Dark Mode afterward. It also supports zero-dependency Standalone HTML exports, allowing you to share a single file with colleagues that looks identical to the app.
-
-### 6. ☁️ One-Click Bidirectional Google Drive Sync
-* **Obsidian**: Requires a paid subscription (Obsidian Sync, $8–$10/month) for real-time cloud sync, or complex configurations with community plugins (like Remotely Save) and third-party cloud accounts.
-* **JM-STUDIO**: Includes a **built-in Google Drive sync engine** out of the box. Users can connect to Google Drive with a single click via OAuth login. It supports automatic sync on save, modification time (mtime) conflict resolution, and remote cloud library browsing to download and import notes onto a new machine instantly.
+* **Obsidian**: Real-time sync and remote viewing require paid services or complex third-party configurations.
+* **JM-STUDIO**: Automatically spins up an internal web server. Access your library wirelessly from tablets or phones, secured with a custom lock screen password.
 
 > **💡 In Summary:**
 > If Obsidian is a "universal diary where you build your own notes using Lego blocks," **Joy Markdown Studio is a "fully-loaded premium research studio designed so scientists and researchers can dive straight into their work with zero setup!"**
+
+---
 
 ## 🚀 Getting Started
 
 ### 📋 Prerequisites
 To run this application or build standalone packages, the following environment is recommended:
-* **Python**: Python 3.10 or higher (The Windows build script automatically detects `C:\Python\Python313\python.exe` and `python` in system PATH.)
-* **Dependency Libraries**:
-  * `pywebview`: Creating desktop app GUI frame window
-  * `bottle`: Operating local lightweight web server and routing resources
-  * `Pillow` (PIL): Automatic conversion of PNG app icon to multi-resolution Windows `.ico` format
-  * `pyinstaller`: Standalone execution bundle compilation (required for building)
+* **Python**: Python 3.10 or higher
+* **Dependency Libraries**: `pywebview`, `bottle`, `Pillow`, `pyinstaller`
 
 ### 💻 Installation & Run
 
 #### Option 1: Official Installation via PyPI (Highly Recommended)
-If you have a Python environment, you can install, run, upgrade, and uninstall the app from anywhere in the world with a single command.
-
-##### Windows & macOS & Linux Combined Commands
+If you have a Python environment, you can install, run, upgrade, and uninstall the app with a single command.
 
 | Action | Command |
 | :--- | :--- |
@@ -260,32 +163,8 @@ If you have a Python environment, you can install, run, upgrade, and uninstall t
 | **Upgrade** | `pip install --upgrade joy-markdown-studio` |
 | **Uninstall** | `pip uninstall joy-markdown-studio` |
 
-> [!TIP]
-> **OS Specific Reference**
-> - **Windows**: Open PowerShell or CMD and type the commands to run immediately.
-> - **macOS**: Can be run from the default Terminal. Depending on your environment, you may need to use `pip3` and `python3` instead.
-> - **Linux (Ubuntu/Debian, etc.)**: 
->   - On Linux desktop environments, some system dependency packages are required for GUI rendering. We highly recommend installing them first using:
->     ```bash
->     sudo apt-get update
->     sudo apt-get install python3-pip python3-pywebview libgtk-3-dev libwebkit2gtk-4.0-dev
->     ```
-
-#### Option 2: Global System Environment Source Code Run
-1. **Install required libraries**:
-   ```bash
-   pip install pywebview bottle Pillow
-   # For building the executable
-   pip install pyinstaller
-   ```
-
-2. **Run application**:
-   ```bash
-   python jmstudio.py
-   ```
-
 #### Option 2: Using Virtual Environment (venv) (Recommended)
-Using a local virtual environment prevents system environment clutter and ensures clean building when using `compile.bat`/`compile.sh` scripts.
+Using a local virtual environment prevents system environment clutter.
 
 1. **Create and activate virtual environment**:
    * **Windows (PowerShell)**:
@@ -293,60 +172,23 @@ Using a local virtual environment prevents system environment clutter and ensure
      python -m venv .venv
      .venv\Scripts\activate
      ```
-   * **macOS / Linux (Terminal)**:
-     ```bash
-     python3 -m venv .venv
-     source .venv/bin/activate
-     ```
-
 2. **Install dependencies and run**:
    ```bash
    pip install --upgrade pip
    pip install pywebview bottle Pillow pyinstaller
    python jmstudio.py
    ```
-   * *Note: If `app_icon.png` exists in the project root on startup, `app_icon.ico` is automatically generated.*
 
 ### 📦 Distributing as Standalone Executable
-You can compile **Joy Markdown Studio** into a standalone executable that runs on other PCs without requiring Python or other libraries.
-
-> [!TIP]
-> **Virtual Environment (.venv) Auto-Detection**
-> * If a `.venv` virtual environment folder exists in the project root, the build scripts automatically prioritize using Python within the virtual environment (`.venv/Scripts/python.exe` or `.venv/bin/python`) over global system Python.
-> * This ensures clean builds isolating all required dependencies.
+You can compile Joy Markdown Studio into a standalone executable (.exe) that runs on other PCs.
 
 #### 🪟 Building on Windows (.exe)
-1. **Run one-click compile script**:
-   * Double-click [compile.bat](file:///e:/jm_studio/compile.bat) or run the following in your shell:
-     * **PowerShell (Default)**:
-       ```powershell
-       .\compile.bat
-       ```
-     * **Command Prompt (CMD)**:
-       ```cmd
-       compile.bat
-       ```
-   * The script auto-installs/upgrades `PyInstaller` within your environment and bundles `jmstudio.py` into a single versioned EXE file (`dist\JoyMarkdownStudio-vX.XX.exe`).
-
-2. **Copy and Distribute**:
-   * Copy the **`JoyMarkdownStudio-vX.XX.exe`** from the `dist/` directory. No other files are needed.
-   * *Note: As the dependencies are compressed inside the executable, first launch may take 3-5 seconds to decompress.*
-
-#### 🍎 Building on macOS (.app)
-> [!IMPORTANT]
-> PyInstaller does not support cross-compilation. You **must build on a macOS computer** to compile macOS applications.
-
-1. **Run compile script in macOS Terminal**:
-   * Copy the source folder to a Mac, open the terminal, navigate to the folder, and run:
-     ```bash
-     chmod +x compile.sh
-     ./compile.sh
+1. **Run compile script**:
+   * Run the compile script in your shell:
+     ```powershell
+     .\compile.bat
      ```
-   * The script generates the standalone app bundle **`JoyMarkdownStudio-vX.XX.app`** inside the `dist/` folder.
-
-2. **Distribute**:
-   * Compress `JoyMarkdownStudio-vX.XX.app` into a Zip file for distribution.
-   * *Note: Since the app is not signed with an Apple Developer account, first-time users must **Right-click -> Open** and click Open to bypass the Gatekeeper security warning.*
+   * The script packages `jmstudio.py` into a single EXE file inside the `dist/` directory.
 
 ---
 
@@ -359,65 +201,30 @@ Set code block language to `smiles` and write a SMILES molecular string:
 OC(=O)/C=C/c1ccc(O)c(O)c1
 ```
 ```
-*This renders as a beautiful **Caffeic acid** molecular structure in the preview.*
 
 ### 📐 2. Entering Equations
-Write block equations using `$$` or inline equations using `$`, or click helper buttons on the left panel:
+Write block equations using `$$` or inline equations using `$`:
 ```markdown
 Mass and energy are equivalent and represented by: $E = mc^2$
 
 $$i\hbar\frac{\partial}{\partial t}\Psi = \hat{H}\Psi$$
 ```
 
-### 📊 3. Inserting Diagrams
-Renders flowcharts or diagrams from text using `mermaid`:
-```markdown
-```mermaid
-graph LR
-    A[Idea] --> B(Verify Formula)
-    B --> C{Search Chemical}
-    C -->|Success| D[Finish Document]
-    C -->|Failure| B
-```
-```
-
 ---
 
 ## ⚙️ Configuration
-
 Settings are permanently preserved inside `md_viewer_config.json` generated in the application folder:
-```json
-{
-    "theme": "dark",
-    "last_file": "doc/markdown_guide_kr.md",
-    "last_workspace": "e:\\jm_studio",
-    "port": 58220,
-    "bind_ip": "0.0.0.0",
-    "access_password": "your_secure_password",
-    "added_documents": [
-        "doc/chemical_formula_guide_kr.md",
-        "doc/chemistry_encyclopedia_kr.md",
-        "document.md",
-        "doc/flowchart_guide_kr.md",
-        "doc/markdown_guide_kr.md",
-        "doc/math_science_guide_kr.md",
-        "doc/mermaid_guide_kr.md"
-    ]
-}
-```
 * **theme**: `dark` or `light`
 * **last_file**: File path of the last working markdown document (restored automatically)
 * **last_workspace**: Path of the active library directory loaded on startup
 * **port**: Access web service port number (default: `58220`)
-* **bind_ip**: Host binding address (`0.0.0.0`: allow all external access, `127.0.0.1`: allow local only)
-* **access_password**: Security login password required for external web browsers (leave blank for no login)
-* **added_documents**: Database list of documents registered in the user's library
+* **bind_ip**: Host binding address (`0.0.0.0`: allow all, `127.0.0.1`: allow local only)
 
 ---
 
 ## 🔒 Security & Optimization
-* **Security Path Checks**: The `serve_workspace_file` router has strict path validation checks to completely prevent Directory Traversal attacks attempting to access files outside the active workspace.
-* **Debounced Live Rendering**: To prevent interface lagging from continuous parsing of Mermaid and KaTeX while typing, a smart debounce timer is applied to ensure a highly responsive editing experience.
+* **Security Path Checks**: Strict path validation checks completely prevent Directory Traversal attacks.
+* **Debounced Live Rendering**: Applies a smart debounce timer to ensure a highly responsive editing experience.
 
 ---
 Start a smart and smooth research and documentation journey with **Joy Markdown Studio**! 🚀

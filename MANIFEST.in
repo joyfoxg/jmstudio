@@ -1,1 +1,2 @@
 recursive-include jmstudio/frontend *
+include CHANGELOG*.md
