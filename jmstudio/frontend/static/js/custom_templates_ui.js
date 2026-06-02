@@ -2,6 +2,9 @@
 
 (function () {
     let initialized = false;
+    let selectedIcon = "file-text";
+    let selectedColor = "#3b82f6";
+
     function init() {
         if (initialized) return;
         initialized = true;
@@ -146,8 +149,6 @@
     }
 
     // D. 아이콘 및 색상칩 동적 채우기
-    let selectedIcon = "file-text";
-    let selectedColor = "#3b82f6";
 
     function setupSaveTemplateOptions() {
         const icons = [
