@@ -21,6 +21,26 @@
     }
 
     function injectTriggersAndModals() {
+        // A-0. CSS 스핀 애니메이션 및 스타일 주입
+        if (!document.getElementById('custom-templates-style')) {
+            const style = document.createElement('style');
+            style.id = 'custom-templates-style';
+            style.innerHTML = `
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                .icon-selector-item:hover {
+                    border-color: rgba(69, 243, 255, 0.4) !important;
+                    background: rgba(69, 243, 255, 0.03) !important;
+                }
+                .color-selector-item:hover {
+                    transform: scale(1.18) !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
         // A. 사이드바 헤더 영역 버튼 주입
         const closeBtn = document.querySelector('#sidebar-template-selector button[onclick*="toggleTemplateSelector(false)"]');
         if (closeBtn && !document.getElementById('save-template-trigger-btn')) {
@@ -542,14 +562,24 @@
                 if (statusIcon) statusIcon.style.animation = 'none';
                 
                 if (res.status === 'success') {
+                    let totalCount = 0;
+                    try {
+                        const templatesRes = await window.pywebview.api.get_custom_templates();
+                        if (templatesRes && templatesRes.subscribed) {
+                            totalCount = templatesRes.subscribed.length;
+                        }
+                    } catch (e) {
+                        console.error("Failed to load custom templates on restore:", e);
+                    }
+
                     if (statusContainer && statusText) {
                         statusContainer.style.background = 'rgba(16, 185, 129, 0.06)';
                         statusContainer.style.borderColor = 'rgba(16, 185, 129, 0.2)';
                         statusContainer.style.color = '#34d399';
-                        statusText.innerText = '복원 성공: 기본 저장소 복원 및 동기화 완료!';
+                        statusText.innerText = `복원 성공: 기본 저장소 복원 및 총 ${totalCount}개 원격 템플릿 동기화 완료!`;
                     }
                     if (typeof window.showToast === 'function') {
-                        window.showToast("기본 저장소가 성공적으로 복원 및 캐싱되었습니다!");
+                        window.showToast(`기본 저장소가 복원되었습니다! (총 ${totalCount}개 원격 템플릿 로드 완료)`);
                     }
                     searchStoreTemplates();
                     renderSubscriptionsList();
@@ -607,10 +637,24 @@
                 
                 // 2. 동기화 성공/실패 결과 적용
                 if (res.status === 'success') {
+                    let totalCount = 0;
+                    try {
+                        const templatesRes = await window.pywebview.api.get_custom_templates();
+                        if (templatesRes && templatesRes.subscribed) {
+                            totalCount = templatesRes.subscribed.length;
+                        }
+                    } catch (e) {
+                        console.error("Failed to load custom templates on sync:", e);
+                    }
+
                     statusContainer.style.background = 'rgba(16, 185, 129, 0.06)';
                     statusContainer.style.borderColor = 'rgba(16, 185, 129, 0.2)';
                     statusContainer.style.color = '#34d399';
-                    statusText.innerText = '동기화 완료: 최신 원격 템플릿 목록 동기화 성공!';
+                    statusText.innerText = `동기화 완료: 최신 원격 템플릿 총 ${totalCount}개 동기화 성공!`;
+                    
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(`원격 템플릿 동기화 완료! (총 ${totalCount}개 템플릿 사용 가능)`);
+                    }
                     
                     searchStoreTemplates();
                 } else {
@@ -618,6 +662,10 @@
                     statusContainer.style.borderColor = 'rgba(239, 68, 68, 0.2)';
                     statusContainer.style.color = '#f87171';
                     statusText.innerText = '동기화 실패: ' + res.message;
+                    
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(`원격 템플릿 동기화 실패: ${res.message}`);
+                    }
                 }
             } catch (err) {
                 statusIcon.style.animation = 'none';
@@ -625,6 +673,10 @@
                 statusContainer.style.borderColor = 'rgba(239, 68, 68, 0.2)';
                 statusContainer.style.color = '#f87171';
                 statusText.innerText = '동기화 중 오류 발생: ' + err.message;
+                
+                if (typeof window.showToast === 'function') {
+                    window.showToast(`동기화 오류 발생: ${err.message}`);
+                }
             }
         } else {
             statusIcon.style.animation = 'none';
