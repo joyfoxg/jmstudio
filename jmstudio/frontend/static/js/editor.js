@@ -4930,16 +4930,78 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
                         }
                     }
                     
-                    // F. 블록 수식 $$formula$$
-                    if (text.startsWith("$$") && text.endsWith("$$") && text.length > 4) {
-                        const math = text.substring(2, text.length - 2);
-                        rawDecos.push({
-                            from: line.from,
-                            to: line.to,
-                            value: Decoration.replace({ widget: new KaTeXWidget(math, true) }),
-                            type: "replace"
-                        });
-                        continue;
+                    // F. 블록 수식 $$formula$$ (단일행 및 다행 지원)
+                    if (text.startsWith("$$")) {
+                        // 1. 단일행 블록 수식: $$formula$$
+                        if (text.endsWith("$$") && text.length > 4) {
+                            const math = text.substring(2, text.length - 2);
+                            rawDecos.push({
+                                from: line.from,
+                                to: line.to,
+                                value: Decoration.replace({ widget: new KaTeXWidget(math, true) }),
+                                type: "replace"
+                            });
+                            continue;
+                        }
+                        
+                        // 2. 다행 블록 수식: $$ 로 시작해서 다음 $$ 까지 수집
+                        let mathLines = [];
+                        let foundEnd = false;
+                        let mathEndLine = l;
+                        
+                        let firstLineMath = text.substring(2).trim();
+                        if (firstLineMath.length > 0) {
+                            mathLines.push(firstLineMath);
+                        }
+                        
+                        for (let nextL = l + 1; nextL <= docLines; nextL++) {
+                            const nextLineText = state.doc.line(nextL).text.trim();
+                            mathEndLine = nextL;
+                            
+                            if (nextLineText === "$$") {
+                                foundEnd = true;
+                                break;
+                            }
+                            if (nextLineText.endsWith("$$")) {
+                                const lastLineMath = nextLineText.substring(0, nextLineText.length - 2).trim();
+                                if (lastLineMath.length > 0) {
+                                    mathLines.push(lastLineMath);
+                                }
+                                foundEnd = true;
+                                break;
+                            }
+                            
+                            mathLines.push(state.doc.line(nextL).text);
+                        }
+                        
+                        let mathActive = false;
+                        for (let cL = l; cL <= mathEndLine; cL++) {
+                            if (selectedLines.has(cL)) {
+                                mathActive = true;
+                                break;
+                            }
+                        }
+                        
+                        if (foundEnd && !mathActive) {
+                            const mathCode = mathLines.join("\n").trim();
+                            rawDecos.push({
+                                from: line.from,
+                                to: line.to,
+                                value: Decoration.replace({ widget: new KaTeXWidget(mathCode, true) }),
+                                type: "replace"
+                            });
+                            for (let currL = l + 1; currL <= mathEndLine; currL++) {
+                                const currLine = state.doc.line(currL);
+                                rawDecos.push({
+                                    from: currLine.from,
+                                    to: currLine.from,
+                                    value: Decoration.line({ attributes: { style: "display: none !important;" } }),
+                                    type: "line"
+                                });
+                            }
+                            l = mathEndLine;
+                            continue;
+                        }
                     }
                     
                     // G. 인라인 수식 $formula$
