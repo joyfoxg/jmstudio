@@ -534,6 +534,8 @@
     };
     
     // H. 원격 템플릿 스토어 탭 제어 & 검색 & 개별 추가 핸들러
+    window.SUBSCRIBED_TEMPLATES_POOL = {}; // 대용량 마크다운/LaTeX 이스케이프 파싱 에러 방지를 위한 전역 메모리 스토어
+
     window.switchSubModalTab = function (tab) {
         const storeTabBtn = document.getElementById('tab-btn-sub-store');
         const manageTabBtn = document.getElementById('tab-btn-sub-manage');
@@ -589,6 +591,11 @@
             
             const subscribed = res.subscribed || [];
             
+            // 메모리 스토어 캐시 갱신
+            subscribed.forEach(t => {
+                window.SUBSCRIBED_TEMPLATES_POOL[t.id] = t;
+            });
+            
             // 검색 필터링 (제목, 설명, #해시태그 매칭)
             let filtered = subscribed;
             if (query) {
@@ -621,8 +628,6 @@
                     <span style="font-size: 0.62em; padding: 1px 5px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 4px; color: #60a5fa; font-family: 'Outfit';">#${tag}</span>
                 `).join(' ');
                 
-                const dataAttr = encodeURIComponent(JSON.stringify(t));
-                
                 return `
                     <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid ${t.color}; border-radius: 6px; text-align: left;">
                         <div style="width: 32px; height: 32px; border-radius: 50%; background: ${t.color}20; border: 1px solid ${t.color}40; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: ${t.color};">
@@ -635,7 +640,7 @@
                             </div>
                             <span style="font-size: 0.68em; color: var(--text-muted); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">${t.desc}</span>
                         </div>
-                        <button onclick="importSubscribedTemplate('${dataAttr}')" style="padding: 6px 12px; border-radius: 4px; background: var(--accent); border: none; color: #000; font-weight: 600; font-size: 0.76em; cursor: pointer; display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                        <button onclick="importSubscribedTemplate('${t.id}')" style="padding: 6px 12px; border-radius: 4px; background: var(--accent); border: none; color: #000; font-weight: 600; font-size: 0.76em; cursor: pointer; display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
                             <i data-lucide="download" style="width: 11px; height: 11px;"></i>
                             <span>추가</span>
                         </button>
@@ -652,10 +657,13 @@
         }
     };
 
-    window.importSubscribedTemplate = async function (encodedData) {
+    window.importSubscribedTemplate = async function (templateId) {
         try {
-            const template = JSON.parse(decodeURIComponent(encodedData));
-            if (!template) return;
+            const template = window.SUBSCRIBED_TEMPLATES_POOL[templateId];
+            if (!template) {
+                alert("템플릿 데이터를 찾을 수 없습니다. 다시 동기화해 주세요.");
+                return;
+            }
             
             if (window.pywebview && window.pywebview.api && window.pywebview.api.import_subscribed_template) {
                 const res = await window.pywebview.api.import_subscribed_template(
