@@ -8,7 +8,8 @@ This document contains the chronological history of updates, releases, and patch
 
 | Version | Date | Key Patches & Features | Status |
 | :--- | :--- | :--- | :--- |
-| **v3.9.24** | 2026-06-02 | Hotfix for KaTeX formula backslash escaping in WYSIWYG rendering | **Latest Stable** |
+| **v3.9.25** | 2026-06-02 | Refactored WYSIWYG math blocks via range replacement & custom template engine | **Latest Stable** |
+| **v3.9.24** | 2026-06-02 | Hotfix for KaTeX formula backslash escaping in WYSIWYG rendering | Stable |
 | **v3.9.23** | 2026-06-02 | Quant Portfolio and K-Stock Trading Diary Templates Launch | Stable |
 | **v3.9.22** | 2026-06-02 | Premium PDF print & preview static pagination engine | Stable |
 | **v3.9.21** | 2026-05-31 | Real-time WYSIWYG rendering, CM6 equation enter crash fix | Stable |
@@ -24,7 +25,17 @@ This document contains the chronological history of updates, releases, and patch
 
 ## 📢 Detailed Release History (v3.9.0 ~ Present)
 
-### 🚀 v3.9.24 (2026-06-02) - WYSIWYG Mode KaTeX Backslash Escaping Hotfix [Latest Stable]
+### 🚀 v3.9.25 (2026-06-02) - WYSIWYG Multiline Math Refactoring & Custom Templates Plugin [Latest Stable]
+*   **WYSIWYG Multiline Math Block Refactoring**:
+    *   Redesigned multiline math (`$$`) and charts (````) rendering architecture to utilize a unified `Decoration.replace` range instead of buggy `display: none !important;` line decorations.
+    *   This eliminates viewport sync glitches and scroll layout rendering bugs across all browsers in the hybrid WYSIWYG mode.
+*   **KOSPI Trading Diary Template Repair**:
+    *   Repaired broken `\times` mathematical multiplication escape sequence (previously corrupted into tabs) within `한국주식_매매일지_템플릿.md`.
+*   **Custom User Templates & RSS Subscriptions Integration**:
+    *   Introduced an elegant, modular plugin architecture dynamically injecting glassmorphic template saving and RSS repository synchronization dialogs.
+    *   Directly binds `ExtendedMdViewerApi` to cleanly expose backend database syncing and caching capabilities, entirely leaving the original templates asset unmodified.
+
+### 🚀 v3.9.24 (2026-06-02) - WYSIWYG Mode KaTeX Backslash Escaping Hotfix [Stable]
 *   **WYSIWYG Editor KaTeX Formula Rendering Hotfix**:
     *   Corrected the backslash double-escaping bug (`\\` -> `\`) inside KaTeX math blocks for both the Quantitative Portfolio and K-Stock Trading Diary templates in `templates.js`.
     *   This hotfix resolves the duplicate backslash display issue in the WYSIWYG editor, guaranteeing math equations render identically in both live preview and WYSIWYG modes with pristine KaTeX typesetting.

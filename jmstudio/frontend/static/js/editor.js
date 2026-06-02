@@ -4910,21 +4910,13 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
                         
                         if (foundEnd && chartLines.length > 0 && !chartActive) {
                             const chartCode = chartLines.join("\n").trim();
+                            const endLineObj = state.doc.line(chartEndLine);
                             rawDecos.push({
                                 from: line.from,
-                                to: line.to,
+                                to: endLineObj.to,
                                 value: Decoration.replace({ widget: new ChartWidget(chartCode) }),
                                 type: "replace"
                             });
-                            for (let currL = l + 1; currL <= chartEndLine; currL++) {
-                                const currLine = state.doc.line(currL);
-                                rawDecos.push({
-                                    from: currLine.from,
-                                    to: currLine.from,
-                                    value: Decoration.line({ attributes: { style: "display: none !important;" } }),
-                                    type: "line"
-                                });
-                            }
                             l = chartEndLine;
                             continue;
                         }
@@ -4984,21 +4976,13 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
                         
                         if (foundEnd && !mathActive) {
                             const mathCode = mathLines.join("\n").trim();
+                            const endLineObj = state.doc.line(mathEndLine);
                             rawDecos.push({
                                 from: line.from,
-                                to: line.to,
+                                to: endLineObj.to,
                                 value: Decoration.replace({ widget: new KaTeXWidget(mathCode, true) }),
                                 type: "replace"
                             });
-                            for (let currL = l + 1; currL <= mathEndLine; currL++) {
-                                const currLine = state.doc.line(currL);
-                                rawDecos.push({
-                                    from: currLine.from,
-                                    to: currLine.from,
-                                    value: Decoration.line({ attributes: { style: "display: none !important;" } }),
-                                    type: "line"
-                                });
-                            }
                             l = mathEndLine;
                             continue;
                         }
