@@ -272,8 +272,8 @@
         }
     }
 
-    // G. 창 제어 함수 바인딩
-    window.selectTemplateIcon = function (ico) {
+    // G. 창 제어 함수 바인딩 (호이스팅을 위한 함수 선언문 구조 채택)
+    function selectTemplateIcon(ico) {
         selectedIcon = ico;
         document.querySelectorAll('.icon-selector-item').forEach(item => {
             if (item.getAttribute('data-icon') === ico) {
@@ -286,9 +286,10 @@
                 item.style.background = 'transparent';
             }
         });
-    };
+    }
+    window.selectTemplateIcon = selectTemplateIcon;
 
-    window.selectTemplateColor = function (col) {
+    function selectTemplateColor(col) {
         selectedColor = col;
         document.querySelectorAll('.color-selector-item').forEach(item => {
             if (item.getAttribute('data-color') === col) {
@@ -299,7 +300,8 @@
                 item.style.transform = 'scale(1)';
             }
         });
-    };
+    }
+    window.selectTemplateColor = selectTemplateColor;
 
     window.openSaveTemplateModal = function () {
         const view = window.cmEditor;
