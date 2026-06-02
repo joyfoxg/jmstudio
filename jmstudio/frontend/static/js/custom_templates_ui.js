@@ -436,10 +436,14 @@
     window.openSubscriptionModal = function () {
         document.getElementById('template-sub-url').value = '';
         switchSubModalTab('store'); // 모달 열었을 때 기본적으로 스토어 검색 탭 로드
+        
+        // 1. 창을 먼저 화면에 완전 렌더링하여 활성화시킵니다.
         document.getElementById('template-subscription-modal').style.display = 'flex';
         
-        // 자동 동기화 트리거
-        triggerAutoSync();
+        // 2. 창이 활성화되어 뜬 후 (250ms 딜레이) 동기화 처리를 개시합니다.
+        setTimeout(() => {
+            triggerAutoSync();
+        }, 250);
     };
 
     window.closeSubscriptionModal = function () {

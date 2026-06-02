@@ -265,10 +265,13 @@ class CustomTemplateManager:
                     errors.append(f"Invalid repository URL structure: {url}")
                     continue
                     
-                # Clean up existing cache for this repository before sync
+                # Clean up existing cache for this repository before sync safely
                 target_cache = os.path.join(self.cache_dir, repo_slug)
                 if os.path.exists(target_cache):
-                    shutil.rmtree(target_cache)
+                    try:
+                        shutil.rmtree(target_cache, ignore_errors=True)
+                    except Exception:
+                        pass
                 os.makedirs(target_cache, exist_ok=True)
                 
                 # Fetch Zip Archive
@@ -311,15 +314,24 @@ class CustomTemplateManager:
                         for item in os.listdir(root_subdir):
                             s = os.path.join(root_subdir, item)
                             d = os.path.join(target_cache, item)
-                            if os.path.isdir(s):
-                                shutil.copytree(s, d, dirs_exist_ok=True)
-                            else:
-                                shutil.copy2(s, d)
+                            try:
+                                if os.path.isdir(s):
+                                    shutil.copytree(s, d, dirs_exist_ok=True)
+                                else:
+                                    shutil.copy2(s, d)
+                            except Exception as copy_err:
+                                print(f"Warning: Failed to copy {item} during sync: {copy_err}")
                                 
-                    shutil.rmtree(extract_temp)
+                    try:
+                        shutil.rmtree(extract_temp, ignore_errors=True)
+                    except Exception:
+                        pass
                 
                 if os.path.exists(zip_temp):
-                    os.remove(zip_temp)
+                    try:
+                        os.remove(zip_temp)
+                    except Exception:
+                        pass
                     
             except Exception as e:
                 errors.append(f"Error syncing {url}: {str(e)}")
