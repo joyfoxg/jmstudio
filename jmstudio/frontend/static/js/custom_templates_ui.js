@@ -848,4 +848,239 @@
         }
     };
 
+    // I. Quarto 컴파일러 연동 툴바 및 콘솔 동적 주입
+    function injectQuartoToolbarAndConsole() {
+        const toolbar = document.querySelector('.editor-toolbar');
+        const hashtagBtn = document.querySelector('.editor-toolbar button[onclick*="openHashtagModal"]');
+        
+        if (toolbar && hashtagBtn && !document.getElementById('toolbar-quarto-dropdown')) {
+            const divider = document.createElement('div');
+            divider.className = 'toolbar-divider';
+            
+            const dropdown = document.createElement('div');
+            dropdown.className = 'toolbar-dropdown';
+            dropdown.id = 'toolbar-quarto-dropdown';
+            dropdown.innerHTML = `
+                <button class="toolbar-btn toolbar-dropdown-btn" id="toolbar-quarto-btn" title="Quarto 컴파일 빌드 (PDF/HTML)" style="color: #60a5fa; display: flex; align-items: center; gap: 4px; padding: 2px 6px;">
+                    <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
+                    <span style="font-size: 0.85em; font-weight: 600; font-family: 'Outfit';">컴파일</span>
+                </button>
+                <div class="toolbar-dropdown-menu" id="toolbar-quarto-menu" style="min-width: 160px; top: 100%; left: 0;">
+                    <div class="dropdown-item" onclick="triggerQuartoCompile('pdf')" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.85em;">
+                        <i data-lucide="file-text" style="width: 14px; height: 14px; color: #f87171;"></i>
+                        <span>PDF 논문 빌드</span>
+                    </div>
+                    <div class="dropdown-item" onclick="triggerQuartoCompile('html')" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.85em;">
+                        <i data-lucide="chrome" style="width: 14px; height: 14px; color: #60a5fa;"></i>
+                        <span>HTML 리포트 빌드</span>
+                    </div>
+                </div>
+            `;
+            
+            hashtagBtn.parentNode.insertBefore(divider, hashtagBtn.nextSibling);
+            divider.parentNode.insertBefore(dropdown, divider.nextSibling);
+            
+            const btn = document.getElementById('toolbar-quarto-btn');
+            if (btn) {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.toolbar-dropdown').forEach(dd => {
+                        if (dd.id !== 'toolbar-quarto-dropdown') {
+                            dd.classList.remove('show');
+                        }
+                    });
+                    dropdown.classList.toggle('show');
+                };
+            }
+        }
+        
+        if (!document.getElementById('quarto-build-console')) {
+            const consoleHtml = `
+                <div id="quarto-build-console" style="position: fixed; bottom: -320px; left: 0; width: 100%; height: 300px; background: rgba(10, 10, 15, 0.96); border-top: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6); z-index: 9999; transition: bottom 0.28s cubic-bezier(0.4, 0, 0.2, 1); color: #cbd5e1; font-family: 'Fira Code', 'Consolas', monospace; display: flex; flex-direction: column; box-sizing: border-box;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 18px; background: rgba(20, 20, 25, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.05); user-select: none;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82em; font-weight: 600; color: #60a5fa;">
+                            <i data-lucide="terminal" style="width: 14px; height: 14px;"></i>
+                            <span>Quarto Compilation Console</span>
+                        </div>
+                        <button onclick="closeQuartoConsole()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2em; display: flex; align-items: center; padding: 4px;">&times;</button>
+                    </div>
+                    <div id="quarto-console-log" style="flex: 1; padding: 14px 18px; overflow-y: auto; font-size: 0.78em; line-height: 1.6; white-space: pre-wrap; word-break: break-all; scrollbar-width: thin; color: #a7f3d0;">
+                        Ready to compile...
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', consoleHtml);
+        }
+        
+        if (!document.getElementById('quarto-viewer-modal')) {
+            const viewerHtml = `
+                <div id="quarto-viewer-modal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 10000;">
+                    <div style="width: 90%; height: 92%; background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75); position: relative; font-family: 'Inter', sans-serif;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: rgba(25, 25, 30, 0.96); border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                            <h3 id="quarto-viewer-title" style="font-size: 1em; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 8px; margin: 0;">
+                                <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
+                                <span>학술 컴파일 결과 미리보기</span>
+                            </h3>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <a id="quarto-viewer-download" href="#" download style="padding: 7px 14px; background: var(--accent); color: #000; font-weight: 600; font-size: 0.8em; border-radius: 4px; border: none; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: all 0.2s;">
+                                    <i data-lucide="download" style="width: 13px; height: 13px;"></i>
+                                    <span>로컬 파일 다운로드</span>
+                                </a>
+                                <button onclick="closeQuartoViewer()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.5em; display: flex; align-items: center; padding: 4px;">&times;</button>
+                            </div>
+                        </div>
+                        <div style="flex: 1; background: #1e1e28; position: relative;">
+                            <iframe id="quarto-viewer-frame" src="" style="width: 100%; height: 100%; border: none; background: #ffffff;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', viewerHtml);
+        }
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+
+    window.closeQuartoConsole = function() {
+        const consoleEl = document.getElementById('quarto-build-console');
+        if (consoleEl) {
+            consoleEl.style.bottom = '-320px';
+        }
+    };
+    
+    window.closeQuartoViewer = function() {
+        const modal = document.getElementById('quarto-viewer-modal');
+        const frame = document.getElementById('quarto-viewer-frame');
+        if (modal) modal.style.display = 'none';
+        if (frame) frame.src = '';
+    };
+
+    window.triggerQuartoCompile = async function(format) {
+        const dd = document.getElementById('toolbar-quarto-dropdown');
+        if (dd) dd.classList.remove('show');
+        
+        if (!window.pywebview || !window.pywebview.api || !window.pywebview.api.check_quarto_installation) {
+            alert("API 연결 대기 중입니다. 잠시 후 다시 시도해 주세요.");
+            return;
+        }
+        
+        const consoleEl = document.getElementById('quarto-build-console');
+        const logEl = document.getElementById('quarto-console-log');
+        
+        if (consoleEl && logEl) {
+            consoleEl.style.bottom = '0px';
+            logEl.innerText = ">> 시스템 환경변수에서 Quarto CLI 탐색 중...\n";
+            logEl.style.color = '#cbd5e1';
+        }
+        
+        try {
+            const check = await window.pywebview.api.check_quarto_installation();
+            if (check.status !== 'available') {
+                if (logEl) {
+                    logEl.innerText += `\n[오류] ${check.message}\n`;
+                    logEl.style.color = '#f87171';
+                }
+                if (typeof window.showToast === 'function') {
+                    window.showToast("Quarto CLI 탐색 실패! 설치 가이드를 참조해 주세요.");
+                }
+                return;
+            }
+            
+            if (logEl) {
+                logEl.innerText += `>> 발견된 Quarto 버전: v${check.version}\n`;
+                logEl.innerText += `>> 컴파일 가동: format = ${format.toUpperCase()} (임시 텍스트 버퍼 전송 중...)\n`;
+            }
+            
+            const activePath = window.activeFilePath || "";
+            
+            let content = "";
+            const view = window.cmEditor;
+            const textarea = document.getElementById('editor');
+            if (view) {
+                content = view.state.doc.toString();
+            } else if (textarea) {
+                content = textarea.value;
+            }
+            
+            if (!content.trim()) {
+                if (logEl) {
+                    logEl.innerText += `\n[오류] 컴파일할 문서 내용이 비어 있습니다.\n`;
+                    logEl.style.color = '#f87171';
+                }
+                return;
+            }
+            
+            if (logEl) {
+                logEl.innerText += `>> 컴파일러 프로세스 백시트 백그라운드 호출 개시...\n`;
+                logEl.innerText += `>> (LaTeX 수식 파싱 및 인쇄 렌더링에 5~15초 소요될 수 있습니다. 대기해 주세요...)\n`;
+            }
+            
+            const compileRes = await window.pywebview.api.compile_quarto_document(activePath, content, format);
+            
+            if (compileRes.status === 'success') {
+                if (logEl) {
+                    logEl.innerText += `\n>> [성공] 컴파일 빌드 프로세스 정상 종료!\n`;
+                    logEl.innerText += `>> 생성된 결과 파일: ${compileRes.filename}\n`;
+                    logEl.innerText += `\n[빌드 로그 출력]:\n${compileRes.log}\n`;
+                    logEl.style.color = '#34d399';
+                }
+                
+                if (typeof window.showToast === 'function') {
+                    window.showToast(`'${compileRes.filename}' 컴파일 성공!`);
+                }
+                
+                setTimeout(() => {
+                    const modal = document.getElementById('quarto-viewer-modal');
+                    const frame = document.getElementById('quarto-viewer-frame');
+                    const titleEl = document.getElementById('quarto-viewer-title');
+                    const downloadBtn = document.getElementById('quarto-viewer-download');
+                    
+                    if (modal && frame) {
+                        const webUrl = `/workspace/${compileRes.output_path}?t=${new Date().getTime()}`;
+                        frame.src = webUrl;
+                        
+                        if (titleEl) {
+                            titleEl.innerHTML = `<i data-lucide="file-text" style="width: 18px; height: 18px;"></i> <span>${compileRes.filename} 미리보기</span>`;
+                        }
+                        if (downloadBtn) {
+                            downloadBtn.href = webUrl;
+                            downloadBtn.setAttribute('download', compileRes.filename);
+                        }
+                        
+                        modal.style.display = 'flex';
+                        if (window.lucide) {
+                            lucide.createIcons();
+                        }
+                    }
+                }, 800);
+                
+            } else {
+                if (logEl) {
+                    logEl.innerText += `\n[실패] ${compileRes.message}\n`;
+                    if (compileRes.log) {
+                        logEl.innerText += `\n[오류 로그 출력]:\n${compileRes.log}\n`;
+                    }
+                    logEl.style.color = '#f87171';
+                }
+                if (typeof window.showToast === 'function') {
+                    window.showToast("컴파일 실패! 콘솔 로그 오류를 참조하세요.");
+                }
+            }
+        } catch (err) {
+            if (logEl) {
+                logEl.innerText += `\n[오류] 비동기 통신 처리 중 치명적 예외 발생: ${err.message}\n`;
+                logEl.style.color = '#f87171';
+            }
+        }
+    };
+
+    // J. 초기화 구문 바인딩 확장
+    const originalInit = init;
+    init = function() {
+        originalInit();
+        injectQuartoToolbarAndConsole();
+    };
+
 })();

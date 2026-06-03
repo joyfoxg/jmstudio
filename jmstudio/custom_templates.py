@@ -418,3 +418,145 @@ class ExtendedMdViewerApi(MdViewerApi):
 
     def import_subscribed_template(self, title, desc, icon, color, content, tags=None):
         return self.template_manager.import_subscribed_template(title, desc, icon, color, content, tags)
+
+    def check_quarto_installation(self):
+        import shutil
+        import subprocess
+        
+        quarto_path = shutil.which("quarto")
+        pandoc_path = shutil.which("pandoc")
+        
+        if not quarto_path:
+            return {
+                "status": "missing",
+                "message": "Quarto CLI가 시스템 환경변수 PATH에서 발견되지 않았습니다. 설치가 필요합니다."
+            }
+            
+        try:
+            creationflags = 0
+            if os.name == 'nt':
+                creationflags = 0x08000000 # CREATE_NO_WINDOW
+                
+            ver = subprocess.check_output(
+                [quarto_path, "--version"], 
+                text=True, 
+                creationflags=creationflags,
+                timeout=3.0
+            ).strip()
+            
+            return {
+                "status": "available",
+                "version": ver,
+                "path": quarto_path,
+                "pandoc": bool(pandoc_path)
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"버전 확인 오류: {str(e)}"
+            }
+
+    def compile_quarto_document(self, rel_path, content, output_format="pdf", template_style="none"):
+        import shutil
+        import subprocess
+        
+        quarto_path = shutil.which("quarto")
+        if not quarto_path:
+            return {"status": "error", "message": "Quarto CLI가 설치되어 있지 않습니다."}
+            
+        ws = self.workspace
+        if rel_path:
+            if os.path.isabs(rel_path):
+                target_dir = os.path.dirname(rel_path)
+                base_name = os.path.splitext(os.path.basename(rel_path))[0]
+            else:
+                target_dir = os.path.dirname(os.path.join(ws, rel_path))
+                base_name = os.path.splitext(os.path.basename(rel_path))[0]
+        else:
+            target_dir = ws
+            base_name = "untitled_document"
+            
+        os.makedirs(target_dir, exist_ok=True)
+        
+        temp_md_name = f".quarto_temp_compile_{base_name}.md"
+        temp_md_path = os.path.join(target_dir, temp_md_name)
+        
+        try:
+            with open(temp_md_path, "w", encoding="utf-8") as f:
+                f.write(content)
+                
+            cmd = [quarto_path, "render", temp_md_name, "--to", output_format]
+            
+            creationflags = 0
+            if os.name == 'nt':
+                creationflags = 0x08000000 # CREATE_NO_WINDOW
+                
+            process = subprocess.Popen(
+                cmd,
+                cwd=target_dir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding="utf-8",
+                creationflags=creationflags
+            )
+            
+            try:
+                stdout, stderr = process.communicate(timeout=40.0)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                stdout, stderr = process.communicate()
+                return {"status": "error", "message": "컴파일 시간 초과 (40초 한도 초과)"}
+                
+            temp_out_name = f".quarto_temp_compile_{base_name}.{output_format}"
+            temp_out_path = os.path.join(target_dir, temp_out_name)
+            
+            final_out_name = f"{base_name}.{output_format}"
+            final_out_path = os.path.join(target_dir, final_out_name)
+            
+            if process.returncode == 0 and os.path.exists(temp_out_path):
+                try:
+                    if os.path.exists(final_out_path):
+                        os.remove(final_out_path)
+                    shutil.move(temp_out_path, final_out_path)
+                except Exception as file_err:
+                    final_out_name = temp_out_name
+                    
+                try:
+                    if os.path.exists(temp_md_path):
+                        os.remove(temp_md_path)
+                except:
+                    pass
+                    
+                if os.path.isabs(rel_path):
+                    try:
+                        rel_out = os.path.relpath(final_out_path, ws).replace('\\', '/')
+                    except:
+                        rel_out = final_out_name
+                else:
+                    rel_out = os.path.join(os.path.dirname(rel_path), final_out_name).replace('\\', '/').lstrip('/')
+                    
+                return {
+                    "status": "success",
+                    "output_path": rel_out,
+                    "filename": final_out_name,
+                    "log": stdout
+                }
+            else:
+                try:
+                    if os.path.exists(temp_md_path):
+                        os.remove(temp_md_path)
+                except:
+                    pass
+                return {
+                    "status": "error",
+                    "message": f"컴파일 빌드 오류 (Exit Code {process.returncode})",
+                    "log": stderr or stdout
+                }
+        except Exception as e:
+            try:
+                if os.path.exists(temp_md_path):
+                    os.remove(temp_md_path)
+            except:
+                pass
+            return {"status": "error", "message": f"컴파일 중 시스템 예외 발생: {str(e)}"}
