@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.26 🌟
+# 🧪 Joy Markdown Studio v3.9.27 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -88,6 +88,12 @@
   * `Ctrl + Z`: Infinite Undo
   * `Ctrl + Y`: Infinite Redo
   * `Right-Click` (on cards): In-place settings and node options menu
+
+### 14. 📂 Separated My Media Accordion, Custom Icons, and Binary Save Lock Protection (v3.9.27)
+* **My Media Accordion Sidebar**: Groups media files (images, PDFs, audio, video) out of the main "My Library" document list, allocating them under a dedicated "My Media" accordion menu. Folder structures are fully preserved across both trees.
+* **Type-Specific Media Icons**: Analyzes media extensions dynamically to assign corresponding Lucide icons (images: `image`, videos: `video`, audio: `music`) in the sidebar tree.
+* **Rich Media Preview & Locked Editor Mode**: Clicked media files automatically lock the text editor (opacity 0.5, pointer-events none, read-only mode) and render a custom viewer/player (image preview, PDF iframe, HTML5 video/audio player) in the right preview pane.
+* **Binary Save Lock Prevention**: Prevents overwriting binary files with empty or invalid text when trying to save (via `Ctrl+S` or the toolbar save button) during media preview, displaying an alert toast.
 
 ---
 

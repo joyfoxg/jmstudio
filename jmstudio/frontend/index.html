@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Joy Markdown Studio v3.9.25</title>
+    <title>Joy Markdown Studio v3.9.27</title>
     <!-- 외부 라이브러리 CDN 로드 -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.17.0/dist/katex.min.css">
@@ -20,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css?v=3.9.25">
+    <link rel="stylesheet" href="/static/css/style.css?v=3.9.27">
 </head>
 <body>
 
@@ -180,6 +180,20 @@
 
                 <!-- 트리 뷰 목록 -->
                 <div class="file-tree" id="file-tree-container"></div>
+
+                <!-- 내 미디어 아코디언 메뉴 -->
+                <details class="math-section-accordion" id="media-sidebar-accordion" style="margin: 10px; border-color: var(--border);" open>
+                    <summary class="math-section-title" style="font-size: 0.85em; padding: 10px 12px;">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <i data-lucide="image" style="width: 14px; height: 14px; color: var(--accent);"></i>
+                            <span data-i18n="tab_media">내 미디어</span>
+                        </span>
+                    </summary>
+                    <div class="file-tree" style="padding: 10px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto;" id="sidebar-media-list">
+                        <div style="font-size: 0.78em; color: var(--text-muted); padding: 4px 0;" data-i18n="msg_no_media">추가된 미디어 파일이 없습니다.</div>
+                    </div>
+                </details>
+
 
                 <!-- 백링크 아코디언 메뉴 -->
                 <details class="math-section-accordion" id="backlinks-sidebar-accordion" style="margin: 10px; border-color: var(--border);" open>
@@ -1776,12 +1790,12 @@
     
 
     <!-- 모듈화된 JavaScript 자산 로드 (캐시 무력화 버전 적용) -->
-    <script src="/static/js/translations.js?v=3.9.25"></script>
-    <script type="module" src="/static/js/editor.js?v=3.9.25"></script>
-    <script type="module" src="/static/js/emoji.js?v=3.9.25"></script>
-    <script type="module" src="/static/js/templates.js?v=3.9.25"></script>
-    <script type="module" src="/static/js/custom_templates_ui.js?v=3.9.25"></script>
-    <script type="module" src="/static/js/canvas_editor.js?v=3.9.25"></script>
+    <script src="/static/js/translations.js?v=3.9.27"></script>
+    <script type="module" src="/static/js/editor.js?v=3.9.27"></script>
+    <script type="module" src="/static/js/emoji.js?v=3.9.27"></script>
+    <script type="module" src="/static/js/templates.js?v=3.9.27"></script>
+    <script type="module" src="/static/js/custom_templates_ui.js?v=3.9.27"></script>
+    <script type="module" src="/static/js/canvas_editor.js?v=3.9.27"></script>
 
     <!-- 창 크기 / 해상도 감지 및 툴바 폰트 자동 스케일러 -->
     <script>

@@ -8,7 +8,8 @@ This document contains the chronological history of updates, releases, and patch
 
 | Version | Date | Key Patches & Features | Status |
 | :--- | :--- | :--- | :--- |
-| **v3.9.26** | 2026-06-03 | Bi-directional Wiki Links, dual backlinks panel, and Obsidian-compatible Infinite Canvas | **Latest Stable** |
+| **v3.9.27** | 2026-06-03 | Separated My Media accordion, custom icons, read-only preview, and save lock prevention | **Latest Stable** |
+| **v3.9.26** | 2026-06-03 | Bi-directional Wiki Links, dual backlinks panel, and Obsidian-compatible Infinite Canvas | Stable |
 | **v3.9.25** | 2026-06-02 | Refactored WYSIWYG math blocks via range replacement & custom template engine | Stable |
 | **v3.9.24** | 2026-06-02 | Hotfix for KaTeX formula backslash escaping in WYSIWYG rendering | Stable |
 | **v3.9.23** | 2026-06-02 | Quant Portfolio and K-Stock Trading Diary Templates Launch | Stable |
@@ -26,7 +27,19 @@ This document contains the chronological history of updates, releases, and patch
 
 ## 📢 Detailed Release History (v3.9.0 ~ Present)
 
-### 🚀 v3.9.26 (2026-06-03) - Wiki Links, Backlinks Panel, and Obsidian-compatible Infinite Canvas Implementation [Latest Stable]
+### 🚀 v3.9.27 (2026-06-03) - Separated My Media Accordion, Dedicated Icons, Preview, and Save Lock Prevention [Latest Stable]
+*   **Separated My Media Accordion in Sidebar**:
+    *   Filtered out media files (images, PDFs, audio, video) from the main "My Library" list and grouped them under a newly introduced "My Media" accordion panel.
+    *   Folder hierarchy structure is fully preserved in both lists even when folders contain both markdown and media files.
+*   **Dedicated Icons for Media File Types**:
+    *   Analyzes file extensions dynamically to map specific icons (images: `image`, videos: `video`, audio: `music`) inside the file tree explorer.
+*   **Rich Media Preview & Locked Editor Mode**:
+    *   Clicking a media file disables the text editor (transparency 0.5 and pointer-events: none) and automatically displays a rich preview (image viewer, native PDF iframe, HTML5 video/audio player) in the right preview pane.
+    *   Fixed a bug where a duplicate `/workspace/` prefix was prepended to absolute/external file paths in the preview pane.
+*   **Preventing Binary File Corruption via Save Lock**:
+    *   Blocks saving operations (`Ctrl+S` or toolbar save) when a media file is active, alerting the user via Toast, thus preventing writing text data over binary files.
+
+### 🚀 v3.9.26 (2026-06-03) - Wiki Links, Backlinks Panel, and Obsidian-compatible Infinite Canvas Implementation [Stable]
 *   **Obsidian-compatible Infinite Canvas Feature**:
     *   D3-Zoom-based infinite panning, mouse/trackpad pinch zoom controls, and a 16px neon grid background.
     *   Real-time drawing and connection drop of bezier line edges between node ports.

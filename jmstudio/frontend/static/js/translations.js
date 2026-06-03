@@ -39,6 +39,8 @@ const translations = {
                 
                 // Sidebar
                 "tab_explorer": "내 서재",
+                "tab_media": "내 미디어",
+                "msg_no_media": "추가된 미디어 파일이 없습니다.",
                 "tab_math": "수식",
                 "tab_chemistry": "화학식",
                 "tab_diagram": "다이어그램",
@@ -582,6 +584,8 @@ const translations = {
                 
                 // Sidebar
                 "tab_explorer": "Library",
+                "tab_media": "My Media",
+                "msg_no_media": "No media files added.",
                 "tab_math": "Math",
                 "tab_chemistry": "Chem",
                 "tab_diagram": "Diagram",

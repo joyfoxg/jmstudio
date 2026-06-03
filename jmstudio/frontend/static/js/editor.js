@@ -381,6 +381,7 @@ class UndoManager {
             const cm = window.cm6;
             window.cmPlaceholderConf = new cm.Compartment();
             window.cmWysiwygConf = new cm.Compartment();
+            window.cmReadOnlyConf = new cm.Compartment();
             
             const state = cm.EditorState.create({
                 doc: "",
@@ -389,6 +390,7 @@ class UndoManager {
                     cm.markdown(),
                     window.cmPlaceholderConf.of(cm.placeholder(t('msg_editor_placeholder'))),
                     window.cmWysiwygConf.of([]),
+                    window.cmReadOnlyConf.of(cm.EditorState.readOnly ? cm.EditorState.readOnly.of(false) : []),
                     cm.keymap.of([{ key: "Enter", run: handleEnterKey }]),
                     cm.EditorView.updateListener.of((update) => {
                         if (update.docChanged) {
@@ -1124,18 +1126,66 @@ class UndoManager {
             return res;
         }
 
+        function splitTree(items) {
+            const docItems = [];
+            const mediaItems = [];
+            const mediaExtensions = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'pdf', 'mp3', 'mp4', 'wav', 'webm', 'mov', 'avi', 'ogg'];
+
+            items.forEach(item => {
+                if (item.type === 'folder') {
+                    const { docItems: subDocs, mediaItems: subMedia } = splitTree(item.children || []);
+                    if (subDocs.length > 0) {
+                        docItems.push({
+                            ...item,
+                            children: subDocs
+                        });
+                    }
+                    if (subMedia.length > 0) {
+                        mediaItems.push({
+                            ...item,
+                            children: subMedia
+                        });
+                    }
+                } else {
+                    const pathLower = (item.path || '').toLowerCase();
+                    const ext = pathLower.split('.').pop();
+                    if (mediaExtensions.includes(ext)) {
+                        mediaItems.push(item);
+                    } else {
+                        docItems.push(item);
+                    }
+                }
+            });
+
+            return { docItems, mediaItems };
+        }
+
         function renderFileTree(files) {
             currentFilesData = files;
             localFiles = collectLocalFiles(files);
-            const container = document.getElementById('file-tree-container');
-            container.innerHTML = "";
             
-            if (!files || files.length === 0) {
-                container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85em; padding: 10px; text-align: center;">${t('sidebar_no_files')}</div>`;
-                return;
+            const { docItems, mediaItems } = splitTree(files);
+            
+            // 1. 내서재 문서 트리 렌더링
+            const docContainer = document.getElementById('file-tree-container');
+            docContainer.innerHTML = "";
+            if (docItems.length === 0) {
+                docContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85em; padding: 10px; text-align: center;">${t('sidebar_no_files')}</div>`;
+            } else {
+                docContainer.appendChild(createTreeDOM(docItems));
             }
             
-            container.appendChild(createTreeDOM(files));
+            // 2. 내미디어 트리 렌더링
+            const mediaContainer = document.getElementById('sidebar-media-list');
+            if (mediaContainer) {
+                mediaContainer.innerHTML = "";
+                if (mediaItems.length === 0) {
+                    mediaContainer.innerHTML = `<div style="font-size: 0.78em; color: var(--text-muted); padding: 4px 0;" data-i18n="msg_no_media">${t('msg_no_media') || '추가된 미디어 파일이 없습니다.'}</div>`;
+                } else {
+                    mediaContainer.appendChild(createTreeDOM(mediaItems));
+                }
+            }
+            
             lucide.createIcons();
             
             if (gdriveAuthenticated) {
@@ -1153,7 +1203,21 @@ class UndoManager {
                     itemEl.classList.add('active');
                 }
                 
-                const iconName = item.type === 'folder' ? 'folder' : 'file-text';
+                let iconName = 'file-text';
+                if (item.type === 'folder') {
+                    iconName = 'folder';
+                } else {
+                    const ext = (item.path || '').split('.').pop().toLowerCase();
+                    if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) {
+                        iconName = 'image';
+                    } else if (ext === 'pdf') {
+                        iconName = 'file-text';
+                    } else if (['mp4', 'webm', 'mov', 'avi'].includes(ext)) {
+                        iconName = 'video';
+                    } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
+                        iconName = 'music';
+                    }
+                }
                 
                 itemEl.innerHTML = `
                     <i data-lucide="${iconName}" style="width: 16px; height: 16px; min-width: 16px;"></i>
@@ -1311,6 +1375,103 @@ class UndoManager {
 
         // 파일 열기
         async function openFile(relPath) {
+            const pathLower = relPath.toLowerCase();
+            const ext = pathLower.split('.').pop();
+            const isMedia = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'pdf', 'mp3', 'mp4', 'wav', 'webm', 'mov', 'avi', 'ogg'].includes(ext);
+
+            if (isMedia) {
+                currentFilePath = relPath;
+                
+                // 캔버스 뷰 열려 있다면 닫기
+                if (window.toggleCanvasView) {
+                    window.toggleCanvasView(false);
+                }
+                
+                // 파일 열기 성공 시 히스토리 기록
+                if (!isNavigatingHistory) {
+                    if (fileHistoryIndex === -1 || fileHistory[fileHistoryIndex] !== relPath) {
+                        fileHistory = fileHistory.slice(0, fileHistoryIndex + 1);
+                        fileHistory.push(relPath);
+                        fileHistoryIndex = fileHistory.length - 1;
+                    }
+                }
+                updateNavigationButtons();
+                
+                // 파일 이름만 노출하고 물리적 전체 저장 경로는 툴팁으로 우아하게 표시
+                const titleEl = document.getElementById('active-file-title');
+                const normalizedRelPath = relPath.replace(/\\/g, '/');
+                const fileName = normalizedRelPath.substring(normalizedRelPath.lastIndexOf('/') + 1);
+                if (titleEl) {
+                    titleEl.innerText = fileName;
+                    const safeRoot = (workspaceRoot || "").replace(/\\/g, '/');
+                    const fullSavingPath = (safeRoot + '/' + normalizedRelPath).replace(/\/+/g, '/');
+                    titleEl.title = t('msg_active_file_tooltip') + fullSavingPath;
+                }
+                
+                // 미디어 종류별 마크다운 생성하여 에디터 렌더링에 우회 제공
+                let virtualContent = "";
+                const urlEncodedPath = encodeURIComponent(relPath);
+                
+                if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) {
+                    virtualContent = `# 🖼️ ${fileName}\n\n> **${t('tab_media')}** - ${t('tooltip_delete')}\n\n![${fileName}](/workspace/${urlEncodedPath})`;
+                } else if (ext === 'pdf') {
+                    virtualContent = `# 📄 ${fileName}\n\n> **${t('tab_media')}** - ${t('tooltip_delete')}\n\n<iframe src="/workspace/${urlEncodedPath}#toolbar=0" style="width: 100%; height: calc(100vh - 220px); border: none;"></iframe>`;
+                } else if (['mp4', 'webm', 'mov', 'avi'].includes(ext)) {
+                    virtualContent = `# 🎥 ${fileName}\n\n> **${t('tab_media')}** - ${t('tooltip_delete')}\n\n<video src="/workspace/${urlEncodedPath}" controls style="max-width: 100%; max-height: 70vh; background: #000; border-radius: 8px;"></video>`;
+                } else if (['mp3', 'wav', 'ogg'].includes(ext)) {
+                    virtualContent = `# 🎵 ${fileName}\n\n> **${t('tab_media')}** - ${t('tooltip_delete')}\n\n<audio src="/workspace/${urlEncodedPath}" controls style="width: 100%; margin-top: 20px;"></audio>`;
+                } else {
+                    virtualContent = `# 📂 ${fileName}\n\n> **${t('tab_media')}** - ${t('tooltip_delete')}\n\n[Download / Open File](/workspace/${urlEncodedPath})`;
+                }
+                
+                setEditorContent(virtualContent);
+                
+                // 에디터 비활성화 (pointer-events & opacity)
+                const editorParent = document.getElementById('editor-parent');
+                if (editorParent) {
+                    editorParent.style.pointerEvents = 'none';
+                    editorParent.style.opacity = '0.5';
+                }
+                
+                // CodeMirror readOnly 적용 (지원 시)
+                const cm = window.cm6;
+                if (window.cmEditor && window.cmReadOnlyConf && cm && cm.EditorState && cm.EditorState.readOnly) {
+                    window.cmEditor.dispatch({
+                        effects: window.cmReadOnlyConf.reconfigure(cm.EditorState.readOnly.of(true))
+                    });
+                }
+                
+                // 마크다운 그래픽 파싱 & 렌더링
+                triggerLiveRender();
+                
+                // 구글 드라이브 동기화 상태 갱신
+                await updateActiveFileSyncStatus();
+                
+                // Undo Manager 초기화 및 첫 스냅샷 기록
+                if (window.undoManager) {
+                    window.undoManager.history = [];
+                    window.undoManager.currentIndex = -1;
+                    window.undoManager.saveState();
+                }
+                
+                // 백링크 정보 갱신
+                updateBacklinks(relPath);
+                return;
+            }
+
+            // 미디어가 아닌 기존 문서 파일 열기 시 에디터 활성화
+            const editorParent = document.getElementById('editor-parent');
+            if (editorParent) {
+                editorParent.style.pointerEvents = 'auto';
+                editorParent.style.opacity = '1';
+            }
+            const cm = window.cm6;
+            if (window.cmEditor && window.cmReadOnlyConf && cm && cm.EditorState && cm.EditorState.readOnly) {
+                window.cmEditor.dispatch({
+                    effects: window.cmReadOnlyConf.reconfigure(cm.EditorState.readOnly.of(false))
+                });
+            }
+
             if (relPath.endsWith('.canvas')) {
                 currentFilePath = relPath;
                 if (!isNavigatingHistory) {
@@ -1619,7 +1780,7 @@ class UndoManager {
             const images = div.querySelectorAll('img');
             images.forEach(img => {
                 const src = img.getAttribute('src');
-                if (src && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('data:')) {
+                if (src && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('data:') && !src.startsWith('/workspace/')) {
                     // relative 경로는 백엔드 Bottle static 서버 경로로 라우팅
                     img.setAttribute('src', `/workspace/${src}`);
                 }
@@ -2925,6 +3086,13 @@ class UndoManager {
         async function saveActiveFile() {
             if (!currentFilePath) {
                 alert(t('msg_save_no_file'));
+                return;
+            }
+            const pathLower = currentFilePath.toLowerCase();
+            const ext = pathLower.split('.').pop();
+            const isMedia = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'pdf', 'mp3', 'mp4', 'wav', 'webm', 'mov', 'avi', 'ogg'].includes(ext);
+            if (isMedia) {
+                showToast(currentLang === 'en' ? "Media files cannot be saved." : "미디어 파일은 저장할 수 없습니다.");
                 return;
             }
             const editorContent = getEditorContent();

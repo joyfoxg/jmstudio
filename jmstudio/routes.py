@@ -58,7 +58,20 @@ def serve_workspace_file(filepath):
     full_path = os.path.abspath(os.path.join(active_workspace, decoded_path))
     
     # 보안 검사: workspace 외부 파일 접근 차단 (Directory Traversal 방어)
-    if not full_path.startswith(os.path.abspath(active_workspace)):
+    # 예외: 사용자가 명시적으로 서재에 등록한 파일(added_documents)은 접근 허용
+    is_allowed = False
+    if full_path.startswith(os.path.abspath(active_workspace)):
+        is_allowed = True
+    else:
+        cfg = get_config()
+        added_docs = cfg.get("added_documents", [])
+        norm_full_path_lower = full_path.replace('\\', '/').lower()
+        for doc in added_docs:
+            if doc.replace('\\', '/').lower() == norm_full_path_lower:
+                is_allowed = True
+                break
+                
+    if not is_allowed:
         return HTTPResponse(status=403, body="Access denied")
         
     if os.path.exists(full_path) and os.path.isfile(full_path):
