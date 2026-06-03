@@ -1,0 +1,111 @@
+{
+    "links": [
+        {
+            "source": "doc/flowchart_guide_en.md",
+            "target": "text"
+        },
+        {
+            "source": "doc/flowchart_guide_en.md",
+            "target": "Subroutine"
+        },
+        {
+            "source": "doc/flowchart_guide_en.md",
+            "target": "Subroutine"
+        },
+        {
+            "source": "doc/flowchart_guide_kr.md",
+            "target": "텍스트"
+        },
+        {
+            "source": "doc/flowchart_guide_kr.md",
+            "target": "서브루틴"
+        },
+        {
+            "source": "doc/flowchart_guide_kr.md",
+            "target": "서브 루틴"
+        },
+        {
+            "source": "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "target": "양자역학"
+        },
+        {
+            "source": "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "target": "파일이름"
+        },
+        {
+            "source": "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "target": "Chemical_Reaction_01"
+        },
+        {
+            "source": "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "target": "로런츠_변환"
+        },
+        {
+            "source": "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "target": "광전효과"
+        },
+        {
+            "source": "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "target": "상대성이론"
+        },
+        {
+            "source": "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "target": "상대성이론"
+        },
+        {
+            "source": "doc/zettelkasten_doc/광전효과.md",
+            "target": "상대성이론"
+        },
+        {
+            "source": "doc/zettelkasten_doc/로런츠_변환.md",
+            "target": "상대성이론"
+        },
+        {
+            "source": "doc/zettelkasten_doc/상대성이론.md",
+            "target": "로런츠_변환"
+        },
+        {
+            "source": "doc/zettelkasten_doc/상대성이론.md",
+            "target": "광전효과"
+        }
+    ],
+    "backlinks": {
+        "text": [
+            "doc/flowchart_guide_en.md"
+        ],
+        "subroutine": [
+            "doc/flowchart_guide_en.md"
+        ],
+        "텍스트": [
+            "doc/flowchart_guide_kr.md"
+        ],
+        "서브루틴": [
+            "doc/flowchart_guide_kr.md"
+        ],
+        "서브 루틴": [
+            "doc/flowchart_guide_kr.md"
+        ],
+        "양자역학": [
+            "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md"
+        ],
+        "파일이름": [
+            "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md"
+        ],
+        "chemical_reaction_01": [
+            "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md"
+        ],
+        "로런츠_변환": [
+            "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "doc/zettelkasten_doc/상대성이론.md"
+        ],
+        "광전효과": [
+            "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "doc/zettelkasten_doc/상대성이론.md"
+        ],
+        "상대성이론": [
+            "doc/zettelkasten_doc/ZETTELKASTEN_GUIDE_kr.md",
+            "doc/zettelkasten_doc/광전효과.md",
+            "doc/zettelkasten_doc/로런츠_변환.md"
+        ]
+    }
+}

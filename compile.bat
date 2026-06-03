@@ -57,13 +57,6 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [Step 4] Creating distribution ZIP package...
-if exist .\dist\JoyMarkdownStudio-%APP_VER%.zip (
-    del .\dist\JoyMarkdownStudio-%APP_VER%.zip
-)
-powershell -Command "Compress-Archive -Path '.\dist\JoyMarkdownStudio-%APP_VER%.exe' -DestinationPath '.\dist\JoyMarkdownStudio-%APP_VER%.zip' -Force"
-
-echo.
 echo =======================================================================
 echo   SUCCESS: Standalone app compiled successfully (Instant Boot)!
 echo =======================================================================
@@ -71,11 +64,8 @@ echo.
 echo The compiled executable is saved at:
 echo   ==> .\dist\JoyMarkdownStudio-%APP_VER%.exe
 echo.
-echo The distribution ZIP package is saved at:
-echo   ==> .\dist\JoyMarkdownStudio-%APP_VER%.zip
-echo.
 echo [Distribution Guide]
 echo 1. Run 'JoyMarkdownStudio-%APP_VER%.exe' in '.\dist' folder to boot instantly (0.1s)!
-echo 2. For distribution, simply copy or send the 'JoyMarkdownStudio-%APP_VER%.exe' or its ZIP file.
+echo 2. For distribution, simply copy or send the 'JoyMarkdownStudio-%APP_VER%.exe'.
 echo.
 pause
