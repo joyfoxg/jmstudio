@@ -799,9 +799,20 @@
                         row.onclick = async (e) => {
                             e.stopPropagation();
                             if (child.type === "file") {
-                                this.closeCanvasView();
-                                if (typeof window.openFile === "function") {
-                                    window.openFile(child.path);
+                                const ext = child.name.split('.').pop().toLowerCase();
+                                if (["md", "qmd", "markdown", "txt", "canvas"].includes(ext)) {
+                                    this.closeCanvasView();
+                                    if (typeof window.openFile === "function") {
+                                        window.openFile(child.path);
+                                    }
+                                } else if (["png", "jpg", "jpeg", "gif", "svg", "webp", "pdf"].includes(ext)) {
+                                    this.pushHistory();
+                                    const newX = node.x + node.width + 50;
+                                    const newY = node.y;
+                                    this.addFileNodeAt(child.path, newX, newY);
+                                    this.showToast("캔버스에 카드 노드가 추가되었습니다.");
+                                } else {
+                                    this.showToast("에디터에서 열 수 없는 파일 포맷입니다.");
                                 }
                             } else {
                                 this.pushHistory();
