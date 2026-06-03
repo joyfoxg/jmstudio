@@ -500,6 +500,79 @@ class MdViewerApi:
         added_docs = cfg.get("added_documents", [])
         saved_positions = cfg.get("graph_node_positions", {})
         
+        # 문서 분류에 따른 이모지 아이콘 및 대표 네온 컬러 결정 헬퍼 함수
+        def determine_node_icon_and_color(path, content="", is_missing=False):
+            if is_missing:
+                return "❓", "#ef4444"
+                
+            icon = "📄"
+            color = "#a855f7" # 기본 퍼플
+            
+            if path:
+                path_lower = path.lower()
+                if path_lower.startswith(('doc/', 'docs/')):
+                    icon = "📖"
+                    color = "#0ea5e9" # 청색
+                elif path_lower.endswith('.qmd'):
+                    icon = "📊"
+                    color = "#10b981" # 초록
+                    
+            tags = []
+            fm_match = re.match(r'^---\s*\n(.*?)\n---\s*\n', content, re.DOTALL)
+            if fm_match:
+                fm_text = fm_match.group(1)
+                for line in fm_text.split('\n'):
+                    if line.strip().startswith('tags:'):
+                        val = line.split('tags:', 1)[1].strip()
+                        if val.startswith('[') and val.endswith(']'):
+                            tags.extend([t.strip().strip("'\"").lower() for t in val[1:-1].split(',') if t.strip()])
+                        else:
+                            tags.extend([t.strip().strip("'\"").lower() for t in val.split(',') if t.strip()])
+                            
+            content_lower = content.lower()
+            
+            # 카테고리 매칭 플래그 계산
+            has_project_tag = any(t in tags for t in ['프로젝트', '기획', 'okr', '비즈니스', '목표', '업무', '보고서', 'roadmap', 'project', 'plan', 'business', 'gantt', 'wbs'])
+            has_project_content = any(x in content_lower for x in ['gantt', 'wbs', 'okr', '프로젝트'])
+            
+            has_science_tag = any(t in tags for t in ['수학', '물리', '학술', '논문', '연구', '공식', 'math', 'physics', 'academic', 'paper', 'research', 'formula', 'latex'])
+            has_science_content = "$$" in content or "$" in content or "\\frac" in content_lower or "\\hbar" in content_lower
+            
+            has_chem_tag = any(t in tags for t in ['화학', '실험', '분자', '원소', 'chemistry', 'molecule', 'smiles', 'beaker', 'reaction'])
+            has_chem_content = "```smiles" in content_lower or "smilesdrawer" in content_lower
+            
+            has_stock_tag = any(t in tags for t in ['주식', '매매', '투자', '재무', '금융', '포트폴리오', 'stock', 'trading', 'investment', 'finance', 'portfolio', 'kospi', 'kosdaq'])
+            has_stock_content = any(x in content_lower for x in ['매매일지', '포트폴리오', 'kospi', 'kosdaq', '순수익률'])
+
+            has_daily_tag = any(t in tags for t in ['일기', '일상', '저널', '루틴', '일지', '습관', '생활', '살림', '레시피', '식단', '트래커', 'diary', 'journal', 'routine', 'habit', 'lifestyle'])
+            
+            has_calendar_tag = any(t in tags for t in ['시간표', '스케줄', '달력', '캘린더', '일정', 'schedule', 'calendar', 'timetable'])
+
+            # 매칭 우선순위 적용
+            if has_chem_tag or has_chem_content:
+                icon = "🧪"
+                color = "#a855f7"
+            elif has_stock_tag or has_stock_content:
+                icon = "📈"
+                color = "#f43f5e" # 네온 핑크
+            elif has_project_tag or has_project_content:
+                icon = "🎯"
+                color = "#fbbf24" # 앰버 황색
+            elif has_science_tag or has_science_content:
+                if any(t in tags for t in ['물리', 'physics']):
+                    icon = "⚛️"
+                else:
+                    icon = "📐"
+                color = "#0ea5e9" # 청색 계열
+            elif has_calendar_tag:
+                icon = "📅"
+                color = "#f43f5e"
+            elif has_daily_tag:
+                icon = "📔"
+                color = "#10b981" # 그린 계열
+                
+            return icon, color
+
         for path in added_docs:
             if os.path.isabs(path):
                 full_path = path
@@ -519,30 +592,42 @@ class MdViewerApi:
                             node_data["fx"] = pos.get("fx")
                             node_data["fy"] = pos.get("fy")
                             
-                    nodes.append(node_data)
-                    node_ids.add(node_id)
                     try:
                         with open(full_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                            matches = re.findall(r'\[\[(.*?)\]\]', content)
-                            for m in matches:
-                                target = m.split('|')[0].strip()
-                                target_lower = target.lower()
-                                if target_lower.endswith('.markdown'):
-                                    target = target[:-9]
-                                elif target_lower.endswith('.qmd'):
-                                    target = target[:-4]
-                                elif target_lower.endswith('.txt'):
-                                    target = target[:-4]
-                                elif target_lower.endswith('.md'):
-                                    target = target[:-3]
-                                links.append({"source": node_id, "target": target})
+                            
+                        # 문서 특징 기반 성격 분석
+                        icon, color = determine_node_icon_and_color(path, content=content)
+                        node_data["icon"] = icon
+                        node_data["color"] = color
+                        
+                        matches = re.findall(r'\[\[(.*?)\]\]', content)
+                        for m in matches:
+                            target = m.split('|')[0].strip()
+                            target_lower = target.lower()
+                            if target_lower.endswith('.markdown'):
+                                target = target[:-9]
+                            elif target_lower.endswith('.qmd'):
+                                target = target[:-4]
+                            elif target_lower.endswith('.txt'):
+                                target = target[:-4]
+                            elif target_lower.endswith('.md'):
+                                target = target[:-3]
+                            links.append({"source": node_id, "target": target})
                     except:
-                        pass
+                        node_data["icon"] = "📄"
+                        node_data["color"] = "#a855f7"
+                        
+                    nodes.append(node_data)
+                    node_ids.add(node_id)
                         
         for link in links:
             if link['target'] not in node_ids:
                 node_data = {"id": link['target'], "name": link['target'] + ".md", "path": "", "missing": True}
+                icon, color = determine_node_icon_and_color("", is_missing=True)
+                node_data["icon"] = icon
+                node_data["color"] = color
+                
                 if link['target'] in saved_positions:
                     pos = saved_positions[link['target']]
                     if pos:

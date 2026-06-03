@@ -177,6 +177,19 @@
                 <!-- 트리 뷰 목록 -->
                 <div class="file-tree" id="file-tree-container"></div>
 
+                <!-- 백링크 아코디언 메뉴 -->
+                <details class="math-section-accordion" id="backlinks-sidebar-accordion" style="margin: 10px; border-color: var(--border);" open>
+                    <summary class="math-section-title" style="font-size: 0.85em; padding: 10px 12px;">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <i data-lucide="link-2" style="width: 14px; height: 14px; color: var(--accent);"></i>
+                            <span data-i18n="tab_backlinks">백링크</span>
+                        </span>
+                    </summary>
+                    <div style="padding: 10px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto;" id="sidebar-backlinks-list">
+                        <div style="font-size: 0.78em; color: var(--text-muted); padding: 4px 0;" data-i18n="msg_no_backlinks">이 문서를 참조하는 다른 문서가 없습니다.</div>
+                    </div>
+                </details>
+
                 <!-- 구글 드라이브 동기화 아코디언 메뉴 -->
                 <details class="math-section-accordion" id="gdrive-sidebar-accordion" style="margin: 10px; border-color: var(--border);">
                     <summary class="math-section-title" style="font-size: 0.8em; padding: 10px 12px;">

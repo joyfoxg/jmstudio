@@ -8,7 +8,8 @@ This document contains the chronological history of updates, releases, and patch
 
 | Version | Date | Key Patches & Features | Status |
 | :--- | :--- | :--- | :--- |
-| **v3.9.25** | 2026-06-02 | Refactored WYSIWYG math blocks via range replacement & custom template engine | **Latest Stable** |
+| **v3.9.26** | 2026-06-03 | Bi-directional Wiki Links ([[WikiName]]) and dual backlinks panel | **Latest Stable** |
+| **v3.9.25** | 2026-06-02 | Refactored WYSIWYG math blocks via range replacement & custom template engine | Stable |
 | **v3.9.24** | 2026-06-02 | Hotfix for KaTeX formula backslash escaping in WYSIWYG rendering | Stable |
 | **v3.9.23** | 2026-06-02 | Quant Portfolio and K-Stock Trading Diary Templates Launch | Stable |
 | **v3.9.22** | 2026-06-02 | Premium PDF print & preview static pagination engine | Stable |
@@ -25,7 +26,27 @@ This document contains the chronological history of updates, releases, and patch
 
 ## 📢 Detailed Release History (v3.9.0 ~ Present)
 
-### 🚀 v3.9.25 (2026-06-02) - WYSIWYG Multiline Math Refactoring & Custom Templates Plugin [Latest Stable]
+### 🚀 v3.9.26 (2026-06-03) - Bi-directional Wiki Links & Backlinks Panel Implementation [Latest Stable]
+*   **Bi-directional Wiki Links (`[[WikiName]]`) & Real-time Rendering**:
+    *   Leverages CodeMirror 6 `ViewPlugin` and `WidgetType` to dynamically parse and render wiki links as clickable, premium purple neon button widgets (`.cm-wiki-link-btn`) in non-active editor lines.
+    *   Clicking a wiki button queries the workspace (case-insensitive); if found, it opens the file instantly. If not, it automatically creates a new file `WikiName.md` with default YAML Front Matter (`tags: [위키링크]`) under the workspace root and loads it.
+*   **Backend Indexing & backlinks.json Schema**:
+    *   Automatically parses link relations upon document saving (`save_file`) to keep the `.jmstudio/backlinks.json` index in sync.
+    *   Starts a background daemon thread on startup to auto-rebuild or repair the backlinks index across the entire library.
+*   **Dual Backlinks Navigator Panels**:
+    *   **Left Sidebar**: Injected a `#backlinks-sidebar-accordion` section below the file tree to list all incoming links mentioning the active note.
+    *   **Right Preview Panel**: Injected a card grid (`.backlinks-footer`, `.backlink-card`) at the very bottom of the markdown preview content for seamless, relational navigation.
+*   **Knowledge Graph (Force Graph) Category Node Icons**:
+    *   Upgraded the force graph visualization engine to draw unique emoji icons inside each document node based on the document type (categorized into 11 categories: Academic, Chemistry, Stock, Project, Diary, Schedule, Wiki, etc.).
+    *   Renders a custom emoji at the center of each node with a semi-transparent circular background and neon-glowing outer rings, improving both readability and aesthetic visual design.
+    *   Improved geometric scaling logic so that node boundaries and emoji sizes scale proportionally with 2D Canvas zoom-in/out levels.
+*   **Resolved Undo/Redo Runtime Error**:
+    *   Fixed the JS TypeError (`window.undoManager.undo is not a function`) that occurred when clicking the undo/redo toolbar buttons.
+    *   Remapped the operations directly to official CodeMirror 6 commands (`undo(view)` / `redo(view)`) and established a backward-compatible mock object wrapper.
+*   **Premium CSS Styles Integration**:
+    *   Removed invalid inline hover styles from DOM templates and defined unified class styling for `.cm-wiki-link-btn`, `.backlinks-footer`, `.backlink-card`, and `.sidebar-backlink-item` with clean hover transitions, HSL values, and glowing borders compatible with both dark and light modes.
+
+### 🚀 v3.9.25 (2026-06-02) - WYSIWYG Multiline Math Refactoring & Custom Templates Plugin [Stable]
 *   **WYSIWYG Multiline Math Block Refactoring**:
     *   Redesigned multiline math (`$$`) and charts (````) rendering architecture to utilize a unified `Decoration.replace` range instead of buggy `display: none !important;` line decorations.
     *   This eliminates viewport sync glitches and scroll layout rendering bugs across all browsers in the hybrid WYSIWYG mode.

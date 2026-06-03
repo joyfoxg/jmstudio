@@ -2696,4 +2696,197 @@
             height: 32px;
             justify-content: center;
             gap: 0;
+        }
+
+        /* ==========================================================================
+           양방향 위키 링크 (Bi-directional Wiki Links) & 백링크 (Backlinks) 스타일
+           ========================================================================== */
+
+        /* 1. 에디터 내 위키 링크 버튼 */
+        .cm-wiki-link-btn {
+            background: var(--accent-glow) !important;
+            color: var(--accent) !important;
+            border: 1px solid rgba(69, 243, 255, 0.15) !important;
+            padding: 2px 8px !important;
+            border-radius: 4px !important;
+            font-size: 0.88em !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            margin: 0 3px !important;
+            font-weight: 500 !important;
+            font-family: inherit !important;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            vertical-align: middle !important;
+        }
+
+        .cm-wiki-link-btn:hover {
+            background: var(--accent) !important;
+            color: #020617 !important;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 10px var(--accent-glow), 0 2px 6px rgba(69, 243, 255, 0.2) !important;
+            transform: translateY(-0.5px) !important;
+        }
+
+        .cm-wiki-link-btn:active {
+            transform: translateY(0.5px) !important;
+        }
+
+        /* 라이트 테마 대응 */
+        .theme-light .cm-wiki-link-btn {
+            border-color: rgba(2, 132, 199, 0.2) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .theme-light .cm-wiki-link-btn:hover {
+            color: #ffffff !important;
+            box-shadow: 0 0 8px rgba(2, 132, 199, 0.2), 0 2px 4px rgba(2, 132, 199, 0.1) !important;
+        }
+
+        /* 2. 좌측 탐색기 하단 백링크 사이드바 아이템 */
+        .sidebar-backlink-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-size: 0.82em;
+            color: var(--text-main);
+            border: 1px solid transparent;
+            user-select: none;
+        }
+
+        .sidebar-backlink-item:hover {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border-color: rgba(69, 243, 255, 0.15);
+            padding-left: 12px;
+        }
+
+        .theme-light .sidebar-backlink-item:hover {
+            border-color: rgba(2, 132, 199, 0.15);
+        }
+
+        .sidebar-backlink-item i, .sidebar-backlink-item svg {
+            color: var(--text-muted);
+            transition: color 0.15s ease;
+        }
+
+        .sidebar-backlink-item:hover i, .sidebar-backlink-item:hover svg {
+            color: var(--accent);
+        }
+
+        /* 3. 우측 미리보기 패널 하단 백링크 영역 */
+        .backlinks-footer {
+            margin-top: 50px;
+            padding: 24px 0 40px 0;
+            border-top: 1.5px dashed var(--border);
+            animation: toolbarDropdownFadeIn 0.3s ease-out forwards;
+        }
+
+        .backlinks-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .backlinks-title svg, .backlinks-title i {
+            color: var(--accent);
+            filter: drop-shadow(0 0 4px var(--accent-glow));
+        }
+
+        .backlinks-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        /* 4. 백링크 카드형 단추 */
+        .backlink-card {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-light .backlink-card {
+            background: rgba(0, 0, 0, 0.01);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .backlink-card:hover {
+            background: var(--accent-glow);
+            border-color: var(--accent);
+            box-shadow: 0 4px 15px var(--accent-glow), 0 0 1px var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .backlink-card:active {
+            transform: translateY(0);
+        }
+
+        .backlink-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .backlink-card:hover::before {
+            opacity: 1;
+        }
+
+        .backlink-card i, .backlink-card svg {
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .backlink-card:hover i, .backlink-card:hover svg {
+            color: var(--accent);
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 3px var(--accent-glow));
+        }
+
+        .backlink-card .backlink-name {
+            font-size: 0.88em;
+            font-weight: 500;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            transition: color 0.2s ease;
+        }
+
+        .backlink-card:hover .backlink-name {
+            color: #ffffff;
+            text-shadow: 0 0 4px var(--accent-glow);
+        }
+
+        .theme-light .backlink-card:hover .backlink-name {
+            color: var(--accent);
+            text-shadow: none;
         }

@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.24 🌟
+# 🧪 Joy Markdown Studio v3.9.26 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -63,6 +63,19 @@
 * **Zero-Configuration OAuth Login**: Standard credentials are built directly into the compiled application. General users do not need to download or manually configure client_secrets.json files.
 * **App-Specific Scope for Safety**: Operates under the drive.file scope, meaning it can only see and manage files created by this application.
 * **Smart Syncing & Conflict Resolution**: Supports automatic background syncing on save, modification time (mtime) conflict resolution, and remote cloud library browsing to download and import notes instantly.
+
+### 11. 🔗 Bi-directional Wiki Links & Backlinks Panel
+* **Zettelkasten-Style Knowledge Connection**: Interconnects notes and documents to build a cohesive visual knowledge web, integrating raw daily ideas and research insights.
+* **Real-time Wiki Link Widget**: Typing `[[WikiName]]` (or `[[WikiName|Alt Text]]`) automatically renders a clickable, beautiful purple neon button widget inside non-active editor lines. Clicking a button opens the document instantly if it exists, or auto-creates a new markdown file under the workspace root if it does not.
+* **Dual Backlinks Navigators**:
+  * **Left Sidebar**: Injects a Backlinks accordion panel below the file tree, displaying all incoming references mentioning the current note.
+  * **Right Preview Panel**: Injects a premium card grid (`.backlink-card`) at the very bottom of the document preview for relational navigation.
+
+### 🕸️ 12. Knowledge Graph & Category-based Node Icons
+* **Interactive 2D Force Graph**: Renders bi-directional link relationships as a real-time 2D Force-Directed Graph, enabling dynamic exploration of your interconnected knowledge structure.
+* **Category Emoji Mapping**: Analyzes tag metadata, file names, and directory paths to automatically classify documents into 11 categories (Academic, Chemistry, Stock, Project, Diary, Schedule, Wiki, etc.) and paints dedicated emoji icons inside each node.
+* **Glassmorphic Neon Rings**: Envelops each node with a semi-transparent circular backdrop and an elegant glowing neon ring for outstanding aesthetic resolution.
+* **Smart Camera Zoom Scaling**: Maintains clean geometry and precise scaling ratios between node boundaries and centered emoji glyphs at any 2D canvas zoom-in/out level.
 
 ---
 
@@ -139,8 +152,12 @@ Joy Markdown Studio (JM-STUDIO) and Obsidian are both powerful local markdown ed
 * **Obsidian**: Real-time sync and remote viewing require paid services or complex third-party configurations.
 * **JM-STUDIO**: Automatically spins up an internal web server. Access your library wirelessly from tablets or phones, secured with a custom lock screen password.
 
+### 🕸️ 4. Category-based Node Icons in Knowledge Graph
+* **Obsidian**: Node representations in the graph view are limited to uniform circular dots. Users must hover or click each node to identify its character or category.
+* **JM-STUDIO**: Natively embeds intuitive emoji icons (📐, ⚛️, 🧪, 📈, 🗓️, etc.) inside the center of each document node, styled with glowing glassmorphic neon rings, providing unmatched visual clarity and aesthetic satisfaction during network exploration.
+
 > **💡 In Summary:**
-> If Obsidian is a "universal diary where you build your own notes using Lego blocks," **Joy Markdown Studio is a "fully-loaded premium research studio designed so scientists and researchers can dive straight into their work with zero setup!"**
+> If Obsidian is a "universal diary where you build your own notes using Lego blocks," **Joy Markdown Studio is a "fully-loaded premium research studio designed so scientists and researchers can dive straight into their work and interact visually with their knowledge web with zero setup!"**
 
 ---
 

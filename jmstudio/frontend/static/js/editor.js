@@ -277,7 +277,9 @@ class UndoManager {
         window.undoManager = {
             saveState: () => {},
             history: [],
-            currentIndex: -1
+            currentIndex: -1,
+            undo: () => { window.undoEditor && window.undoEditor(); },
+            redo: () => { window.redoEditor && window.redoEditor(); }
         };
 
         function handleEnterKey(view) {
@@ -392,7 +394,8 @@ class UndoManager {
                         if (update.docChanged) {
                             handleEditorInput();
                         }
-                    })
+                    }),
+                    wikiLinkPlugin
                 ]
             });
             
@@ -480,24 +483,6 @@ class UndoManager {
                 });
             } else {
                 window.pendingEditorContent = cleanText;
-            }
-        };
-
-        window.undoEditor = function() {
-            const view = window.cmEditor;
-            if (view && window.cm6) {
-                import("https://esm.sh/@codemirror/commands").then(cmds => {
-                    cmds.undo(view);
-                }).catch(err => console.error("Undo error:", err));
-            }
-        };
-
-        window.redoEditor = function() {
-            const view = window.cmEditor;
-            if (view && window.cm6) {
-                import("https://esm.sh/@codemirror/commands").then(cmds => {
-                    cmds.redo(view);
-                }).catch(err => console.error("Redo error:", err));
             }
         };
 
@@ -729,33 +714,48 @@ class UndoManager {
                                 const baseRadius = 5 + Math.min(degree, 8) * 1.5;
                                 const radius = baseRadius * nodeSizeVal;
                                 
-                                // Color logic based on rules:
-                                let color = '#a855f7';
-                                if (node.missing) {
-                                    color = '#ef4444';
-                                } else if (degree >= 5) {
-                                    color = '#fbbf24';
-                                } else if (node.path) {
-                                    if (node.path.startsWith('doc/')) {
-                                        color = '#0ea5e9';
-                                    } else if (node.path.startsWith('docs/')) {
-                                        color = '#10b981';
+                                // 문서 성격에 따른 이모지 및 색상 로드 (백엔드 매핑 결과 매칭)
+                                let color = node.color || '#a855f7';
+                                if (!node.color) {
+                                    if (node.missing) {
+                                        color = '#ef4444';
+                                    } else if (degree >= 5) {
+                                        color = '#fbbf24';
+                                    } else if (node.path) {
+                                        if (node.path.startsWith('doc/') || node.path.startsWith('docs/')) {
+                                            color = '#0ea5e9';
+                                        }
                                     }
                                 }
+                                const icon = node.icon || (node.missing ? '❓' : '📄');
                                 
-                                const fontSize = (degree >= 5 ? fontSizeVal + 1 : fontSizeVal - 1) / globalScale;
-                                ctx.font = `${fontSize}px sans-serif`;
+                                const isHub = degree >= 5;
+                                const strokeWidth = isHub ? 2.2 : 1.2;
+                                const glowBlur = isHub ? 16 : 6;
                                 
-                                // Node circle with glow effect
+                                // 1. 노드 원형 배경 및 네온 외곽 링 그리기
                                 ctx.beginPath();
                                 ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
-                                ctx.fillStyle = color;
-                                ctx.shadowBlur = degree >= 5 ? 15 : 8;
+                                ctx.fillStyle = color + '22'; // 약 13%의 불투명도로 은은하게 반투명 채움
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = strokeWidth;
+                                ctx.shadowBlur = glowBlur;
                                 ctx.shadowColor = color;
                                 ctx.fill();
-                                ctx.shadowBlur = 0; // reset
+                                ctx.stroke();
+                                ctx.shadowBlur = 0; // 그림자 효과 리셋
                                 
-                                // Text label below
+                                // 2. 노드 중심부에 카테고리 이모지 아이콘 그리기
+                                if (icon) {
+                                    ctx.font = `${radius * 1.15}px sans-serif`;
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.fillText(icon, node.x, node.y);
+                                }
+                                
+                                // 3. 하단 문서 제목 라벨 텍스트 그리기
+                                const fontSize = (degree >= 5 ? fontSizeVal + 1 : fontSizeVal - 1) / globalScale;
+                                ctx.font = `${fontSize}px sans-serif`;
                                 ctx.textAlign = 'center';
                                 ctx.textBaseline = 'middle';
                                 ctx.fillStyle = fontColorVal;
@@ -1100,6 +1100,9 @@ class UndoManager {
             const files = await pywebview.api.list_files();
             renderFileTree(files);
             showToast(t('msg_library_refreshed'));
+            if (currentFilePath) {
+                updateBacklinks(currentFilePath);
+            }
         }
 
         // 파일 트리 렌더링
@@ -1198,6 +1201,102 @@ class UndoManager {
             return ul;
         }
 
+        // WikiLink 열기
+        window.openWikiLink = async function(wikiName) {
+            if (!window.pywebview) return;
+            try {
+                const res = await pywebview.api.open_wiki_link(wikiName);
+                if (res.status === 'success') {
+                    if (res.is_new) {
+                        showToast(`'${wikiName}' ${t('msg_create_success') || '새 문서가 생성되었습니다.'}`);
+                        await refreshWorkspace();
+                    }
+                    await openFile(res.filepath);
+                } else {
+                    showToast("오류: " + res.message);
+                }
+            } catch (e) {
+                console.error("openWikiLink error:", e);
+            }
+        };
+
+        // 백링크 갱신 및 렌더링
+        window.updateBacklinks = async function(relPath) {
+            if (!window.pywebview) return;
+            try {
+                const res = await pywebview.api.get_backlinks(relPath);
+                if (res.status === 'success') {
+                    const backlinks = res.backlinks || [];
+                    
+                    // 1. 좌측 사이드바 백링크 목록 업데이트
+                    const sidebarList = document.getElementById('sidebar-backlinks-list');
+                    if (sidebarList) {
+                        if (backlinks.length === 0) {
+                            sidebarList.innerHTML = `<div style="font-size: 0.78em; color: var(--text-muted); padding: 4px 0;">${t('msg_no_backlinks') || '이 문서를 참조하는 다른 문서가 없습니다.'}</div>`;
+                        } else {
+                            sidebarList.innerHTML = backlinks.map(b => `
+                                <div class="sidebar-backlink-item" onclick="openFile('${b.path}')">
+                                    <i data-lucide="file-text" style="width: 12px; height: 12px;"></i>
+                                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${b.name}</span>
+                                </div>
+                            `).join('');
+                            if (window.lucide) {
+                                window.lucide.createIcons({node: sidebarList});
+                            }
+                        }
+                    }
+                    
+                    // 2. 우측 미리보기 하단 백링크 목록 업데이트
+                    const previewPane = document.getElementById('preview-pane');
+                    if (previewPane) {
+                        const oldFooter = document.getElementById('preview-backlinks-footer');
+                        if (oldFooter) oldFooter.remove();
+                        
+                        const previewContent = document.getElementById('preview-content');
+                        if (previewContent) {
+                            const footer = document.createElement('div');
+                            footer.id = 'preview-backlinks-footer';
+                            footer.className = 'backlinks-footer';
+                            
+                            const titleText = t('lbl_backlinks_title') || '백링크 (Backlinks)';
+                            const noBacklinksText = t('msg_no_backlinks') || '이 문서를 참조하는 다른 문서가 없습니다.';
+                            
+                            let cardsHtml = '';
+                            if (backlinks.length === 0) {
+                                cardsHtml = `<div style="font-size: 0.9em; color: var(--text-muted);">${noBacklinksText}</div>`;
+                            } else {
+                                cardsHtml = `
+                                    <div class="backlinks-list">
+                                        ${backlinks.map(b => `
+                                            <div class="backlink-card" onclick="openFile('${b.path}')">
+                                                <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
+                                                <div class="backlink-name">${b.name}</div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `;
+                            }
+                            
+                            footer.innerHTML = `
+                                <div class="backlinks-title">
+                                    <i data-lucide="link-2" style="width: 16px; height: 16px;"></i>
+                                    <span>${titleText} (${backlinks.length})</span>
+                                </div>
+                                ${cardsHtml}
+                            `;
+                            
+                            previewContent.appendChild(footer);
+                            if (window.lucide) {
+                                window.lucide.createIcons({node: footer});
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("updateBacklinks error:", e);
+            }
+        };
+
         // 파일 열기
         async function openFile(relPath) {
             const res = await pywebview.api.read_file(relPath);
@@ -1237,6 +1336,9 @@ class UndoManager {
                     window.undoManager.currentIndex = -1;
                     window.undoManager.saveState();
                 }
+                
+                // 백링크 정보 갱신
+                updateBacklinks(relPath);
             } else {
                 alert(t('msg_file_read_failed') + res.message);
             }
@@ -1732,20 +1834,26 @@ class UndoManager {
         window.toggleMermaidZoom = toggleMermaidZoom;
 
         function undoEditor() {
-            if (window.undoManager) {
-                const undone = window.undoManager.undo();
-                if (undone) {
-                    showToast(t('msg_undo_done'));
-                }
+            const view = window.cmEditor;
+            if (view && window.cm6) {
+                import("https://esm.sh/@codemirror/commands").then(cmds => {
+                    const undone = cmds.undo(view);
+                    if (undone) {
+                        showToast(t('msg_undo_done'));
+                    }
+                }).catch(err => console.error("Undo error:", err));
             }
         }
 
         function redoEditor() {
-            if (window.undoManager) {
-                const redone = window.undoManager.redo();
-                if (redone) {
-                    showToast(t('msg_redo_done'));
-                }
+            const view = window.cmEditor;
+            if (view && window.cm6) {
+                import("https://esm.sh/@codemirror/commands").then(cmds => {
+                    const redone = cmds.redo(view);
+                    if (redone) {
+                        showToast(t('msg_redo_done'));
+                    }
+                }).catch(err => console.error("Redo error:", err));
             }
         }
 
@@ -2785,6 +2893,9 @@ class UndoManager {
                 showToast(t('msg_save_success'));
                 loadWorkspaceTags(); // Refresh tags index on save
                 
+                // 백링크 정보 실시간 갱신
+                updateBacklinks(currentFilePath);
+                
                 // 구글 드라이브 자동 동기화 처리
                 if (gdriveAuthenticated) {
                     const statusRes = await pywebview.api.gdrive_get_file_sync_status(currentFilePath);
@@ -3814,6 +3925,92 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
             WidgetType,
             syntaxTree
         };
+        // WikiLink Widget 및 ViewPlugin 정의
+        class WikiLinkWidget extends window.cm6.WidgetType {
+            constructor(wikiName) {
+                super();
+                this.wikiName = wikiName;
+            }
+            eq(other) {
+                return other.wikiName === this.wikiName;
+            }
+            toDOM() {
+                const btn = document.createElement("button");
+                btn.className = "cm-wiki-link-btn";
+                btn.innerHTML = `<i data-lucide="link" style="width: 12px; height: 12px;"></i>${this.wikiName}`;
+                btn.title = `클릭하여 '${this.wikiName}' 문서 열기/생성`;
+                
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof window.openWikiLink === "function") {
+                        window.openWikiLink(this.wikiName);
+                    }
+                });
+                
+                setTimeout(() => {
+                    if (window.lucide) {
+                        window.lucide.createIcons({node: btn});
+                    }
+                }, 0);
+                
+                return btn;
+            }
+        }
+
+        const wikiLinkPlugin = window.cm6.ViewPlugin.fromClass(class {
+            constructor(view) {
+                this.decorations = this.getDecorations(view);
+            }
+            update(update) {
+                if (update.docChanged || update.selectionSet) {
+                    this.decorations = this.getDecorations(update.view);
+                }
+            }
+            getDecorations(view) {
+                const builder = new window.cm6.RangeSetBuilder();
+                const state = view.state;
+                
+                const selectedLines = new Set();
+                for (const range of state.selection.ranges) {
+                    const startLine = state.doc.lineAt(range.from).number;
+                    const endLine = state.doc.lineAt(range.to).number;
+                    for (let i = startLine; i <= endLine; i++) {
+                        selectedLines.add(i);
+                    }
+                }
+                
+                for (let l = 1; l <= state.doc.lines; l++) {
+                    const line = state.doc.line(l);
+                    if (selectedLines.has(l)) {
+                        continue;
+                    }
+                    
+                    let wikiRegex = /\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g;
+                    let match;
+                    while ((match = wikiRegex.exec(line.text)) !== null) {
+                        const wikiName = match[1].trim();
+                        if (!wikiName) continue;
+                        
+                        const startPos = line.from + match.index;
+                        const endPos = startPos + match[0].length;
+                        
+                        try {
+                            builder.add(
+                                startPos,
+                                endPos,
+                                window.cm6.Decoration.replace({ widget: new WikiLinkWidget(wikiName) })
+                            );
+                        } catch (err) {
+                            // ignore range error
+                        }
+                    }
+                }
+                return builder.finish();
+            }
+        }, {
+            decorations: v => v.decorations
+        });
 
         // --- WYSIWYG 하이브리드 에디터 데코레이션 및 위젯 정의 ---
         const hideDeco = Decoration.mark({ class: "cm-hidden-mark" });

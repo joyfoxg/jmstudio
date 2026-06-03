@@ -392,6 +392,200 @@ class ExtendedMdViewerApi(MdViewerApi):
         super().__init__()
         self.template_manager = CustomTemplateManager()
 
+    def get_initial_state(self):
+        res = super().get_initial_state()
+        # 백링크 색인 파일 존재 여부 검사 후 비동기 빌드
+        path = self._get_backlinks_json_path()
+        if not os.path.exists(path):
+            import threading
+            threading.Thread(target=self.rebuild_backlinks_index, daemon=True).start()
+        return res
+
+    def save_file(self, rel_path, content):
+        res = super().save_file(rel_path, content)
+        if res.get("status") == "success":
+            try:
+                self.update_backlinks_for_file(rel_path, content)
+            except Exception as e:
+                print(f"Error updating backlinks for {rel_path}: {e}")
+        return res
+
+    def _get_backlinks_json_path(self):
+        dot_folder = os.path.join(self.workspace, '.jmstudio')
+        os.makedirs(dot_folder, exist_ok=True)
+        return os.path.join(dot_folder, 'backlinks.json')
+
+    def _load_backlinks_index(self):
+        path = self._get_backlinks_json_path()
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return {"links": [], "backlinks": {}}
+
+    def _save_backlinks_index(self, data):
+        path = self._get_backlinks_json_path()
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+            return True
+        except Exception:
+            return False
+
+    def rebuild_backlinks_index(self):
+        import re
+        ws = self.workspace
+        links = []
+        
+        # 워크스페이스 내 모든 md, qmd, markdown, txt 파일 검색
+        for root, dirs, files in os.walk(ws):
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ('custom_templates', 'build', 'dist', 'node_modules')]
+            for file in files:
+                if file.lower().endswith(('.md', '.qmd', '.markdown', '.txt')):
+                    full_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(full_path, ws).replace('\\', '/')
+                    try:
+                        with open(full_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        
+                        matches = re.findall(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', content)
+                        for m in matches:
+                            target = m.strip()
+                            if target:
+                                links.append({
+                                    "source": rel_path,
+                                    "target": target
+                                })
+                    except Exception as e:
+                        print(f"Error parsing file {rel_path} for rebuild_backlinks: {e}")
+                        
+        backlinks = {}
+        for link in links:
+            tgt_lower = link["target"].lower()
+            if tgt_lower not in backlinks:
+                backlinks[tgt_lower] = []
+            if link["source"] not in backlinks[tgt_lower]:
+                backlinks[tgt_lower].append(link["source"])
+                
+        index_data = {
+            "links": links,
+            "backlinks": backlinks
+        }
+        self._save_backlinks_index(index_data)
+        return index_data
+
+    def update_backlinks_for_file(self, rel_path, content):
+        import re
+        if os.path.isabs(rel_path):
+            try:
+                rel_path = os.path.relpath(rel_path, self.workspace).replace('\\', '/')
+            except:
+                pass
+        rel_path = rel_path.replace('\\', '/')
+        
+        index_data = self._load_backlinks_index()
+        links = index_data.get("links", [])
+        links = [l for l in links if l["source"] != rel_path]
+        
+        matches = re.findall(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', content)
+        for m in matches:
+            target = m.strip()
+            if target:
+                links.append({
+                    "source": rel_path,
+                    "target": target
+                })
+                
+        backlinks = {}
+        for link in links:
+            tgt_lower = link["target"].lower()
+            if tgt_lower not in backlinks:
+                backlinks[tgt_lower] = []
+            if link["source"] not in backlinks[tgt_lower]:
+                backlinks[tgt_lower].append(link["source"])
+                
+        index_data["links"] = links
+        index_data["backlinks"] = backlinks
+        self._save_backlinks_index(index_data)
+
+    def get_backlinks(self, rel_path):
+        if not rel_path:
+            return {"status": "success", "backlinks": []}
+            
+        filename = os.path.basename(rel_path)
+        wiki_name = os.path.splitext(filename)[0]
+        wiki_name_lower = wiki_name.lower()
+        
+        index_data = self._load_backlinks_index()
+        backlinks_map = index_data.get("backlinks", {})
+        sources = backlinks_map.get(wiki_name_lower, [])
+        
+        valid_sources = []
+        changed = False
+        ws = self.workspace
+        
+        for src in sources:
+            src_full = os.path.join(ws, src)
+            if os.path.exists(src_full) and os.path.isfile(src_full):
+                valid_sources.append({
+                    "name": os.path.basename(src),
+                    "path": src
+                })
+            else:
+                changed = True
+                
+        if changed:
+            import threading
+            threading.Thread(target=self.rebuild_backlinks_index, daemon=True).start()
+            
+        return {"status": "success", "backlinks": valid_sources}
+
+    def open_wiki_link(self, wiki_name):
+        ws = self.workspace
+        wiki_name_clean = wiki_name.strip()
+        wiki_name_lower = wiki_name_clean.lower()
+        
+        found_path = None
+        for root, dirs, files in os.walk(ws):
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ('custom_templates', 'build', 'dist', 'node_modules')]
+            for file in files:
+                name_no_ext, ext = os.path.splitext(file)
+                if name_no_ext.lower() == wiki_name_lower and ext.lower() in ('.md', '.qmd', '.markdown', '.txt'):
+                    found_path = os.path.relpath(os.path.join(root, file), ws).replace('\\', '/')
+                    break
+            if found_path:
+                break
+                
+        if found_path:
+            return {"status": "success", "filepath": found_path, "is_new": False}
+            
+        new_filename = f"{wiki_name_clean}.md"
+        new_filepath = os.path.join(ws, new_filename)
+        
+        try:
+            os.makedirs(os.path.dirname(new_filepath), exist_ok=True)
+            initial_content = f"---\ntags: [위키링크]\n---\n\n# {wiki_name_clean}\n\n"
+            with open(new_filepath, 'w', encoding='utf-8') as f:
+                f.write(initial_content)
+                
+            from .app_config import get_config, save_config
+            cfg = get_config()
+            added_docs = cfg.get("added_documents", [])
+            
+            rel_new_path = new_filename.replace('\\', '/')
+            if rel_new_path not in added_docs:
+                added_docs.append(rel_new_path)
+                cfg["added_documents"] = added_docs
+                save_config(cfg)
+                
+            self.update_backlinks_for_file(rel_new_path, initial_content)
+            
+            return {"status": "success", "filepath": rel_new_path, "is_new": True}
+        except Exception as e:
+            return {"status": "error", "message": f"새 위키 문서 생성 중 오류 발생: {str(e)}"}
+
     def save_custom_template(self, title, desc, icon, color, content):
         return self.template_manager.save_custom_template(title, desc, icon, color, content)
 
