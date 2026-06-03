@@ -862,9 +862,8 @@
             dropdown.className = 'toolbar-dropdown';
             dropdown.id = 'toolbar-quarto-dropdown';
             dropdown.innerHTML = `
-                <button class="toolbar-btn toolbar-dropdown-btn" id="toolbar-quarto-btn" title="Quarto 컴파일 빌드 (PDF/HTML)" style="color: #60a5fa; display: flex; align-items: center; gap: 4px; padding: 2px 6px;">
+                <button class="toolbar-btn toolbar-dropdown-btn" id="toolbar-quarto-btn" title="Quarto 컴파일 빌드 (PDF/HTML)" style="color: #60a5fa;">
                     <i data-lucide="book-open" style="width: 14px; height: 14px;"></i>
-                    <span style="font-size: 0.85em; font-weight: 600; font-family: 'Outfit';">컴파일</span>
                 </button>
                 <div class="toolbar-dropdown-menu" id="toolbar-quarto-menu" style="min-width: 160px; top: 100%; left: 0;">
                     <div class="dropdown-item" onclick="triggerQuartoCompile('pdf')" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.85em;">
