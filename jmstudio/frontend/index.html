@@ -1704,5 +1704,35 @@
     <script type="module" src="/static/js/templates.js?v=3.9.25"></script>
     <script type="module" src="/static/js/custom_templates_ui.js?v=3.9.25"></script>
 
+    <!-- 창 크기 / 해상도 감지 및 툴바 폰트 자동 스케일러 -->
+    <script>
+        (function() {
+            function adjustHeaderFontSize() {
+                const width = window.innerWidth;
+                const header = document.querySelector('header');
+                if (!header) return;
+                
+                header.classList.remove('hdr-scale-large', 'hdr-scale-medium', 'hdr-scale-small', 'hdr-scale-tiny');
+                
+                if (width >= 1650) {
+                    header.classList.add('hdr-scale-large');
+                } else if (width >= 1350) {
+                    header.classList.add('hdr-scale-medium');
+                } else if (width >= 1100) {
+                    header.classList.add('hdr-scale-small');
+                } else {
+                    header.classList.add('hdr-scale-tiny');
+                }
+            }
+            
+            window.addEventListener('resize', adjustHeaderFontSize);
+            window.addEventListener('DOMContentLoaded', adjustHeaderFontSize);
+            // 초기 렌더링 시 레이스 방지를 위해 즉시 실행 및 지연 연쇄 실행
+            adjustHeaderFontSize();
+            setTimeout(adjustHeaderFontSize, 100);
+            setTimeout(adjustHeaderFontSize, 500);
+        })();
+    </script>
+
 </body>
 </html>

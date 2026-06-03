@@ -164,6 +164,7 @@
             transition: all 0.2s ease;
             font-family: 'Outfit', sans-serif;
             font-weight: 500;
+            white-space: nowrap;
         }
         .add-doc-btn:hover {
             background: var(--accent);
@@ -195,6 +196,7 @@
             align-items: center;
             gap: 6px;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .mode-btn.active {
@@ -229,6 +231,7 @@
             align-items: center;
             gap: 6px;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .btn:hover {
@@ -2621,3 +2624,76 @@
             background: rgba(69, 243, 255, 0.25) !important;
             color: inherit !important;
         }
+
+        /* 자바스크립트 동적 해상도/창크기 스케일링 스타일 정의 */
+        header.hdr-scale-large .brand-title {
+            font-size: 1.25em;
+            display: block;
+        }
+        header.hdr-scale-large .add-doc-btn,
+        header.hdr-scale-large .mode-btn,
+        header.hdr-scale-large .btn {
+            font-size: 0.85em;
+            padding: 6px 12px;
+            gap: 8px;
+        }
+        header.hdr-scale-large .mode-btn {
+            padding: 6px 16px;
+        }
+        header.hdr-scale-large .btn {
+            padding: 8px 14px;
+        }
+
+        header.hdr-scale-medium .brand-title {
+            font-size: 1.1em;
+            display: block;
+        }
+        header.hdr-scale-medium .add-doc-btn,
+        header.hdr-scale-medium .mode-btn,
+        header.hdr-scale-medium .btn {
+            font-size: 0.78em;
+            padding: 5px 10px;
+            gap: 5px;
+        }
+        header.hdr-scale-medium .mode-btn {
+            padding: 5px 12px;
+        }
+        header.hdr-scale-medium .btn {
+            padding: 6px 10px;
+        }
+
+        header.hdr-scale-small .brand-title {
+            display: none;
+        }
+        header.hdr-scale-small .add-doc-btn,
+        header.hdr-scale-small .mode-btn,
+        header.hdr-scale-small .btn {
+            font-size: 0.72em;
+            padding: 4px 8px;
+            gap: 4px;
+        }
+        header.hdr-scale-small .mode-btn {
+            padding: 4px 8px;
+        }
+        header.hdr-scale-small .btn {
+            padding: 5px 8px;
+        }
+
+        header.hdr-scale-tiny .brand-title {
+            display: none;
+        }
+        header.hdr-scale-tiny .add-doc-btn span,
+        header.hdr-scale-tiny .mode-btn span,
+        header.hdr-scale-tiny .btn span {
+            display: none; /* 아주 작아지면 아이콘만 노출 */
+        }
+        header.hdr-scale-tiny .add-doc-btn,
+        header.hdr-scale-tiny .mode-btn,
+        header.hdr-scale-tiny .btn {
+            padding: 8px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            justify-content: center;
+            gap: 0;
+        }
