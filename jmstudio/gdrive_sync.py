@@ -25,9 +25,23 @@ class GoogleDriveSync:
             self.client_secrets_path = os.path.normpath(os.path.join(self.workspace_path, 'client_secrets.json'))
         self.token_file_path = os.path.normpath(os.path.join(self.workspace_path, 'token.json'))
         self.creds = None
-        self.service = None
+        self._service = None
         self.app_folder_id = None
         self.load_credentials()
+
+    @property
+    def service(self):
+        if self._service is None and self.creds and self.creds.valid:
+            try:
+                self._service = build('drive', 'v3', credentials=self.creds)
+            except Exception as e:
+                print(f"Error building service lazy: {e}")
+                self._service = None
+        return self._service
+
+    @service.setter
+    def service(self, value):
+        self._service = value
 
     def load_credentials(self):
         if os.path.exists(self.token_file_path):
@@ -36,13 +50,6 @@ class GoogleDriveSync:
             except Exception as e:
                 print(f"Error loading credentials: {e}")
                 self.creds = None
-        
-        if self.creds and self.creds.valid:
-            try:
-                self.service = build('drive', 'v3', credentials=self.creds)
-            except Exception as e:
-                print(f"Error building service: {e}")
-                self.service = None
 
     def is_authenticated(self):
         if self.creds and self.creds.expired and self.creds.refresh_token:
@@ -50,7 +57,7 @@ class GoogleDriveSync:
                 self.creds.refresh(Request())
                 with open(self.token_file_path, 'w') as token:
                     token.write(self.creds.to_json())
-                self.service = build('drive', 'v3', credentials=self.creds)
+                self._service = build('drive', 'v3', credentials=self.creds)
                 return True
             except Exception as e:
                 print(f"Token refresh failed: {e}")

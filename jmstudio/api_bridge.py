@@ -14,15 +14,27 @@ from .gdrive_sync import GoogleDriveSync
 window = None
 api_instance = None
 
+_latest_version_cache = None
+
 def get_pypi_latest_version():
-    url = "https://pypi.org/pypi/joy-markdown-studio/json"
-    try:
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=2.0) as response:
-            data = json.loads(response.read().decode('utf-8'))
-            return data.get("info", {}).get("version", "")
-    except Exception:
-        return ""
+    global _latest_version_cache
+    if _latest_version_cache is not None:
+        return _latest_version_cache
+        
+    import threading
+    def fetch_version():
+        global _latest_version_cache
+        url = "https://pypi.org/pypi/joy-markdown-studio/json"
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=2.0) as response:
+                data = json.loads(response.read().decode('utf-8'))
+                _latest_version_cache = data.get("info", {}).get("version", "")
+        except Exception:
+            _latest_version_cache = ""
+            
+    threading.Thread(target=fetch_version, daemon=True).start()
+    return ""
 
 def is_update_available(current_ver, latest_ver):
     if not latest_ver:
