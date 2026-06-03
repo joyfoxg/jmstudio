@@ -64,6 +64,11 @@ def get_local_ip():
 def extract_tags_from_file(file_path):
     if not os.path.exists(file_path) or not os.path.isfile(file_path):
         return []
+    
+    # Ignore binary media files
+    if not file_path.lower().endswith(('.md', '.qmd', '.markdown', '.txt')):
+        return []
+        
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             lines = []
