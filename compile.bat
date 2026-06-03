@@ -49,7 +49,7 @@ for /f "tokens=*" %%a in ('%PY_CMD% -c "from jmstudio import app_config; print(a
     set APP_VER=v%%a
 )
 
-%PY_CMD% -m PyInstaller --clean --noconfirm --onedir --windowed --add-data "jmstudio/frontend;jmstudio/frontend" --add-data "client_secrets.json;." --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" jmstudio/__main__.py
+%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "jmstudio/frontend;jmstudio/frontend" --add-data "client_secrets.json;." --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" jmstudio/__main__.py
 if %errorlevel% neq 0 (
     echo [ERROR] PyInstaller compilation failed!
     pause
@@ -61,21 +61,21 @@ echo [Step 4] Creating distribution ZIP package...
 if exist .\dist\JoyMarkdownStudio-%APP_VER%.zip (
     del .\dist\JoyMarkdownStudio-%APP_VER%.zip
 )
-powershell -Command "Compress-Archive -Path '.\dist\JoyMarkdownStudio-%APP_VER%' -DestinationPath '.\dist\JoyMarkdownStudio-%APP_VER%.zip' -Force"
+powershell -Command "Compress-Archive -Path '.\dist\JoyMarkdownStudio-%APP_VER%.exe' -DestinationPath '.\dist\JoyMarkdownStudio-%APP_VER%.zip' -Force"
 
 echo.
 echo =======================================================================
 echo   SUCCESS: Standalone app compiled successfully (Instant Boot)!
 echo =======================================================================
 echo.
-echo The compiled folder is saved at:
-echo   =^> .\dist\JoyMarkdownStudio-%APP_VER%
+echo The compiled executable is saved at:
+echo   ==> .\dist\JoyMarkdownStudio-%APP_VER%.exe
 echo.
 echo The distribution ZIP package is saved at:
-echo   =^> .\dist\JoyMarkdownStudio-%APP_VER%.zip
+echo   ==> .\dist\JoyMarkdownStudio-%APP_VER%.zip
 echo.
 echo [Distribution Guide]
-echo 1. Run 'JoyMarkdownStudio-%APP_VER%.exe' inside the 'dist\JoyMarkdownStudio-%APP_VER%' folder to boot instantly (0.1s)!
-echo 2. For distribution, simply copy or send the 'JoyMarkdownStudio-%APP_VER%.zip' file.
+echo 1. Run 'JoyMarkdownStudio-%APP_VER%.exe' in '.\dist' folder to boot instantly (0.1s)!
+echo 2. For distribution, simply copy or send the 'JoyMarkdownStudio-%APP_VER%.exe' or its ZIP file.
 echo.
 pause
