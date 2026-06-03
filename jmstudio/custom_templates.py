@@ -560,3 +560,43 @@ class ExtendedMdViewerApi(MdViewerApi):
             except:
                 pass
             return {"status": "error", "message": f"컴파일 중 시스템 예외 발생: {str(e)}"}
+
+    def download_compiled_file(self, rel_path, filename):
+        import webview
+        from . import api_bridge
+        import shutil
+        
+        try:
+            if api_bridge.window is None:
+                return {"status": "error", "message": "Window instance not bound"}
+                
+            ws = self.workspace
+            full_path = os.path.abspath(os.path.join(ws, rel_path))
+            
+            if not os.path.exists(full_path) or not os.path.isfile(full_path):
+                return {"status": "error", "message": "다운로드할 원본 파일을 찾을 수 없습니다."}
+                
+            ext = os.path.splitext(filename)[1].lower()
+            if ext == '.pdf':
+                file_types = ('PDF Document (*.pdf)', 'All files (*.*)')
+            elif ext == '.html':
+                file_types = ('HTML Document (*.html)', 'All files (*.*)')
+            else:
+                file_types = ('All files (*.*)',)
+                
+            file_path = api_bridge.window.create_file_dialog(
+                webview.SAVE_DIALOG,
+                directory=os.path.dirname(full_path),
+                save_filename=filename,
+                file_types=file_types
+            )
+            
+            if file_path:
+                if isinstance(file_path, (list, tuple)):
+                    file_path = file_path[0]
+                shutil.copy2(full_path, file_path)
+                return {"status": "success"}
+            return {"status": "cancel"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+

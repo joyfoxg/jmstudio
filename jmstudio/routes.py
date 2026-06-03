@@ -48,10 +48,10 @@ def serve_static(filepath):
 @app.route('/workspace/<filepath:path>')
 def serve_workspace_file(filepath):
     # active_workspace 내의 상대 파일 경로 이미지 및 자산 서빙
-    if api_bridge.window is None:
+    if api_bridge.api_instance is None:
         return HTTPResponse(status=500, body="API instance not initialized")
         
-    api_instance = api_bridge.window.js_api
+    api_instance = api_bridge.api_instance
     active_workspace = api_instance.workspace
     
     decoded_path = urllib.parse.unquote(filepath)

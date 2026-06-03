@@ -1045,8 +1045,25 @@
                             titleEl.innerHTML = `<i data-lucide="file-text" style="width: 18px; height: 18px;"></i> <span>${compileRes.filename} 미리보기</span>`;
                         }
                         if (downloadBtn) {
-                            downloadBtn.href = webUrl;
-                            downloadBtn.setAttribute('download', compileRes.filename);
+                            downloadBtn.onclick = async function(e) {
+                                e.preventDefault();
+                                if (!window.pywebview || !window.pywebview.api || !window.pywebview.api.download_compiled_file) {
+                                    alert("API 연결 대기 중입니다. 잠시 후 다시 시도해 주세요.");
+                                    return;
+                                }
+                                try {
+                                    const dlRes = await window.pywebview.api.download_compiled_file(compileRes.output_path, compileRes.filename);
+                                    if (dlRes.status === 'success') {
+                                        if (typeof window.showToast === 'function') {
+                                            window.showToast("파일이 로컬에 저장되었습니다.");
+                                        }
+                                    } else if (dlRes.status === 'error') {
+                                        alert("파일 저장 실패: " + dlRes.message);
+                                    }
+                                } catch (err) {
+                                    alert("다운로드 중 예외 발생: " + err.message);
+                                }
+                            };
                         }
                         
                         modal.style.display = 'flex';
