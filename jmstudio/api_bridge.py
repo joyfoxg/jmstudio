@@ -41,6 +41,7 @@ def is_update_available(current_ver, latest_ver):
 def get_local_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0.2)
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
         s.close()

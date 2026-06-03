@@ -502,11 +502,11 @@ class ExtendedMdViewerApi(MdViewerApi):
             )
             
             try:
-                stdout, stderr = process.communicate(timeout=40.0)
+                stdout, stderr = process.communicate(timeout=180.0)
             except subprocess.TimeoutExpired:
                 process.kill()
                 stdout, stderr = process.communicate()
-                return {"status": "error", "message": "컴파일 시간 초과 (40초 한도 초과)"}
+                return {"status": "error", "message": "컴파일 시간 초과 (3분 한도 초과)"}
                 
             temp_out_name = f".quarto_temp_compile_{base_name}.{output_format}"
             temp_out_path = os.path.join(target_dir, temp_out_name)
