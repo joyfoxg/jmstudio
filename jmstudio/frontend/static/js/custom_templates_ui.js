@@ -10,6 +10,7 @@
         initialized = true;
         injectTriggersAndModals();
         hijackRenderTemplates();
+        injectQuartoToolbarAndConsole();
     }
 
     // 1. DOM 로드 후 아이콘 버튼 및 모달 동적 강제 주입
@@ -1076,11 +1077,6 @@
         }
     };
 
-    // J. 초기화 구문 바인딩 확장
-    const originalInit = init;
-    init = function() {
-        originalInit();
-        injectQuartoToolbarAndConsole();
-    };
+    // J. 초기화 구문 바인딩 완료
 
 })();
