@@ -18,7 +18,7 @@
     <!-- force-graph: 그래프 뷰 버튼 클릭 시 동적 로드 -->
     
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
     <link rel="stylesheet" href="/static/css/style.css?v=3.9.25">
 </head>
@@ -71,6 +71,10 @@
             <button class="mode-btn" id="mode-graph" onclick="toggleGraphView()" style="color: #a855f7;">
                 <i data-lucide="share-2" style="width: 14px; height: 14px;"></i>
                 <span data-i18n="mode_graph">Graph</span>
+            </button>
+            <button class="mode-btn" id="mode-canvas" onclick="toggleCanvasView()" style="color: #45f3ff;">
+                <i data-lucide="layout-dashboard" style="width: 14px; height: 14px;"></i>
+                <span data-i18n="mode_canvas">Canvas</span>
             </button>
         </div>
 
@@ -1194,6 +1198,67 @@
             </div>
         </div>
 
+        <!-- 인피니트 캔버스 컨테이너 (기본 숨김) -->
+        <div id="canvas-view-container" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #08090d; z-index: 99990; font-family: 'Outfit', sans-serif;">
+            <!-- D3-Zoom 격자 그리드 캔버스 보드 -->
+            <div id="canvas-board" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; cursor: default; user-select: none;">
+                <!-- SVG 연결선 (Edge) 레이어 -->
+                <svg id="canvas-svg-layer" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1;">
+                    <defs>
+                        <!-- 베지어 연결선 끝 화살표 정의 -->
+                        <marker id="canvas-arrowhead" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1.5 L 10 5 L 0 8.5 z" fill="currentColor" />
+                        </marker>
+                    </defs>
+                </svg>
+                <!-- HTML 카드 노드 레이어 -->
+                <div id="canvas-nodes-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; transform-origin: 0 0; pointer-events: none;"></div>
+            </div>
+            
+            <!-- 캔버스 전용 툴바 -->
+            <div class="canvas-toolbar" style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; background: rgba(15, 17, 26, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 6px 18px; gap: 8px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 10000; user-select: none;">
+                <button onclick="addCanvasTextNode()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="텍스트 카드 추가">
+                    <i data-lucide="sticky-note" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button onclick="addCanvasFileNode()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="서재 문서 임베드 추가">
+                    <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button onclick="addCanvasFolderNode()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="폴더 임베드 추가">
+                    <i data-lucide="folder" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button onclick="addCanvasMediaNode()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="이미지/미디어 임베드 추가">
+                    <i data-lucide="image" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button onclick="saveActiveCanvas()" style="background: none; border: none; color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="캔버스 즉시 저장 (Ctrl + S)">
+                    <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button onclick="saveActiveCanvasAs()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="다른 이름으로 저장">
+                    <i data-lucide="file-output" style="width: 16px; height: 16px;"></i>
+                </button>
+                
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+                
+                <button onclick="canvasUndo()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="되돌리기 (Ctrl + Z)">
+                    <i data-lucide="undo-2" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button onclick="canvasRedo()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="다시실행 (Ctrl + Y)">
+                    <i data-lucide="redo-2" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button onclick="canvasFitToView()" style="background: none; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'" title="화면에 모든 노드 맞춤">
+                    <i data-lucide="maximize" style="width: 16px; height: 16px;"></i>
+                </button>
+                
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 4px;"></div>
+                
+                <button onclick="closeCanvasView()" style="background: none; border: none; color: #ff5858; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,88,88,0.15)'" onmouseout="this.style.background='none'" title="캔버스 닫기">
+                    <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+
+            <!-- 우측 상단 닫기 버튼 -->
+            <button onclick="toggleCanvasView()" style="position: absolute; top: 20px; right: 20px; z-index: 10000; background: rgba(69, 243, 255, 0.2); border: 1px solid var(--accent); color: white; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 0 10px rgba(69,243,255,0.4); transition: all 0.2s;" onmouseover="this.style.background='rgba(69,243,255,0.4)'; this.style.boxShadow='0 0 15px rgba(69,243,255,0.6)'" onmouseout="this.style.background='rgba(69, 243, 255, 0.2)'; this.style.boxShadow='0 0 10px rgba(69,243,255,0.4)'">×</button>
+        </div>
+
         <!-- 우측 TOC 플로팅 패널 -->
         <div class="toc-pane" id="sidebar-toc">
             <div class="toc-title" data-i18n="toc_title">문서 개요 (TOC)</div>
@@ -1716,6 +1781,7 @@
     <script type="module" src="/static/js/emoji.js?v=3.9.25"></script>
     <script type="module" src="/static/js/templates.js?v=3.9.25"></script>
     <script type="module" src="/static/js/custom_templates_ui.js?v=3.9.25"></script>
+    <script type="module" src="/static/js/canvas_editor.js?v=3.9.25"></script>
 
     <!-- 창 크기 / 해상도 감지 및 툴바 폰트 자동 스케일러 -->
     <script>

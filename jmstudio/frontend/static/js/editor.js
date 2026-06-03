@@ -1104,6 +1104,7 @@ class UndoManager {
                 updateBacklinks(currentFilePath);
             }
         }
+        window.refreshWorkspace = refreshWorkspace;
 
         // 파일 트리 렌더링
         function collectLocalFiles(items) {
@@ -1168,6 +1169,13 @@ class UndoManager {
                     const childrenWrapper = document.createElement('div');
                     childrenWrapper.className = 'tree-folder-children';
                     
+                    // 폴더도 드래그 앤 드롭으로 캔버스에 추가 가능하도록 설정
+                    itemEl.setAttribute('draggable', 'true');
+                    itemEl.ondragstart = (e) => {
+                        e.stopPropagation();
+                        e.dataTransfer.setData("text/plain", item.path);
+                    };
+                    
                     itemEl.onclick = (e) => {
                         if (e.target.closest('.tree-item-actions')) return;
                         childrenWrapper.classList.toggle('open');
@@ -1187,6 +1195,10 @@ class UndoManager {
                     folderWrapper.appendChild(childrenWrapper);
                     ul.appendChild(folderWrapper);
                 } else {
+                    itemEl.setAttribute('draggable', 'true');
+                    itemEl.ondragstart = (e) => {
+                        e.dataTransfer.setData("text/plain", item.path);
+                    };
                     itemEl.onclick = (e) => {
                         if (e.target.closest('.tree-item-actions')) return;
                         // 활성화 스타일 해제 후 신규 지정
@@ -1299,9 +1311,42 @@ class UndoManager {
 
         // 파일 열기
         async function openFile(relPath) {
+            if (relPath.endsWith('.canvas')) {
+                currentFilePath = relPath;
+                if (!isNavigatingHistory) {
+                    if (fileHistoryIndex === -1 || fileHistory[fileHistoryIndex] !== relPath) {
+                        fileHistory = fileHistory.slice(0, fileHistoryIndex + 1);
+                        fileHistory.push(relPath);
+                        fileHistoryIndex = fileHistory.length - 1;
+                    }
+                }
+                updateNavigationButtons();
+                
+                const titleEl = document.getElementById('active-file-title');
+                const normalizedRelPath = relPath.replace(/\\/g, '/');
+                const fileName = normalizedRelPath.substring(normalizedRelPath.lastIndexOf('/') + 1);
+                if (titleEl) {
+                    titleEl.innerText = fileName;
+                    const safeRoot = (workspaceRoot || "").replace(/\\/g, '/');
+                    const fullSavingPath = (safeRoot + '/' + normalizedRelPath).replace(/\/+/g, '/');
+                    titleEl.title = t('msg_active_file_tooltip') + fullSavingPath;
+                }
+                
+                if (window.toggleCanvasView) {
+                    window.toggleCanvasView(true);
+                    await window.loadCanvas(relPath);
+                }
+                return;
+            }
+            
             const res = await pywebview.api.read_file(relPath);
             if (res.status === 'success') {
                 currentFilePath = relPath;
+                
+                // 캔버스 뷰 열려 있다면 닫기
+                if (window.toggleCanvasView) {
+                    window.toggleCanvasView(false);
+                }
                 
                 // 파일 열기 성공 시 히스토리 기록
                 if (!isNavigatingHistory) {

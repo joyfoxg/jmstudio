@@ -8,7 +8,7 @@ This document contains the chronological history of updates, releases, and patch
 
 | Version | Date | Key Patches & Features | Status |
 | :--- | :--- | :--- | :--- |
-| **v3.9.26** | 2026-06-03 | Bi-directional Wiki Links ([[WikiName]]) and dual backlinks panel | **Latest Stable** |
+| **v3.9.26** | 2026-06-03 | Bi-directional Wiki Links, dual backlinks panel, and Obsidian-compatible Infinite Canvas | **Latest Stable** |
 | **v3.9.25** | 2026-06-02 | Refactored WYSIWYG math blocks via range replacement & custom template engine | Stable |
 | **v3.9.24** | 2026-06-02 | Hotfix for KaTeX formula backslash escaping in WYSIWYG rendering | Stable |
 | **v3.9.23** | 2026-06-02 | Quant Portfolio and K-Stock Trading Diary Templates Launch | Stable |
@@ -26,7 +26,16 @@ This document contains the chronological history of updates, releases, and patch
 
 ## 📢 Detailed Release History (v3.9.0 ~ Present)
 
-### 🚀 v3.9.26 (2026-06-03) - Bi-directional Wiki Links & Backlinks Panel Implementation [Latest Stable]
+### 🚀 v3.9.26 (2026-06-03) - Wiki Links, Backlinks Panel, and Obsidian-compatible Infinite Canvas Implementation [Latest Stable]
+*   **Obsidian-compatible Infinite Canvas Feature**:
+    *   D3-Zoom-based infinite panning, mouse/trackpad pinch zoom controls, and a 16px neon grid background.
+    *   Real-time drawing and connection drop of bezier line edges between node ports.
+    *   Embedded card nodes for markdown files (cached render), images, and PDFs (native iframe) with lazy CodeMirror 6 editor binding.
+    *   Canvas-specific keyboard shortcuts for infinite Undo/Redo (`Ctrl+Z`, `Ctrl+Y`) and instant save (`Ctrl+S`).
+    *   Edge connection selection highlight and custom HSL color picker (6 colors) with delete toolbar (click detection radius expanded to 28px for optimal hit accuracy).
+    *   Replaced default grab cursor with default arrow cursor (`default`) on board, and move cursor (`move`) during card dragging.
+    *   Interactive Directory Viewer (Folder Embedding Card): Drag-and-drop folders from sidebar tree, list/grid layout toggle, real-time file search filter, alphabetical sorting (A-Z/Z-A), document creation (`+`), parent folder navigation (`..`), and direct editor navigation.
+    *   Save As Dialog Integration: Prompts PyWebView native save dialog to specify custom name and location for new/exported `.canvas` files.
 *   **Bi-directional Wiki Links (`[[WikiName]]`) & Real-time Rendering**:
     *   Leverages CodeMirror 6 `ViewPlugin` and `WidgetType` to dynamically parse and render wiki links as clickable, premium purple neon button widgets (`.cm-wiki-link-btn`) in non-active editor lines.
     *   Clicking a wiki button queries the workspace (case-insensitive); if found, it opens the file instantly. If not, it automatically creates a new file `WikiName.md` with default YAML Front Matter (`tags: [위키링크]`) under the workspace root and loads it.

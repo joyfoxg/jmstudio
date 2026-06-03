@@ -2889,4 +2889,354 @@
         .theme-light .backlink-card:hover .backlink-name {
             color: var(--accent);
             text-shadow: none;
+        }
+
+        /* =======================================================================
+           5. 인피니트 캔버스 (Infinite Canvas) 전용 스타일 명세
+           ======================================================================= */
+        #canvas-board {
+            background-color: #08090d;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+        .theme-light #canvas-board {
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+        .canvas-tool-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: #e2e8f0;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .theme-light .canvas-tool-btn {
+            color: #1e293b;
+        }
+        .canvas-tool-btn:hover {
+            border-color: var(--accent);
+            background: rgba(69, 243, 255, 0.12);
+            color: var(--accent);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+        .theme-light .canvas-tool-btn:hover {
+            background: rgba(2, 132, 199, 0.1);
+        }
+        .canvas-node {
+            position: absolute;
+            background: rgba(20, 22, 30, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: box-shadow 0.2s, border-color 0.2s;
+            pointer-events: auto;
+        }
+        .theme-light .canvas-node {
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+        .canvas-node.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow), 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        .canvas-node-header {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: move;
+            user-select: none;
+        }
+        .theme-light .canvas-node-header {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        .canvas-node-title {
+            font-size: 0.78em;
+            font-weight: 600;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 70%;
+        }
+        .canvas-node-content {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            font-size: 0.84em;
+            line-height: 1.5;
+            color: var(--text-main);
+            background: transparent;
+            outline: none;
+            user-select: text;
+        }
+        .canvas-node-resizer {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--border);
+            right: 0;
+            bottom: 0;
+            cursor: se-resize;
+            border-radius: 0 0 12px 0;
+            transition: background 0.2s;
+            z-index: 6;
+        }
+        .canvas-node-resizer:hover {
+            background: var(--accent);
+        }
+        .canvas-node-port {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            cursor: crosshair;
+            z-index: 5;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .theme-light .canvas-node-port {
+            background: rgba(0, 0, 0, 0.15);
+        }
+        .canvas-node-port:hover {
+            background: var(--accent);
+            transform: scale(1.4);
+            box-shadow: 0 0 8px var(--accent);
+        }
+        .port-top { top: -5px; left: calc(50% - 5px); }
+        .port-bottom { bottom: -5px; left: calc(50% - 5px); }
+        .port-left { left: -5px; top: calc(50% - 5px); }
+        .port-right { right: -5px; top: calc(50% - 5px); }
+        .canvas-edge {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 2px;
+            transition: stroke 0.2s, stroke-width 0.2s;
+            cursor: pointer;
+            pointer-events: stroke;
+        }
+        .canvas-edge:hover {
+            stroke: var(--accent);
+            stroke-width: 3px;
+        }
+        .canvas-edge.selected {
+            stroke: #f43f5e !important;
+            stroke-width: 3px;
+            filter: drop-shadow(0 0 4px rgba(244, 63, 94, 0.4));
+        }
+
+        /* =======================================================================
+           인피니트 캔버스 (Infinite Canvas) 확장 피쳐 및 버그 수정 스타일 명세
+           ======================================================================= */
+        .canvas-align-line {
+            stroke: rgba(69, 243, 255, 0.5);
+            stroke-width: 1.5px;
+            stroke-dasharray: 4,4;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .theme-light .canvas-align-line {
+            stroke: rgba(2, 132, 199, 0.5);
+        }
+
+        /* 플로팅 컨텍스트 툴바 */
+        .canvas-context-toolbar {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            background: rgba(15, 17, 26, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 4px 6px;
+            gap: 4px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            pointer-events: auto;
+            transform: translate(-50%, -100%);
+            margin-top: -16px;
+        }
+        .theme-light .canvas-context-toolbar {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .canvas-context-btn {
+            background: none;
+            border: none;
+            color: #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .theme-light .canvas-context-btn {
+            color: #334155;
+        }
+        .canvas-context-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent);
+        }
+        .theme-light .canvas-context-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* 색상 선택 파레트 */
+        .canvas-color-palette {
+            display: flex;
+            gap: 6px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            margin-right: 4px;
+        }
+        .theme-light .canvas-color-palette {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .canvas-color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .theme-light .canvas-color-dot {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+        .canvas-color-dot:hover {
+            transform: scale(1.25);
+            border-color: #fff;
+        }
+        .theme-light .canvas-color-dot:hover {
+            border-color: #000;
+        }
+
+        /* Obsidian 컬러칩 HSL 테마 값 정의 (1~6) */
+        .canvas-node[data-color="1"] { border-color: #ff5252; box-shadow: 0 0 10px rgba(255, 82, 82, 0.2); }
+        .canvas-node[data-color="2"] { border-color: #ff9800; box-shadow: 0 0 10px rgba(255, 152, 0, 0.2); }
+        .canvas-node[data-color="3"] { border-color: #ffeb3b; box-shadow: 0 0 10px rgba(255, 235, 59, 0.2); }
+        .canvas-node[data-color="4"] { border-color: #4caf50; box-shadow: 0 0 10px rgba(76, 175, 80, 0.2); }
+        .canvas-node[data-color="5"] { border-color: #2196f3; box-shadow: 0 0 10px rgba(33, 150, 243, 0.2); }
+        .canvas-node[data-color="6"] { border-color: #9c27b0; box-shadow: 0 0 10px rgba(156, 39, 176, 0.2); }
+
+        /* 시인성 좋은 커서 가이드 */
+        #canvas-board {
+            cursor: grab;
+        }
+        #canvas-board:active {
+            cursor: grabbing;
+        }
+        .canvas-node-header {
+            cursor: move;
+        }
+        .canvas-node-port {
+            cursor: crosshair !important;
+        }
+        .canvas-node-resizer {
+            cursor: nwse-resize !important;
+        }
+
+        /* 캔버스 마우스 우클릭 메뉴 */
+        .canvas-context-menu {
+            position: fixed;
+            background: rgba(20, 22, 30, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 6px;
+            min-width: 160px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            z-index: 200000;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .theme-light .canvas-context-menu {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .canvas-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .theme-light .canvas-menu-item {
+            color: #334155;
+        }
+        .canvas-menu-item:hover {
+            background: rgba(69, 243, 255, 0.1);
+            color: var(--accent);
+        }
+        .theme-light .canvas-menu-item:hover {
+            background: rgba(2, 132, 199, 0.08);
+        }
+
+        /* --- Canvas Folder Card Styles --- */
+        .canvas-folder-toolbar i {
+            transition: transform 0.15s, color 0.15s;
+        }
+        .canvas-folder-toolbar i:hover {
+            transform: scale(1.2);
+            color: var(--accent);
+        }
+        .canvas-folder-search-input::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+        .theme-light .canvas-folder-search-input {
+            background: rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            color: #000 !important;
+        }
+        .theme-light .canvas-folder-search-input::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+        .canvas-folder-list::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .canvas-folder-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+        .canvas-folder-list::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+        .theme-light .canvas-folder-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
         }

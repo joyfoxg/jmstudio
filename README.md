@@ -77,6 +77,18 @@
 * **Glassmorphic Neon Rings**: Envelops each node with a semi-transparent circular backdrop and an elegant glowing neon ring for outstanding aesthetic resolution.
 * **Smart Camera Zoom Scaling**: Maintains clean geometry and precise scaling ratios between node boundaries and centered emoji glyphs at any 2D canvas zoom-in/out level.
 
+### 13. 🎨 Obsidian-Compatible Infinite Canvas & Folder Embedding
+* **Infinite 2D Canvas Board**: Provides D3-Zoom-based panning and pinch-to-zoom controls alongside a modern 16px neon grid background.
+* **Bezier Edge Connections (SVG Edge)**: Draw smooth bezier curves between nodes. Click edge lines (28px click detection radius) to highlight, change HSL-based colors (6 options), or delete via a floating toolbar.
+* **Smart Folder Embedding Cards**: Embed an entire local directory inside your canvas workspace. Supports Grid/List layout toggle, real-time file name filtering, sorting, parent-directory navigation, and instant file creation (`+`) directly inside the card.
+* **Dedicated Card Nodes**: Freely position markdown files (with cached rendering), images, or PDF preview iframe nodes. Instantly mount CodeMirror 6 in-place editor widgets to modify embedded markdown files.
+* **Native Mouse Interactions**: Matches standard desktop cursor styling using a default arrow (`default`) on the canvas board and a move cursor (`move`) during card dragging.
+* **Canvas-specific Keyboard Shortcuts**:
+  * `Ctrl + S`: Instant canvas saving
+  * `Ctrl + Z`: Infinite Undo
+  * `Ctrl + Y`: Infinite Redo
+  * `Right-Click` (on cards): In-place settings and node options menu
+
 ---
 
 ## 🛠️ System Architecture

@@ -1,0 +1,33 @@
+{
+    "nodes": [
+        {
+            "id": "text_r5qv6yx5c8",
+            "type": "text",
+            "text": "### 제목\n내용을 입력하세요.",
+            "x": 580,
+            "y": 392,
+            "width": 250,
+            "height": 200,
+            "color": ""
+        },
+        {
+            "id": "text_nr1ij06ky9",
+            "type": "text",
+            "text": "### 제목\n내용을 입력하세요.",
+            "x": 1108,
+            "y": 392,
+            "width": 250,
+            "height": 200,
+            "color": ""
+        }
+    ],
+    "edges": [
+        {
+            "id": "edge_ueci7oyb6c",
+            "fromNode": "text_r5qv6yx5c8",
+            "fromSide": "right",
+            "toNode": "text_nr1ij06ky9",
+            "toSide": "left"
+        }
+    ]
+}

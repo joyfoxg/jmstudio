@@ -6,6 +6,7 @@ import zipfile
 import shutil
 import re
 from .api_bridge import MdViewerApi
+from .app_config import get_config, save_config
 
 class CustomTemplateManager:
     def __init__(self):
@@ -439,25 +440,53 @@ class ExtendedMdViewerApi(MdViewerApi):
         ws = self.workspace
         links = []
         
-        # 워크스페이스 내 모든 md, qmd, markdown, txt 파일 검색
+        # 워크스페이스 내 모든 md, qmd, markdown, txt, canvas 파일 검색
         for root, dirs, files in os.walk(ws):
             dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ('custom_templates', 'build', 'dist', 'node_modules')]
             for file in files:
-                if file.lower().endswith(('.md', '.qmd', '.markdown', '.txt')):
+                if file.lower().endswith(('.md', '.qmd', '.markdown', '.txt', '.canvas')):
                     full_path = os.path.join(root, file)
                     rel_path = os.path.relpath(full_path, ws).replace('\\', '/')
                     try:
-                        with open(full_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                        
-                        matches = re.findall(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', content)
-                        for m in matches:
-                            target = m.strip()
-                            if target:
-                                links.append({
-                                    "source": rel_path,
-                                    "target": target
-                                })
+                        if file.lower().endswith('.canvas'):
+                            with open(full_path, 'r', encoding='utf-8') as f:
+                                canvas_data = json.load(f)
+                            
+                            for node in canvas_data.get("nodes", []):
+                                ntype = node.get("type")
+                                if ntype == "file":
+                                    ref_file = node.get("file", "")
+                                    if ref_file:
+                                        ref_base = os.path.basename(ref_file)
+                                        ref_name = os.path.splitext(ref_base)[0]
+                                        if ref_name:
+                                            links.append({
+                                                "source": rel_path,
+                                                "target": ref_name
+                                            })
+                                elif ntype == "text":
+                                    text = node.get("text", "")
+                                    if text:
+                                        matches = re.findall(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', text)
+                                        for m in matches:
+                                            target = m.strip()
+                                            if target:
+                                                links.append({
+                                                    "source": rel_path,
+                                                    "target": target
+                                                })
+                        else:
+                            with open(full_path, 'r', encoding='utf-8') as f:
+                                content = f.read()
+                            
+                            matches = re.findall(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', content)
+                            for m in matches:
+                                target = m.strip()
+                                if target:
+                                    links.append({
+                                        "source": rel_path,
+                                        "target": target
+                                    })
                     except Exception as e:
                         print(f"Error parsing file {rel_path} for rebuild_backlinks: {e}")
                         
@@ -570,7 +599,6 @@ class ExtendedMdViewerApi(MdViewerApi):
             with open(new_filepath, 'w', encoding='utf-8') as f:
                 f.write(initial_content)
                 
-            from .app_config import get_config, save_config
             cfg = get_config()
             added_docs = cfg.get("added_documents", [])
             
@@ -585,6 +613,144 @@ class ExtendedMdViewerApi(MdViewerApi):
             return {"status": "success", "filepath": rel_new_path, "is_new": True}
         except Exception as e:
             return {"status": "error", "message": f"새 위키 문서 생성 중 오류 발생: {str(e)}"}
+
+    def read_canvas(self, rel_path):
+        if os.path.isabs(rel_path):
+            full_path = os.path.abspath(rel_path)
+        else:
+            full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+            if not full_path.startswith(self.workspace):
+                return {"status": "error", "message": "Access denied"}
+        try:
+            with open(full_path, "r", encoding="utf-8") as f:
+                canvas_data = json.load(f)
+            
+            for node in canvas_data.get("nodes", []):
+                if node.get("type") == "file":
+                    ref_file = node.get("file", "")
+                    if ref_file:
+                        ref_full = os.path.join(self.workspace, ref_file)
+                        if not os.path.exists(ref_full):
+                            node["missing"] = True
+                            
+            cfg = get_config()
+            cfg["last_file"] = rel_path
+            save_config(cfg)
+            
+            return {"status": "success", "content": canvas_data, "path": rel_path}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def save_canvas(self, rel_path, canvas_data):
+        if os.path.isabs(rel_path):
+            full_path = os.path.abspath(rel_path)
+        else:
+            full_path = os.path.abspath(os.path.join(self.workspace, rel_path))
+            if not full_path.startswith(self.workspace):
+                return {"status": "error", "message": "Access denied"}
+        try:
+            if isinstance(canvas_data, str):
+                canvas_dict = json.loads(canvas_data)
+            else:
+                canvas_dict = canvas_data
+                
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, "w", encoding="utf-8") as f:
+                json.dump(canvas_dict, f, ensure_ascii=False, indent=4)
+                
+            self.update_backlinks_for_canvas(rel_path, canvas_dict)
+            
+            return {"status": "success"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def save_canvas_as_dialog(self, canvas_data):
+        import webview
+        from jmstudio.api_bridge import window
+        try:
+            if window is None:
+                return {"status": "error", "message": "Window instance not bound"}
+            
+            file_path = window.create_file_dialog(
+                webview.SAVE_DIALOG,
+                directory=self.workspace,
+                save_filename='untitled.canvas',
+                file_types=('Canvas File (*.canvas)', 'All files (*.*)')
+            )
+            if not file_path:
+                return {"status": "cancel"}
+                
+            if isinstance(file_path, (list, tuple)):
+                file_path = file_path[0]
+                
+            # workspace를 기준으로 상대 경로 계산
+            rel_path = os.path.relpath(file_path, self.workspace).replace('\\', '/')
+            if not rel_path.endswith('.canvas'):
+                rel_path += '.canvas'
+            
+            # 실제 저장 수행
+            res = self.save_canvas(rel_path, canvas_data)
+            if res["status"] == "success":
+                return {"status": "success", "path": rel_path}
+            return res
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    def update_backlinks_for_canvas(self, rel_path, canvas_data):
+        import re
+        if os.path.isabs(rel_path):
+            try:
+                rel_path = os.path.relpath(rel_path, self.workspace).replace('\\', '/')
+            except:
+                pass
+        rel_path = rel_path.replace('\\', '/')
+        
+        if isinstance(canvas_data, str):
+            try:
+                canvas_data = json.loads(canvas_data)
+            except Exception as e:
+                print(f"Error parsing canvas JSON for backlinks: {e}")
+                return
+                
+        index_data = self._load_backlinks_index()
+        links = index_data.get("links", [])
+        links = [l for l in links if l["source"] != rel_path]
+        
+        for node in canvas_data.get("nodes", []):
+            ntype = node.get("type")
+            if ntype == "file":
+                ref_file = node.get("file", "")
+                if ref_file:
+                    ref_base = os.path.basename(ref_file)
+                    ref_name = os.path.splitext(ref_base)[0]
+                    if ref_name:
+                        links.append({
+                            "source": rel_path,
+                            "target": ref_name
+                        })
+            elif ntype == "text":
+                text = node.get("text", "")
+                if text:
+                    matches = re.findall(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', text)
+                    for m in matches:
+                        target = m.strip()
+                        if target:
+                            links.append({
+                                "source": rel_path,
+                                "target": target
+                            })
+                            
+        backlinks = {}
+        for link in links:
+            tgt_lower = link["target"].lower()
+            if tgt_lower not in backlinks:
+                backlinks[tgt_lower] = []
+            if link["source"] not in backlinks[tgt_lower]:
+                backlinks[tgt_lower].append(link["source"])
+                
+        index_data["links"] = links
+        index_data["backlinks"] = backlinks
+        self._save_backlinks_index(index_data)
 
     def save_custom_template(self, title, desc, icon, color, content):
         return self.template_manager.save_custom_template(title, desc, icon, color, content)

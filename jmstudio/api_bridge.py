@@ -211,7 +211,7 @@ class MdViewerApi:
             file_paths = window.create_file_dialog(
                 webview.OPEN_DIALOG,
                 allow_multiple=True,
-                file_types=('Markdown Documents (*.md;*.qmd;*.markdown;*.txt)', 'All files (*.*)')
+                file_types=('Markdown & Canvas Documents (*.md;*.qmd;*.markdown;*.txt;*.canvas)', 'All files (*.*)')
             )
             if file_paths:
                 added_count = 0
@@ -248,7 +248,7 @@ class MdViewerApi:
                 for item in sorted(os.listdir(self.workspace)):
                     if item.startswith('.') or os.path.isdir(os.path.join(self.workspace, item)):
                         continue
-                    if item.lower().endswith(('.md', '.qmd', '.markdown', '.txt')):
+                    if item.lower().endswith(('.md', '.qmd', '.markdown', '.txt', '.canvas')):
                         initial_docs.append(item)
             except:
                 pass
@@ -381,8 +381,12 @@ class MdViewerApi:
                 os.makedirs(full_path, exist_ok=True)
             else:
                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
-                with open(full_path, "w", encoding="utf-8") as f:
-                    f.write("---\ntags: [새문서]\n---\n\n")
+                if rel_path.lower().endswith('.canvas'):
+                    with open(full_path, "w", encoding="utf-8") as f:
+                        f.write(json.dumps({"nodes": [], "edges": []}, ensure_ascii=False, indent=4))
+                else:
+                    with open(full_path, "w", encoding="utf-8") as f:
+                        f.write("---\ntags: [새문서]\n---\n\n")
                 cfg = get_config()
                 added_docs = cfg.get("added_documents", [])
                 if rel_path not in added_docs:
