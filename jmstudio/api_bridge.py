@@ -211,7 +211,7 @@ class MdViewerApi:
             file_paths = window.create_file_dialog(
                 webview.OPEN_DIALOG,
                 allow_multiple=True,
-                file_types=('Markdown & Canvas Documents (*.md;*.qmd;*.markdown;*.txt;*.canvas)', 'All files (*.*)')
+                file_types=('Markdown and Canvas Documents (*.md;*.qmd;*.markdown;*.txt;*.canvas)', 'All files (*.*)')
             )
             if file_paths:
                 added_count = 0
