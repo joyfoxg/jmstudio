@@ -3,11 +3,6 @@ import sys
 import json
 import io
 import datetime
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 SCOPES = ['https://www.googleapis.com/auth/drive.file']
 TOKEN_FILE = 'token.json'
@@ -33,6 +28,7 @@ class GoogleDriveSync:
     def service(self):
         if self._service is None and self.creds and self.creds.valid:
             try:
+                from googleapiclient.discovery import build
                 self._service = build('drive', 'v3', credentials=self.creds)
             except Exception as e:
                 print(f"Error building service lazy: {e}")
@@ -46,6 +42,7 @@ class GoogleDriveSync:
     def load_credentials(self):
         if os.path.exists(self.token_file_path):
             try:
+                from google.oauth2.credentials import Credentials
                 self.creds = Credentials.from_authorized_user_file(self.token_file_path, SCOPES)
             except Exception as e:
                 print(f"Error loading credentials: {e}")
@@ -54,6 +51,8 @@ class GoogleDriveSync:
     def is_authenticated(self):
         if self.creds and self.creds.expired and self.creds.refresh_token:
             try:
+                from google.auth.transport.requests import Request
+                from googleapiclient.discovery import build
                 self.creds.refresh(Request())
                 with open(self.token_file_path, 'w') as token:
                     token.write(self.creds.to_json())
@@ -80,6 +79,8 @@ class GoogleDriveSync:
                 pass
 
         try:
+            from google_auth_oauthlib.flow import InstalledAppFlow
+            from googleapiclient.discovery import build
             if use_custom_secrets:
                 flow = InstalledAppFlow.from_client_secrets_file(self.client_secrets_path, SCOPES)
             elif DEFAULT_CLIENT_ID and "YOUR_APP_DEFAULT" not in DEFAULT_CLIENT_ID:
@@ -179,6 +180,7 @@ class GoogleDriveSync:
         if not os.path.exists(local_path):
             raise Exception(f"로컬 파일이 존재하지 않습니다: {local_path}")
 
+        from googleapiclient.http import MediaFileUpload
         folder_id = self.get_or_create_app_folder()
         filename = os.path.basename(local_path)
         media = MediaFileUpload(local_path, mimetype='text/markdown', resumable=True)
@@ -226,6 +228,7 @@ class GoogleDriveSync:
             raise Exception("구글 계정 연동이 필요합니다.")
         
         try:
+            from googleapiclient.http import MediaIoBaseDownload
             request = self.service.files().get_media(fileId=file_id)
             fh = io.BytesIO()
             downloader = MediaIoBaseDownload(fh, request)
