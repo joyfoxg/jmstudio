@@ -8,7 +8,8 @@ This document contains the chronological history of updates, releases, and patch
 
 | Version | Date | Key Patches & Features | Status |
 | :--- | :--- | :--- | :--- |
-| **v3.9.27** | 2026-06-03 | Separated My Media accordion, custom icons, read-only preview, and save lock prevention | **Latest Stable** |
+| **v3.9.28** | 2026-06-14 | Canvas multi-select, lasso selection, grouping, quick duplicate, and markdown shortcuts | **Latest Stable** |
+| **v3.9.27** | 2026-06-03 | Separated My Media accordion, custom icons, read-only preview, and save lock prevention | Stable |
 | **v3.9.26** | 2026-06-03 | Bi-directional Wiki Links, dual backlinks panel, and Obsidian-compatible Infinite Canvas | Stable |
 | **v3.9.25** | 2026-06-02 | Refactored WYSIWYG math blocks via range replacement & custom template engine | Stable |
 | **v3.9.24** | 2026-06-02 | Hotfix for KaTeX formula backslash escaping in WYSIWYG rendering | Stable |
@@ -27,7 +28,14 @@ This document contains the chronological history of updates, releases, and patch
 
 ## 📢 Detailed Release History (v3.9.0 ~ Present)
 
-### 🚀 v3.9.27 (2026-06-03) - Separated My Media Accordion, Dedicated Icons, Preview, and Save Lock Prevention [Latest Stable]
+### 🚀 v3.9.28 (2026-06-14) - Canvas Multi-select, Grouping, Quick Duplicate, and Editing Shortcuts [Latest Stable]
+*   **Obsidian-compatible Infinite Canvas Enhancements**:
+    *   **Multi/Lasso Select**: Implemented interactive area selection and multi-node selection on the canvas.
+    *   **Grouping**: Added the ability to create visual group containers for selected nodes.
+    *   **Quick Duplicate**: Instant duplication of selected canvas elements via shortcut or click.
+    *   **Markdown Editing Shortcuts**: Dedicated keyboard shortcut system optimized for markdown card typing within the canvas.
+
+### 🚀 v3.9.27 (2026-06-03) - Separated My Media Accordion, Dedicated Icons, Preview, and Save Lock Prevention [Stable]
 *   **Separated My Media Accordion in Sidebar**:
     *   Filtered out media files (images, PDFs, audio, video) from the main "My Library" list and grouped them under a newly introduced "My Media" accordion panel.
     *   Folder hierarchy structure is fully preserved in both lists even when folders contain both markdown and media files.

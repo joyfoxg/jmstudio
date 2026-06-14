@@ -33,7 +33,7 @@ if "%PY_CMD%"=="" (
 echo.
 echo [Step 2] Installing/Upgrading required libraries (PyInstaller, pywebview, bottle, Pillow)...
 %PY_CMD% -m pip install --upgrade pip
-%PY_CMD% -m pip install --upgrade pyinstaller bottle pywebview Pillow
+%PY_CMD% -m pip install --upgrade pyinstaller bottle pywebview Pillow google-api-python-client google-auth-httplib2 google-auth-oauthlib
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to install required libraries. Please check internet connection.
     pause
@@ -49,7 +49,7 @@ for /f "tokens=*" %%a in ('%PY_CMD% -c "from jmstudio import app_config; print(a
     set APP_VER=v%%a
 )
 
-%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "jmstudio/frontend;jmstudio/frontend" --add-data "client_secrets.json;." --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" jmstudio/__main__.py
+%PY_CMD% -m PyInstaller --clean --noconfirm --onefile --windowed --add-data "jmstudio/frontend;jmstudio/frontend" --add-data "client_secrets.json;." --hidden-import googleapiclient.discovery --hidden-import google.oauth2.credentials --hidden-import google.auth.transport.requests --hidden-import google_auth_oauthlib.flow --icon=app_icon.ico --name="JoyMarkdownStudio-%APP_VER%" jmstudio/__main__.py
 if %errorlevel% neq 0 (
     echo [ERROR] PyInstaller compilation failed!
     pause
@@ -62,7 +62,7 @@ echo   SUCCESS: Standalone app compiled successfully (Instant Boot)!
 echo =======================================================================
 echo.
 echo The compiled executable is saved at:
-echo   ==> .\dist\JoyMarkdownStudio-%APP_VER%.exe
+echo   --^> .\dist\JoyMarkdownStudio-%APP_VER%.exe
 echo.
 echo [Distribution Guide]
 echo 1. Run 'JoyMarkdownStudio-%APP_VER%.exe' in '.\dist' folder to boot instantly (0.1s)!

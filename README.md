@@ -1,4 +1,4 @@
-# 🧪 Joy Markdown Studio v3.9.27 🌟
+# 🧪 Joy Markdown Studio v3.9.28 🌟
 
 > **The Ultimate Science & Engineering Research and Academic Markdown Editing & Visualization Studio**  
 > A premium desktop markdown creator application crafted with Python (`PyWebView` + `Bottle`) and modern Vanilla CSS/JS.
@@ -83,11 +83,7 @@
 * **Smart Folder Embedding Cards**: Embed an entire local directory inside your canvas workspace. Supports Grid/List layout toggle, real-time file name filtering, sorting, parent-directory navigation, and instant file creation (`+`) directly inside the card.
 * **Dedicated Card Nodes**: Freely position markdown files (with cached rendering), images, or PDF preview iframe nodes. Instantly mount CodeMirror 6 in-place editor widgets to modify embedded markdown files.
 * **Native Mouse Interactions**: Matches standard desktop cursor styling using a default arrow (`default`) on the canvas board and a move cursor (`move`) during card dragging.
-* **Canvas-specific Keyboard Shortcuts**:
-  * `Ctrl + S`: Instant canvas saving
-  * `Ctrl + Z`: Infinite Undo
-  * `Ctrl + Y`: Infinite Redo
-  * `Right-Click` (on cards): In-place settings and node options menu
+* **Canvas-specific Keyboard Shortcuts**: For a full list of all major shortcuts (multi-select, grouping, duplication, formatting, etc.), please refer to the [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts) section below.
 
 ### 14. 📂 Separated My Media Accordion, Custom Icons, and Binary Save Lock Protection (v3.9.27)
 * **My Media Accordion Sidebar**: Groups media files (images, PDFs, audio, video) out of the main "My Library" document list, allocating them under a dedicated "My Media" accordion menu. Folder structures are fully preserved across both trees.
@@ -244,6 +240,47 @@ Mass and energy are equivalent and represented by: $E = mc^2$
 
 $$i\hbar\frac{\partial}{\partial t}\Psi = \hat{H}\Psi$$
 ```
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+Joy Markdown Studio provides a variety of shortcuts for fast and efficient document editing and canvas manipulation.
+
+### 📝 Editor & General Shortcuts
+* `Ctrl + N`: Add a new markdown document to the library
+* `Ctrl + S`: Save the current document or canvas
+* `Ctrl + Z`: Undo the last action
+* `Ctrl + Y` / `Ctrl + Shift + Z`: Redo the last action
+* `Ctrl + E`: Export the current document as a standalone HTML file
+* `Ctrl + P`: Print the current document as PDF (clean output of preview only)
+* `F11`: Toggle document fullscreen mode
+
+### 🎨 Canvas Shortcuts
+* **Selection & Manipulation**
+  * `Ctrl + A`: Select all elements in the canvas
+  * `Shift + Drag`: Box selection (Marquee) to select multiple objects
+  * `Shift + Click`: Add/remove objects to/from the current selection
+  * `Esc`: Deselect all (exits edit mode if currently editing)
+  * `Arrow Keys`: Nudge selected elements by 1px
+  * `Shift + Arrow Keys`: Nudge selected elements by 10px
+  * `Delete` or `Backspace`: Delete selected nodes and edges
+* **Duplication & Grouping**
+  * `Ctrl + D`: Duplicate selected elements instantly with a 20px offset
+  * `Alt + Drag`: Clone object while dragging
+  * `Ctrl + G`: Group selected elements into a visual bounding box
+  * `Ctrl + Shift + G`: Ungroup the selected group
+* **View Controls**
+  * `Ctrl + Mouse Wheel`: Zoom in / Zoom out of the canvas
+  * `Ctrl + 0` or `Shift + 1` / `Shift + !`: Fit all elements to the current view
+  * `Space + Drag`: Pan the canvas freely
+* **Text Card (Markdown) Editing**
+  * `Enter` or `F2`: Enter edit mode for the selected text card
+  * `Ctrl + Enter` or `Esc`: Complete markdown editing and exit (save)
+  * `Ctrl + B`: Apply **Bold** formatting (while editing)
+  * `Ctrl + I`: Apply *Italic* formatting (while editing)
+  * `Ctrl + K`: Insert `[Link Text](URL)` format (while editing)
+  * `Right-Click` (on cards): Open the context menu for node settings and editing
 
 ---
 

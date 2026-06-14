@@ -2948,6 +2948,22 @@ class UndoManager {
                 e.preventDefault();
                 redoEditor();
             }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'n') {
+                e.preventDefault();
+                addDocumentToLibrary();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'e') {
+                e.preventDefault();
+                exportToHtml();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                printDocument();
+            }
+            if (e.key === 'F11') {
+                e.preventDefault();
+                toggleDocumentFullscreen();
+            }
         });
 
         // 뷰 모드 조절
