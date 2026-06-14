@@ -12,8 +12,8 @@
             this.svgGroup = null;
             this.nodesLayer = null;
             
-            this.selectedNodeId = null;
-            this.selectedEdgeId = null;
+            this.selectedNodeIds = new Set();
+            this.selectedEdgeIds = new Set();
             
             this.activeCM6 = null; // { nodeId, view }
             this.saveTimeout = null;
@@ -45,6 +45,11 @@
             
             // D3 줌 세팅
             this.zoom = d3.zoom()
+                .filter((event) => {
+                    if (event.type === "wheel") return event.ctrlKey || event.metaKey; // Ctrl+Wheel로만 줌
+                    if (event.type === "mousedown" && event.shiftKey) return false; // Shift+Drag는 박스 선택
+                    return !event.ctrlKey && !event.button; // 좌클릭 및 Space+Drag(스페이스는 커스텀) 허용
+                })
                 .scaleExtent([0.15, 3.0])
                 .on("zoom", (event) => {
                     this.transform = event.transform;
@@ -54,6 +59,76 @@
                 
             this.board.call(this.zoom);
             this.board.on("dblclick.zoom", null); // 더블클릭 줌 방지 (텍스트 카드 편집과 충돌 회피)
+            
+            // 기존 마우스 휠 상하 스크롤 (Ctrl 없을 때) -> 상하좌우 패닝
+            this.board.on("wheel.custom", (event) => {
+                if (!event.ctrlKey && !event.metaKey) {
+                    event.preventDefault();
+                    this.zoom.translateBy(this.board, -event.deltaX / this.transform.k, -event.deltaY / this.transform.k);
+                }
+            });
+            
+            // 박스 선택(Marquee Tool) 세팅
+            let isBoxSelecting = false;
+            let boxStart = null;
+            let selectionBox = null;
+            
+            const boardDrag = d3.drag()
+                .filter(event => event.shiftKey)
+                .on("start", (event) => {
+                    isBoxSelecting = true;
+                    this.deselectAll();
+                    const rect = this.board.node().getBoundingClientRect();
+                    const mouseWorldX = (event.sourceEvent.clientX - rect.left - this.transform.x) / this.transform.k;
+                    const mouseWorldY = (event.sourceEvent.clientY - rect.top - this.transform.y) / this.transform.k;
+                    boxStart = { x: mouseWorldX, y: mouseWorldY };
+                    
+                    selectionBox = this.svgGroup.append("rect")
+                        .attr("class", "canvas-selection-box")
+                        .attr("x", mouseWorldX).attr("y", mouseWorldY)
+                        .attr("width", 0).attr("height", 0)
+                        .attr("fill", "rgba(69, 243, 255, 0.1)")
+                        .attr("stroke", "rgba(69, 243, 255, 0.5)")
+                        .attr("stroke-width", 2 / this.transform.k);
+                })
+                .on("drag", (event) => {
+                    if (!isBoxSelecting) return;
+                    const rect = this.board.node().getBoundingClientRect();
+                    const mouseWorldX = (event.sourceEvent.clientX - rect.left - this.transform.x) / this.transform.k;
+                    const mouseWorldY = (event.sourceEvent.clientY - rect.top - this.transform.y) / this.transform.k;
+                    
+                    const minX = Math.min(boxStart.x, mouseWorldX);
+                    const minY = Math.min(boxStart.y, mouseWorldY);
+                    const width = Math.abs(mouseWorldX - boxStart.x);
+                    const height = Math.abs(mouseWorldY - boxStart.y);
+                    
+                    selectionBox.attr("x", minX).attr("y", minY).attr("width", width).attr("height", height);
+                    
+                    this.selectedNodeIds.clear();
+                    this.nodes.forEach(n => {
+                        const nx2 = n.x + n.width, ny2 = n.y + n.height;
+                        if (minX < nx2 && minX + width > n.x && minY < ny2 && minY + height > n.y) {
+                            this.selectedNodeIds.add(n.id);
+                        }
+                    });
+                    
+                    this.nodes.forEach(n => {
+                        const nodeEl = document.getElementById(`node-${n.id}`);
+                        if (nodeEl) {
+                            if (this.selectedNodeIds.has(n.id)) nodeEl.classList.add("selected");
+                            else nodeEl.classList.remove("selected");
+                        }
+                    });
+                })
+                .on("end", () => {
+                    isBoxSelecting = false;
+                    if (selectionBox) { selectionBox.remove(); selectionBox = null; }
+                    if (this.selectedNodeIds.size === 1) {
+                        const n = this.nodes.find(node => node.id === Array.from(this.selectedNodeIds)[0]);
+                        if (n) this.showFloatingToolbarForNode(n);
+                    }
+                });
+            this.board.call(boardDrag);
             
             // 보드 빈 영역 클릭 시 선택 해제 및 CM6 닫기, 컨텍스트 메뉴 닫기
             this.board.on("click", (event) => {
@@ -73,10 +148,36 @@
             
             // 키보드 Delete 단추로 노드/엣지 삭제 및 Undo/Redo/Save 단축키 지원
             d3.select(window).on("keydown.canvas", (event) => {
-                // CM6 에디터 포커스 중에는 단축키/삭제 우회
-                if (this.activeCM6) return;
+                // CM6 에디터 포커스 중에는 단축키/삭제 우회 (단, Esc/Ctrl+Enter는 허용)
+                if (this.activeCM6) {
+                    if (event.key === "Escape" || (event.key === "Enter" && (event.ctrlKey || event.metaKey))) {
+                        event.preventDefault();
+                        this.closeActiveCM6();
+                        this.deselectAll();
+                    }
+                    return;
+                }
+                
                 if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
                 
+                // Esc: 전체 선택 해제
+                if (event.key === "Escape") {
+                    this.deselectAll();
+                }
+                // Enter / F2: 텍스트 노드 편집 진입
+                else if (event.key === "Enter" || event.key === "F2") {
+                    if (this.selectedNodeIds.size === 1) {
+                        const id = Array.from(this.selectedNodeIds)[0];
+                        const n = this.nodes.find(node => node.id === id);
+                        if (n && n.type === "text") {
+                            event.preventDefault();
+                            const contentEl = document.getElementById(`content-${n.id}`);
+                            if (contentEl) {
+                                this.editMarkdownNode(n, contentEl);
+                            }
+                        }
+                    }
+                }
                 // Undo: Ctrl + Z
                 if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
                     event.preventDefault();
@@ -92,15 +193,97 @@
                     event.preventDefault();
                     this.saveCanvasImmediately();
                 }
+                // Select All: Ctrl + A
+                else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "a") {
+                    event.preventDefault();
+                    this.nodes.forEach(n => this.selectedNodeIds.add(n.id));
+                    d3.selectAll(".canvas-node").classed("selected", true);
+                    this.removeFloatingToolbar();
+                }
+                // Zoom to Fit: Ctrl + 0 or Shift + 1
+                else if (((event.ctrlKey || event.metaKey) && event.key === "0") || (event.shiftKey && event.key === "1") || (event.shiftKey && event.key === "!")) {
+                    event.preventDefault();
+                    this.fitToView();
+                }
                 // Delete / Backspace 삭제
                 else if (event.key === "Delete" || event.key === "Backspace") {
-                    if (this.selectedNodeId) {
+                    if (this.selectedNodeIds.size > 0 || this.selectedEdgeIds.size > 0) {
                         this.pushHistory();
-                        this.deleteNode(this.selectedNodeId);
-                    } else if (this.selectedEdgeId) {
-                        this.pushHistory();
-                        this.deleteEdge(this.selectedEdgeId);
+                        this.selectedNodeIds.forEach(id => {
+                            this.nodes = this.nodes.filter(n => n.id !== id);
+                            this.edges = this.edges.filter(e => e.fromNode !== id && e.toNode !== id);
+                            if (this.activeCM6 && this.activeCM6.nodeId === id) {
+                                this.activeCM6.view.destroy();
+                                this.activeCM6 = null;
+                            }
+                        });
+                        this.selectedEdgeIds.forEach(id => {
+                            this.edges = this.edges.filter(e => e.id !== id);
+                        });
+                        this.selectedNodeIds.clear();
+                        this.selectedEdgeIds.clear();
+                        this.renderCanvas();
+                        this.saveCanvasDebounced();
                     }
+                }
+                // Ctrl + D: 복제
+                else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d") {
+                    event.preventDefault();
+                    if (this.selectedNodeIds.size > 0) {
+                        this.duplicateSelected();
+                    }
+                }
+                // Ctrl + G / Ctrl + Shift + G: 그룹화
+                else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "g") {
+                    event.preventDefault();
+                    if (event.shiftKey) {
+                        this.ungroupSelected();
+                    } else if (this.selectedNodeIds.size > 1) {
+                        this.groupSelected();
+                    }
+                }
+                // Nudge: Arrow Keys
+                else if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+                    if (this.selectedNodeIds.size > 0) {
+                        event.preventDefault();
+                        const amount = event.shiftKey ? 10 : 1;
+                        let dx = 0, dy = 0;
+                        if (event.key === "ArrowUp") dy = -amount;
+                        else if (event.key === "ArrowDown") dy = amount;
+                        else if (event.key === "ArrowLeft") dx = -amount;
+                        else if (event.key === "ArrowRight") dx = amount;
+                        
+                        this.pushHistory();
+                        this.selectedNodeIds.forEach(id => {
+                            const n = this.nodes.find(node => node.id === id);
+                            if (n) {
+                                n.x += dx;
+                                n.y += dy;
+                                const nodeEl = document.getElementById(`node-${id}`);
+                                if (nodeEl) {
+                                    nodeEl.style.left = `${n.x}px`;
+                                    nodeEl.style.top = `${n.y}px`;
+                                }
+                            }
+                        });
+                        this.drawEdges();
+                        this.saveCanvasDebounced();
+                        if (this.selectedNodeIds.size === 1) {
+                            const n = this.nodes.find(node => node.id === Array.from(this.selectedNodeIds)[0]);
+                            if (n) this.showFloatingToolbarForNode(n);
+                        }
+                    }
+                }
+            });
+            
+            // Space 바 누를 때 커서 모양 변경 (패닝 힌트)
+            d3.select(window).on("keydown.space", (e) => {
+                if (e.code === "Space" && !this.activeCM6 && document.activeElement.tagName !== "INPUT") {
+                    this.board.style("cursor", "grab");
+                }
+            }).on("keyup.space", (e) => {
+                if (e.code === "Space") {
+                    this.board.style("cursor", "default");
                 }
             });
             
@@ -142,9 +325,9 @@
         }
         
         deselectAll() {
-            const hasSelectedEdge = (this.selectedEdgeId !== null);
-            this.selectedNodeId = null;
-            this.selectedEdgeId = null;
+            const hasSelectedEdge = (this.selectedEdgeIds.size > 0);
+            this.selectedNodeIds.clear();
+            this.selectedEdgeIds.clear();
             d3.selectAll(".canvas-node").classed("selected", false);
             d3.selectAll(".canvas-edge").classed("selected", false);
             this.removeFloatingToolbar();
@@ -326,7 +509,7 @@
                 nodeEl.setAttribute("data-color", node.color);
             }
             
-            if (this.selectedNodeId === node.id) {
+            if (this.selectedNodeIds.has(node.id)) {
                 nodeEl.classList.add("selected");
             }
             
@@ -342,6 +525,11 @@
                 const baseName = node.file.split(/[\\/]/).pop();
                 title.innerHTML = `<i data-lucide="file-text" style="width: 14px; height: 14px; margin-right: 4px;"></i> ${baseName}`;
                 title.title = node.file;
+            } else if (node.type === "group") {
+                title.innerHTML = '<i data-lucide="layers" style="width: 14px; height: 14px; margin-right: 4px;"></i> Group';
+                nodeEl.style.backgroundColor = "var(--bg-tertiary)";
+                nodeEl.style.border = "2px dashed var(--border)";
+                nodeEl.style.zIndex = "0";
             } else {
                 title.innerHTML = '<i data-lucide="box" style="width: 14px; height: 14px; margin-right: 4px;"></i> Node';
             }
@@ -383,12 +571,28 @@
             // 클릭 선택 바인딩 (이벤트 버블링으로 인한 deselectAll 오작동 방지)
             d3.select(nodeEl).on("mousedown", (event) => {
                 event.stopPropagation();
-                this.deselectAll();
-                this.selectedNodeId = node.id;
-                d3.select(nodeEl).classed("selected", true);
+                if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                    if (this.selectedNodeIds.has(node.id)) {
+                        this.selectedNodeIds.delete(node.id);
+                        d3.select(nodeEl).classed("selected", false);
+                    } else {
+                        this.selectedNodeIds.add(node.id);
+                        d3.select(nodeEl).classed("selected", true);
+                    }
+                } else {
+                    if (!this.selectedNodeIds.has(node.id)) {
+                        this.deselectAll();
+                        this.selectedNodeIds.add(node.id);
+                        d3.select(nodeEl).classed("selected", true);
+                    }
+                }
                 
-                // 플로팅 메뉴 노출
-                this.showFloatingToolbarForNode(node);
+                // 플로팅 메뉴 노출 (단일 선택일 때만)
+                if (this.selectedNodeIds.size === 1) {
+                    this.showFloatingToolbarForNode(node);
+                } else {
+                    this.removeFloatingToolbar();
+                }
             });
             d3.select(nodeEl).on("click", (event) => {
                 event.stopPropagation();
@@ -897,6 +1101,44 @@
                 extensions: [
                     cm.basicSetup,
                     cm.markdown(),
+                    cm.keymap.of([
+                        {
+                            key: "Mod-b",
+                            run: (view) => {
+                                const { from, to } = view.state.selection.main;
+                                const text = view.state.doc.sliceString(from, to);
+                                view.dispatch({
+                                    changes: { from, to, insert: `**${text}**` },
+                                    selection: { anchor: from + 2, head: to + 2 }
+                                });
+                                return true;
+                            }
+                        },
+                        {
+                            key: "Mod-i",
+                            run: (view) => {
+                                const { from, to } = view.state.selection.main;
+                                const text = view.state.doc.sliceString(from, to);
+                                view.dispatch({
+                                    changes: { from, to, insert: `*${text}*` },
+                                    selection: { anchor: from + 1, head: to + 1 }
+                                });
+                                return true;
+                            }
+                        },
+                        {
+                            key: "Mod-k",
+                            run: (view) => {
+                                const { from, to } = view.state.selection.main;
+                                const text = view.state.doc.sliceString(from, to);
+                                view.dispatch({
+                                    changes: { from, to, insert: `[${text}](url)` },
+                                    selection: { anchor: from + text.length + 3, head: from + text.length + 6 }
+                                });
+                                return true;
+                            }
+                        }
+                    ]),
                     cm.EditorView.theme({
                         "&": { height: "100%", fontSize: "13px" },
                         ".cm-scroller": { overflow: "auto" }
@@ -943,10 +1185,11 @@
         
         // --- 드래그 & 정렬 보조 안내선 구현 ---
         bindNodeDrag(nodeEl, node) {
+            let startPositions = new Map();
             let startMouseWorldX = 0;
             let startMouseWorldY = 0;
-            let startNodeX = 0;
-            let startNodeY = 0;
+            let isAltClone = false;
+            let clonedNodesMap = new Map(); // 원본id -> 복제본 객체
             
             const dragHandler = d3.drag()
                 .on("start", (event) => {
@@ -954,9 +1197,6 @@
                     d3.select(nodeEl).raise().style("cursor", "move");
                     
                     this.pushHistory(); // 히스토리 백업
-                    
-                    startNodeX = node.x;
-                    startNodeY = node.y;
                     
                     const boardEl = document.getElementById("canvas-board");
                     const rect = boardEl.getBoundingClientRect();
@@ -967,6 +1207,49 @@
                     startMouseWorldY = (clientY - rect.top - this.transform.y) / this.transform.k;
                     
                     this.removeFloatingToolbar(); // 드래그 시작 시 플로팅 툴바 가림
+                    
+                    // Alt+Drag -> Clone
+                    if (event.sourceEvent.altKey) {
+                        isAltClone = true;
+                        const newSelectedIds = new Set();
+                        
+                        this.selectedNodeIds.forEach(id => {
+                            const origNode = this.nodes.find(n => n.id === id);
+                            if (origNode) {
+                                const cloneId = `${origNode.type}_${Math.random().toString(36).substring(2, 12)}`;
+                                const cloneNode = JSON.parse(JSON.stringify(origNode));
+                                cloneNode.id = cloneId;
+                                this.nodes.push(cloneNode);
+                                clonedNodesMap.set(origNode.id, cloneNode);
+                                newSelectedIds.add(cloneId);
+                                startPositions.set(cloneId, { x: cloneNode.x, y: cloneNode.y });
+                            }
+                        });
+                        
+                        // 엣지 복제 (선택된 노드들끼리 연결된 엣지만 복제)
+                        const newEdges = [];
+                        this.edges.forEach(e => {
+                            if (this.selectedNodeIds.has(e.fromNode) && this.selectedNodeIds.has(e.toNode)) {
+                                const cloneEdge = JSON.parse(JSON.stringify(e));
+                                cloneEdge.id = `edge_${Math.random().toString(36).substring(2, 12)}`;
+                                cloneEdge.fromNode = clonedNodesMap.get(e.fromNode).id;
+                                cloneEdge.toNode = clonedNodesMap.get(e.toNode).id;
+                                newEdges.push(cloneEdge);
+                            }
+                        });
+                        this.edges.push(...newEdges);
+                        
+                        this.selectedNodeIds.clear();
+                        newSelectedIds.forEach(id => this.selectedNodeIds.add(id));
+                        
+                        this.renderCanvas(); // DOM 생성
+                    } else {
+                        isAltClone = false;
+                        this.selectedNodeIds.forEach(id => {
+                            const n = this.nodes.find(no => no.id === id);
+                            if (n) startPositions.set(id, { x: n.x, y: n.y });
+                        });
+                    }
                 })
                 .on("drag", (event) => {
                     const boardEl = document.getElementById("canvas-board");
@@ -980,117 +1263,95 @@
                     const dx = currentMouseWorldX - startMouseWorldX;
                     const dy = currentMouseWorldY - startMouseWorldY;
                     
-                    let targetX = startNodeX + dx;
-                    let targetY = startNodeY + dy;
-                    
-                    // 정렬 보조 가이드 연산 및 자석 자성 부여
-                    const snapDist = 6;
+                    // 정렬 보조선 (단일 드래그일 때만 자석효과)
                     let alignX = null;
                     let alignY = null;
+                    this.svgGroup.selectAll(".canvas-align-line").remove();
                     
-                    this.svgGroup.selectAll(".canvas-align-line").remove(); // 기존 가이드라인 삭제
+                    let dxOffset = dx;
+                    let dyOffset = dy;
                     
-                    // 다른 노드들과 경계/센터 비교 (상하좌우 교차 정렬 가이드라인 추가)
-                    for (const other of this.nodes) {
-                        if (other.id === node.id) continue;
+                    if (this.selectedNodeIds.size === 1) {
+                        const dragNodeId = Array.from(this.selectedNodeIds)[0];
+                        const dragNode = this.nodes.find(n => n.id === dragNodeId);
+                        const startPos = startPositions.get(dragNodeId);
                         
-                        // 1. X축 정렬선 매칭 (좌-좌, 좌-우, 센터, 우-좌, 우-우)
-                        const selfLeft = targetX;
-                        const selfCenter = targetX + node.width / 2;
-                        const selfRight = targetX + node.width;
+                        let targetX = startPos.x + dx;
+                        let targetY = startPos.y + dy;
                         
-                        const otherLeft = other.x;
-                        const otherCenter = other.x + other.width / 2;
-                        const otherRight = other.x + other.width;
+                        const snapDist = 6;
                         
-                        if (Math.abs(selfLeft - otherLeft) < snapDist) {
-                            targetX = otherLeft;
-                            alignX = otherLeft;
-                        } else if (Math.abs(selfLeft - otherRight) < snapDist) {
-                            targetX = otherRight;
-                            alignX = otherRight;
-                        } else if (Math.abs(selfCenter - otherCenter) < snapDist) {
-                            targetX = otherCenter - node.width / 2;
-                            alignX = otherCenter;
-                        } else if (Math.abs(selfRight - otherLeft) < snapDist) {
-                            targetX = otherLeft - node.width;
-                            alignX = otherLeft;
-                        } else if (Math.abs(selfRight - otherRight) < snapDist) {
-                            targetX = otherRight - node.width;
-                            alignX = otherRight;
+                        for (const other of this.nodes) {
+                            if (other.id === dragNode.id) continue;
+                            const selfCenter = targetX + dragNode.width / 2;
+                            const otherCenter = other.x + other.width / 2;
+                            const selfMiddle = targetY + dragNode.height / 2;
+                            const otherMiddle = other.y + other.height / 2;
+                            
+                            if (Math.abs(targetX - other.x) < snapDist) { targetX = other.x; alignX = other.x; }
+                            else if (Math.abs(selfCenter - otherCenter) < snapDist) { targetX = otherCenter - dragNode.width/2; alignX = otherCenter; }
+                            
+                            if (Math.abs(targetY - other.y) < snapDist) { targetY = other.y; alignY = other.y; }
+                            else if (Math.abs(selfMiddle - otherMiddle) < snapDist) { targetY = otherMiddle - dragNode.height/2; alignY = otherMiddle; }
                         }
                         
-                        // 2. Y축 정렬선 매칭 (상-상, 상-하, 센터, 하-상, 하-하)
-                        const selfTop = targetY;
-                        const selfMiddle = targetY + node.height / 2;
-                        const selfBottom = targetY + node.height;
+                        dxOffset = targetX - startPos.x;
+                        dyOffset = targetY - startPos.y;
                         
-                        const otherTop = other.y;
-                        const otherMiddle = other.y + other.height / 2;
-                        const otherBottom = other.y + other.height;
-                        
-                        if (Math.abs(selfTop - otherTop) < snapDist) {
-                            targetY = otherTop;
-                            alignY = otherTop;
-                        } else if (Math.abs(selfTop - otherBottom) < snapDist) {
-                            targetY = otherBottom;
-                            alignY = otherBottom;
-                        } else if (Math.abs(selfMiddle - otherMiddle) < snapDist) {
-                            targetY = otherMiddle - node.height / 2;
-                            alignY = otherMiddle;
-                        } else if (Math.abs(selfBottom - otherTop) < snapDist) {
-                            targetY = otherTop - node.height;
-                            alignY = otherTop;
-                        } else if (Math.abs(selfBottom - otherBottom) < snapDist) {
-                            targetY = otherBottom - node.height;
-                            alignY = otherBottom;
+                        const margin = 200;
+                        if (alignX !== null) {
+                            this.svgGroup.append("line").attr("class", "canvas-align-line")
+                                .attr("x1", alignX).attr("y1", targetY - margin).attr("x2", alignX).attr("y2", targetY + dragNode.height + margin);
+                        }
+                        if (alignY !== null) {
+                            this.svgGroup.append("line").attr("class", "canvas-align-line")
+                                .attr("x1", targetX - margin).attr("y1", alignY).attr("x2", targetX + dragNode.width + margin).attr("y2", alignY);
                         }
                     }
                     
-                    // 정렬선 드로잉
-                    const margin = 200;
-                    if (alignX !== null) {
-                        this.svgGroup.append("line")
-                            .attr("class", "canvas-align-line")
-                            .attr("x1", alignX)
-                            .attr("y1", Math.min(targetY, ...this.nodes.map(n=>n.y)) - margin)
-                            .attr("x2", alignX)
-                            .attr("y2", Math.max(targetY + node.height, ...this.nodes.map(n=>n.y+n.height)) + margin);
-                    }
-                    if (alignY !== null) {
-                        this.svgGroup.append("line")
-                            .attr("class", "canvas-align-line")
-                            .attr("x1", Math.min(targetX, ...this.nodes.map(n=>n.x)) - margin)
-                            .attr("y1", alignY)
-                            .attr("x2", Math.max(targetX + node.width, ...this.nodes.map(n=>n.x+n.width)) + margin)
-                            .attr("y2", alignY);
-                    }
-                    
-                    node.x = targetX;
-                    node.y = targetY;
-                    
-                    nodeEl.style.left = `${targetX}px`;
-                    nodeEl.style.top = `${targetY}px`;
+                    // 다중 선택된 모든 노드에 변위 적용
+                    this.selectedNodeIds.forEach(id => {
+                        const n = this.nodes.find(no => no.id === id);
+                        const start = startPositions.get(id);
+                        if (n && start) {
+                            n.x = start.x + dxOffset;
+                            n.y = start.y + dyOffset;
+                            const el = document.getElementById(`node-${id}`);
+                            if (el) {
+                                el.style.left = `${n.x}px`;
+                                el.style.top = `${n.y}px`;
+                            }
+                        }
+                    });
                     
                     this.drawEdges();
                 })
                 .on("end", () => {
                     d3.select(nodeEl).style("cursor", "default");
-                    this.svgGroup.selectAll(".canvas-align-line").remove(); // 드래그 끝 시점 가이드라인 삭제
+                    this.svgGroup.selectAll(".canvas-align-line").remove();
                     
-                    // 마우스를 놓았을 때(드래그가 끝난 시점) 최종 정렬용 격자 스냅 적용
+                    // 그리드 스냅 (마우스 놓을 때)
                     const snap = 4;
-                    const snapX = Math.round(node.x / snap) * snap;
-                    const snapY = Math.round(node.y / snap) * snap;
-                    
-                    node.x = snapX;
-                    node.y = snapY;
-                    nodeEl.style.left = `${snapX}px`;
-                    nodeEl.style.top = `${snapY}px`;
+                    this.selectedNodeIds.forEach(id => {
+                        const n = this.nodes.find(no => no.id === id);
+                        if (n) {
+                            n.x = Math.round(n.x / snap) * snap;
+                            n.y = Math.round(n.y / snap) * snap;
+                            const el = document.getElementById(`node-${id}`);
+                            if (el) {
+                                el.style.left = `${n.x}px`;
+                                el.style.top = `${n.y}px`;
+                            }
+                        }
+                    });
                     
                     this.drawEdges();
                     this.saveCanvasDebounced();
-                    this.showFloatingToolbarForNode(node); // 플로팅 메뉴 재노출
+                    
+                    if (this.selectedNodeIds.size === 1) {
+                        const n = this.nodes.find(no => no.id === Array.from(this.selectedNodeIds)[0]);
+                        if (n) this.showFloatingToolbarForNode(n);
+                    }
                 });
                 
             // 헤더 영역을 잡고만 드래그 가능하도록 세팅 (텍스트 복사 및 스크롤 배제)
@@ -1311,7 +1572,7 @@
                         endPt.x, endPt.y, edge.toSide
                     );
                     
-                    const isSelected = this.selectedEdgeId === edge.id;
+                    const isSelected = this.selectedEdgeIds.has(edge.id);
                     
                     // 연결선 색상 연산
                     let colorVal = "var(--accent)";
@@ -1342,14 +1603,20 @@
                         .attr("style", "cursor: pointer; pointer-events: stroke;")
                         .on("mousedown", (event) => {
                             event.stopPropagation();
-                            this.deselectAll();
-                            this.selectedEdgeId = edge.id;
+                            if (!event.shiftKey && !event.ctrlKey && !event.metaKey) {
+                                this.deselectAll();
+                            }
+                            this.selectedEdgeIds.add(edge.id);
                             this.drawEdges(); // 선택 시 색상 즉시 업데이트
                             
-                            // 엣지 플로팅 삭제 및 색상 변경 툴바 제공
-                            const midX = (startPt.x + endPt.x) / 2;
-                            const midY = (startPt.y + endPt.y) / 2;
-                            this.showFloatingToolbarForEdge(edge, midX, midY);
+                            // 엣지 플로팅 툴바 제공 (단일 선택 시)
+                            if (this.selectedEdgeIds.size === 1 && this.selectedNodeIds.size === 0) {
+                                const midX = (startPt.x + endPt.x) / 2;
+                                const midY = (startPt.y + endPt.y) / 2;
+                                this.showFloatingToolbarForEdge(edge, midX, midY);
+                            } else {
+                                this.removeFloatingToolbar();
+                            }
                         })
                         .on("click", (event) => {
                             event.stopPropagation();
@@ -1372,7 +1639,7 @@
             this.nodes = this.nodes.filter(n => n.id !== nodeId);
             this.edges = this.edges.filter(e => e.fromNode !== nodeId && e.toNode !== nodeId);
             
-            if (this.selectedNodeId === nodeId) this.selectedNodeId = null;
+            this.selectedNodeIds.delete(nodeId);
             if (this.activeCM6 && this.activeCM6.nodeId === nodeId) {
                 this.activeCM6.view.destroy();
                 this.activeCM6 = null;
@@ -1384,9 +1651,109 @@
         
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(e => e.id !== edgeId);
-            if (this.selectedEdgeId === edgeId) this.selectedEdgeId = null;
+            this.selectedEdgeIds.delete(edgeId);
             this.drawEdges();
             this.saveCanvasDebounced();
+        }
+        
+        duplicateSelected() {
+            this.pushHistory();
+            const newSelectedIds = new Set();
+            const clonedNodesMap = new Map();
+            
+            this.selectedNodeIds.forEach(id => {
+                const origNode = this.nodes.find(n => n.id === id);
+                if (origNode) {
+                    const cloneId = `${origNode.type}_${Math.random().toString(36).substring(2, 12)}`;
+                    const cloneNode = JSON.parse(JSON.stringify(origNode));
+                    cloneNode.id = cloneId;
+                    cloneNode.x += 20; // 오프셋 적용
+                    cloneNode.y += 20;
+                    this.nodes.push(cloneNode);
+                    clonedNodesMap.set(origNode.id, cloneNode);
+                    newSelectedIds.add(cloneId);
+                }
+            });
+            
+            const newEdges = [];
+            this.edges.forEach(e => {
+                if (this.selectedNodeIds.has(e.fromNode) && this.selectedNodeIds.has(e.toNode)) {
+                    const cloneEdge = JSON.parse(JSON.stringify(e));
+                    cloneEdge.id = `edge_${Math.random().toString(36).substring(2, 12)}`;
+                    cloneEdge.fromNode = clonedNodesMap.get(e.fromNode).id;
+                    cloneEdge.toNode = clonedNodesMap.get(e.toNode).id;
+                    newEdges.push(cloneEdge);
+                }
+            });
+            this.edges.push(...newEdges);
+            
+            this.selectedNodeIds.clear();
+            newSelectedIds.forEach(id => this.selectedNodeIds.add(id));
+            
+            this.renderCanvas();
+            this.saveCanvasDebounced();
+        }
+        
+        groupSelected() {
+            this.pushHistory();
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            const groupChildren = [];
+            
+            this.selectedNodeIds.forEach(id => {
+                const n = this.nodes.find(node => node.id === id);
+                if (n) {
+                    groupChildren.push(n.id);
+                    minX = Math.min(minX, n.x);
+                    minY = Math.min(minY, n.y);
+                    maxX = Math.max(maxX, n.x + n.width);
+                    maxY = Math.max(maxY, n.y + n.height);
+                }
+            });
+            
+            const padding = 20;
+            const groupNode = {
+                id: `group_${Math.random().toString(36).substring(2, 12)}`,
+                type: "group",
+                x: minX - padding,
+                y: minY - padding - 30, // 헤더 공간 고려
+                width: (maxX - minX) + padding * 2,
+                height: (maxY - minY) + padding * 2 + 30,
+                text: "",
+                children: groupChildren // 내부적으로 자식 참조 저장
+            };
+            
+            this.nodes.unshift(groupNode); // 먼저 렌더링되게 하여 뒤로 보냄
+            this.selectedNodeIds.clear();
+            this.selectedNodeIds.add(groupNode.id);
+            
+            this.renderCanvas();
+            this.saveCanvasDebounced();
+        }
+        
+        ungroupSelected() {
+            let changed = false;
+            this.pushHistory();
+            const groupsToUngroup = [];
+            
+            this.selectedNodeIds.forEach(id => {
+                const n = this.nodes.find(node => node.id === id);
+                if (n && n.type === "group") {
+                    groupsToUngroup.push(n);
+                    changed = true;
+                }
+            });
+            
+            if (changed) {
+                this.selectedNodeIds.clear();
+                groupsToUngroup.forEach(g => {
+                    this.nodes = this.nodes.filter(n => n.id !== g.id);
+                    if (g.children) {
+                        g.children.forEach(childId => this.selectedNodeIds.add(childId));
+                    }
+                });
+                this.renderCanvas();
+                this.saveCanvasDebounced();
+            }
         }
         
         // --- 플로팅 컨텍스트 메뉴 (노드 & 엣지) ---
