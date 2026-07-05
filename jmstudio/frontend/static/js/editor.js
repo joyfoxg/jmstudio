@@ -2042,7 +2042,7 @@ class UndoManager {
         function undoEditor() {
             const view = window.cmEditor;
             if (view && window.cm6) {
-                import("https://esm.sh/@codemirror/commands").then(cmds => {
+                import("https://esm.sh/@codemirror/commands@6.3.3?deps=@codemirror/view@6.42.0,@codemirror/state@6.4.1").then(cmds => {
                     const undone = cmds.undo(view);
                     if (undone) {
                         showToast(t('msg_undo_done'));
@@ -2054,7 +2054,7 @@ class UndoManager {
         function redoEditor() {
             const view = window.cmEditor;
             if (view && window.cm6) {
-                import("https://esm.sh/@codemirror/commands").then(cmds => {
+                import("https://esm.sh/@codemirror/commands@6.3.3?deps=@codemirror/view@6.42.0,@codemirror/state@6.4.1").then(cmds => {
                     const redone = cmds.redo(view);
                     if (redone) {
                         showToast(t('msg_redo_done'));
@@ -4133,12 +4133,12 @@ import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.es
             flowchart: { useMaxWidth: false, htmlLabels: true }
         });
 
-        // CodeMirror 6 모듈 가져오기 및 글로벌 바인딩
-        import { basicSetup, EditorView } from 'https://esm.sh/codemirror';
-        import { EditorState, Compartment, RangeSetBuilder } from 'https://esm.sh/@codemirror/state';
-        import { markdown } from 'https://esm.sh/@codemirror/lang-markdown';
-        import { placeholder, keymap, Decoration, ViewPlugin, WidgetType } from 'https://esm.sh/@codemirror/view';
-        import { syntaxTree } from 'https://esm.sh/@codemirror/language';
+        // CodeMirror 6 모듈 가져오기 및 글로벌 바인딩 (버전 고정 및 deps 지정으로 esm.sh 컴파일 500 에러 우회)
+        import { basicSetup, EditorView } from 'https://esm.sh/codemirror@6.0.1?deps=@codemirror/view@6.42.0,@codemirror/state@6.4.1';
+        import { EditorState, Compartment, RangeSetBuilder } from 'https://esm.sh/@codemirror/state@6.4.1';
+        import { markdown } from 'https://esm.sh/@codemirror/lang-markdown@6.2.2?deps=@codemirror/view@6.42.0,@codemirror/state@6.4.1';
+        import { placeholder, keymap, Decoration, ViewPlugin, WidgetType } from 'https://esm.sh/@codemirror/view@6.42.0?deps=@codemirror/state@6.4.1';
+        import { syntaxTree } from 'https://esm.sh/@codemirror/language@6.10.1?deps=@codemirror/view@6.42.0,@codemirror/state@6.4.1';
 
         window.cm6 = {
             basicSetup,

@@ -28,6 +28,11 @@ def index():
     response.set_header("Expires", "0")
     return static_file("index.html", root=get_asset_path("frontend"))
 
+@app.route('/favicon.ico')
+def favicon():
+    # favicon.ico 정적 파일 서빙
+    return static_file("favicon.ico", root=get_asset_path("frontend"))
+
 @app.route('/katex_support')
 def katex_support():
     # frontend/katex_support.html 정적 파일 서빙

@@ -8,7 +8,8 @@ This document contains the chronological history of updates, releases, and patch
 
 | Version | Date | Key Patches & Features | Status |
 | :--- | :--- | :--- | :--- |
-| **v3.9.28** | 2026-06-14 | Canvas multi-select, lasso selection, grouping, quick duplicate, and markdown shortcuts | **Latest Stable** |
+| **v3.9.29** | 2026-07-05 | Fixed esm.sh CDN compilation failures by pinning versions and resolving dependencies, fixed favicon 404 error | **Latest Stable** |
+| **v3.9.28** | 2026-06-14 | Canvas multi-select, lasso selection, grouping, quick duplicate, and markdown shortcuts | Stable |
 | **v3.9.27** | 2026-06-03 | Separated My Media accordion, custom icons, read-only preview, and save lock prevention | Stable |
 | **v3.9.26** | 2026-06-03 | Bi-directional Wiki Links, dual backlinks panel, and Obsidian-compatible Infinite Canvas | Stable |
 | **v3.9.25** | 2026-06-02 | Refactored WYSIWYG math blocks via range replacement & custom template engine | Stable |
@@ -28,7 +29,14 @@ This document contains the chronological history of updates, releases, and patch
 
 ## 📢 Detailed Release History (v3.9.0 ~ Present)
 
-### 🚀 v3.9.28 (2026-06-14) - Canvas Multi-select, Grouping, Quick Duplicate, and Editing Shortcuts [Latest Stable]
+### 🚀 v3.9.29 (2026-07-05) - Fixed esm.sh CDN Resolution and favicon.ico 404 [Latest Stable]
+*   **CDN Stability Fix**:
+    *   Pinned CodeMirror 6 packages and dependencies (using `?deps=@codemirror/view@6.42.0,@codemirror/state@6.4.1`) to resolve dynamic compilation failures (HTTP 500) on the `esm.sh` CDN.
+    *   Resolved the `Duplicate instance of EditorState` error caused by multiple transitive versions of `@codemirror/state` being loaded concurrently.
+*   **Favicon Error Fix**:
+    *   Copied the application icon to the frontend assets and added a dedicated `/favicon.ico` route in the Bottle server to resolve the browser 404 console error.
+
+### 🚀 v3.9.28 (2026-06-14) - Canvas Multi-select, Grouping, Quick Duplicate, and Editing Shortcuts [Stable]
 *   **Obsidian-compatible Infinite Canvas Enhancements**:
     *   **Multi/Lasso Select**: Implemented interactive area selection and multi-node selection on the canvas.
     *   **Grouping**: Added the ability to create visual group containers for selected nodes.
